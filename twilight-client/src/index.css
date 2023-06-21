@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*background: url(../public/circle-scatter-haikei.svg) no-repeat center;*/
+@layer base{
+  html, body{
+    @apply box-border;
+    @apply bg-slate-900;
+    @apply text-white;
+    @apply font-Nunito;
+    @apply h-screen; 
+  }
+  input:not([type="submit"]){
+    @apply outline-none;
+    @apply bg-transparent;
+  }
+  input[type="submit"]{
+    @apply bg-transparent;
+    @apply border-2;
+    @apply border-indigo-600;
+    @apply p-2;
+    @apply rounded-md;
+  }
+  input[type="submit"]:hover{
+    @apply transition;
+    @apply duration-700;
+    @apply bg-indigo-600;
+    @apply p-2;
+    @apply rounded-md;
+    @apply border-indigo-400;
+    @apply cursor-pointer;
+  }
+}
+
+@layer components{
+  .form-input{
+    @apply outline-none !important;
+    @apply bg-slate-800 !important;
+    @apply p-2 !important;
+    @apply rounded-md;
+  }
+  .button-normal{
+    @apply bg-slate-500;
+    @apply border-2;
+    @apply border-slate-500;
+    @apply p-2;
+    @apply rounded-md;
+    @apply w-fit;
+    @apply min-w-[100px];
+    @apply text-center;
+    @apply hover:bg-slate-800;
+    @apply hover:border-slate-400;
+    @apply hover:transition-all;
+  }
+  .button-violet{
+    @apply bg-violet-600;
+    @apply border-2;
+    @apply border-violet-600;
+    @apply p-2;
+    @apply rounded-md;
+    @apply w-fit;
+    @apply min-w-[100px];
+    @apply text-center;
+    @apply hover:bg-violet-700;
+    @apply hover:border-violet-400;
+    @apply hover:transition-all;
+  }
+  .button-violet-active{
+    @apply bg-violet-600;
+    @apply border-2;
+    @apply border-violet-600;
+    @apply p-2;
+    @apply rounded-md;
+    @apply w-fit;
+    @apply min-w-[100px];
+    @apply text-center;
+    @apply hover:bg-red-600;
+    @apply hover:border-red-200;
+    @apply hover:transition-all;
+  }
+  .radio-btn{
+    @apply p-1;
+    @apply border-2;
+    @apply border-slate-500;
+    @apply rounded-md;
+    @apply bg-slate-600;
+    
+  }
+  .radio-btn-active{
+    @apply p-1;
+    @apply border-2;
+    @apply border-violet-600;
+    @apply rounded-md;
+    @apply bg-slate-600;
+    
+  }
+}
+
+#root{
+  @apply h-screen; 
+}

@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String  @id @default(uuid())
+  displayName  String
+  email     String  @unique
+  password  String
+  ModeratorOf Community[] @relation(name: "ModeratorOf")
+  Followed Community[]
+  Posts Post[]
+}
+
+model Community{
+  id String @id @default(cuid())
+  displayName String
+  name String @unique
+  desc String
+  Moderators User[]  @relation(name: "ModeratorOf")
+  Users User[]
+  Img String
+  Posts Post[]
+}
+
+model Post{
+  id String @id @default(cuid())
+  title String
+  type String
+  content String?
+  community Community @relation(fields: [comID], references: [id])
+  comID String
+  author User @relation(fields: [userId], references: [id])
+  userId String
+  commentsCount Int @default(0)
+  likes Int @default(0)
+}

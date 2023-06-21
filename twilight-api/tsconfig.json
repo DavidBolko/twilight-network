@@ -1,0 +1,19 @@
+{
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+    }
+  },
+  "compilerOptions": {
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "target": "ES6",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "build",
+    "baseUrl": ".",
+  },
+  "emitDecoratorMetadata": true,
+  "experimentalDecorators": true,
+}
