@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { createContext } from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import { Index } from './Index'
@@ -7,8 +7,10 @@ import { Auth } from './auth';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import CreateCommunity from './routes/community/CreateCommunity';
 import Community from './routes/community/Community';
-import ErrorPage from './routes/ErrorPage';
 import CreatePost from './routes/post/CreatePost';
+import PostPage from './routes/post/PostPage';
+import Layout from './Layout';
+import Profile from './routes/Profile';
 
 
 const queryClient = new QueryClient()
@@ -17,7 +19,7 @@ const queryClient = new QueryClient()
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Index />,
+    element: [ <Layout/>, <Index />],
     
   },
   {
@@ -26,15 +28,25 @@ const router = createBrowserRouter([
   },
   {
     path: "/p",
+    element: <Layout/>,
     children:[
+      {
+        path: "",
+        element: <Profile/>
+      },
       {
         path: "create",
         element: <CreatePost/>
-      }
+      },
+      {
+        path: ":id",
+        element: <PostPage/>
+      },
     ],
   },
   {
     path: "/c",
+    element: <Layout/>,
     children:[
       {
         path:"create",

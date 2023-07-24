@@ -11,7 +11,7 @@ interface props{
 
 const ErrorPage:FC<props> = (props) => {
   return (
-    <div className="">
+    <div className="flex flex-col-reverse justify-center items-center h-screen">
       <p>{props.error.status}</p>
       <p>{props.error.text}</p>
       <ServerStackIcon width={128} />

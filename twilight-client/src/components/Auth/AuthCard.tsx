@@ -1,13 +1,19 @@
-import { AtSymbolIcon, KeyIcon } from "@heroicons/react/24/solid";
 import { FC, useState } from "react";
 import { LoginCard } from "./LoginCard";
 import { RegisterCard } from "./RegisterCard";
+import ProfileInformation from "./ProfileInformation";
 
-export const AuthCard:FC = () =>{
+type props = {
+  refetch: Function
+}
+
+export const AuthCard:FC<props> = (props) =>{
   const [register, setRegister] = useState(false);
   if(!register){
     return(
-      <LoginCard toggleCard={setRegister}/>
+      <>
+        <LoginCard toggleCard={setRegister} refetch={props.refetch}/>
+      </>
     )
   }
   else{

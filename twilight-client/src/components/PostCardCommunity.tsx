@@ -4,24 +4,26 @@ import {
   HandThumbUpIcon as LikeSolid,
 } from "@heroicons/react/24/solid";
 import { HandThumbUpIcon as LikeOutline } from "@heroicons/react/24/outline";
-import avatar from "../../public/post.png";
 import { FC } from "react";
 import { CDN } from "../utils";
+import placeholder from "../../src/assets/placeholder.jpg"
 
 interface props{
   img: string,
   author: string,
   comments: number,
+  likes: number
 }
 
 const PostCardCommunity:FC<props> = (props) => {
   return (
     <li>
-      <div className="flex flex-col bg-slate-700 p-4 rounded-lg">
+      <div className="postCard">
         <p className="text-xs mb-2">by {props.author}</p>
         <img src={CDN(props.img)} alt="" className="rounded-lg mb-4" loading="lazy"/>
         <div className="flex w-full">
           <LikeOutline width={24} />
+          <p>{props.likes}</p>
           <div className="flex ml-auto items-center">
             <ChatBubbleOvalLeftIcon width={24} />
             <p className="text-sm">{props.comments}</p>

@@ -1,5 +1,7 @@
-import { Cog6ToothIcon, UserIcon, UsersIcon } from "@heroicons/react/24/solid";
+import { SignOut, Gear, User, Users, X } from "@phosphor-icons/react";
 import { FC } from "react";
+import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 
 interface props {
   visible: boolean;
@@ -7,44 +9,43 @@ interface props {
 }
 
 const OptionsCard: FC<props> = (props) => {
-  return (
-    <div
-      className={`flex items-center justify-center fixed w-screen h-screen backdrop-blur-xl ${
-        props.visible ? "visible" : "hidden"
-      }`}
-      onClick={(e) => props.setVisible(false)}
-    >
-      <div className="bg-slate-600 w-64 h-fit p-6 rounded-md">
-        <p className="text-2xl">Options</p>
-        <ul className="flex flex-col gap-2 text-lg border-t-2 pt-2">
-		<li className="bg-slate-700 rounded-md p-2">
-            <a className="flex">
-              <UserIcon width={24} />
+  const navigate = useNavigate()
+  return createPortal(
+    <div className={`flex items-center justify-center fixed top-20 right-4 ${props.visible ? "visible" : "hidden"}`}>
+      <div className="bg-nord-snow-200 shadow-shadowNord dark:shadow-shadowFrost dark:bg-nord-night-300 h-fit p-6 rounded-md">
+        <div className="flex items-center justify-between">
+          <p className="text-xl">Options</p>
+          <X width={24} height={24} className="hover:cursor-pointer hover:text-nord-frost-200" onClick={(e) => props.setVisible(false)}/>
+        </div>
+        <ul className="flex flex-col gap-2 pt-2 text-md">
+          <li>
+            <a className="button-normal"  onClick={()=>navigate("/profile")}>
+              <User width={24} height={24} />
               <p>Profile</p>
             </a>
           </li>
-          <li className="bg-slate-700 rounded-md p-2">
-            <a className="flex">
-              <UsersIcon width={24} />
+          <li>
+            <a className="button-normal "  onClick={()=>navigate("/c/create")}>
+              <Users width={24} height={24} />
               <p>Create a community</p>
             </a>
           </li>
-          <li className="bg-slate-700 rounded-md p-2">
-            <a className="flex">
-              <Cog6ToothIcon width={24} />
+          <li>
+            <a className="button-normal"  onClick={()=>navigate("/profile/settings")}>
+              <Gear width={24} height={24} />
               <p>Settings</p>
             </a>
           </li>
-          <li className="bg-slate-700 rounded-md p-2">
-            <a className="flex">
-              <UserIcon width={24} />
+          <li>
+            <a className="button-normal" onClick={()=>navigate("/auth/signout")}>
+              <SignOut width={24} height={24} />
               <p>Log out</p>
             </a>
           </li>
         </ul>
       </div>
     </div>
-  );
+  ,document.body);
 };
 
 export default OptionsCard;

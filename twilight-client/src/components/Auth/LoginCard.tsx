@@ -3,6 +3,7 @@ import { FC, useState } from "react";
 
 interface Props {
   toggleCard: Function;
+  refetch: Function,
 }
 
 export const LoginCard: FC<Props> = (props) => {
@@ -15,33 +16,36 @@ export const LoginCard: FC<Props> = (props) => {
       username: email,
       password: password,
     };
-    await fetch("/api/auth/signin", {
+    const res = await fetch("/api/auth/signin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
+    if(res.ok){
+      props.refetch()
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}  className="flex flex-col gap-6 p-8 text-lg border-2 bg-slate-800/60 backdrop-blur-sm rounded-md text-center shadow-2xl shadow-indigo-800">
-      <p>Sign in to your account</p>
-      <div className="flex border-b-2">
+    <form onSubmit={handleSubmit}  className="flex flex-col gap-2 p-8 text-lg min-w-[300px] justify-center bg-nord-snow-200 dark:bg-nord-night-300 rounded-l-md text-center">
+      <p className="text-xl">Sign in to your account</p>
+      <div className="flex form-input">
         <label htmlFor="email" className="hidden">
           E-Mail
         </label>
         <AtSymbolIcon width={20} />
-        <input type="text" name="email" placeholder="JohnDoe@gmail.com"  onChange={(e)=>setEmail(e.target.value)}/>
+        <input type="text" name="email" className="" placeholder="JohnDoe@gmail.com"  onChange={(e)=>setEmail(e.target.value)}/>
       </div>
-      <div className="flex border-b-2">
+      <div className="flex form-input">
         <label htmlFor="password" className="hidden">
           Password
         </label>
         <KeyIcon width={20} />
         <input type="password" name="password" placeholder="Password" onChange={(e)=>setPassword(e.target.value)}/>
       </div>
-      <input type="submit" />
+      <input type="submit" className="button-colored w-full"/>
       <div className="text-sm">
         <p>Don't have an account?</p>
         <a
