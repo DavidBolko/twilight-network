@@ -1,11 +1,11 @@
 import { FC, useState } from "react";
 import { useQuery } from "react-query";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { CDN, fetcher } from "../../utils";
 import { ChatBubbleOvalLeftIcon, HandThumbUpIcon as LikeSolid } from "@heroicons/react/24/solid";
 import { FaceSmileIcon, HandThumbUpIcon as LikeOutline } from "@heroicons/react/24/outline";
-import Navbar from "../../components/Navbar";
 import Comment from "../../components/Comment";
+import { Users } from "@phosphor-icons/react";
 
 type comment = [
   {
@@ -21,7 +21,7 @@ type User = {
 
 type Community = {
   displayName: string;
-  name: string
+  name: string;
 };
 
 type data = {
@@ -30,11 +30,12 @@ type data = {
   content: string;
   author: User;
   comments: comment;
-  community: Community
-  comID: string,
+  community: Community;
+  comID: string;
 };
 
 const PostPage: FC = () => {
+  const navigate = useNavigate()
   const [comment, setComment] = useState("");
 
   const params = useParams();
@@ -66,14 +67,18 @@ const PostPage: FC = () => {
     console.log(data);
 
     return (
-      <main className="flex flex-col gap-2 p-4 pt-20 mr-auto ml-auto max-w-[800px] lg:col-start-2">
-        <section className="postCard">
+      <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[800px] lg:col-start-2">
+        <section className="card">
           <div className="flex items-center gap-2">
-            <img src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")} className="w-12 h-12 rounded-full object-cover"/>
-            <div>
-              <p className="font-bold">{data.title}<a href={`/c/${data.community.name}`} className="ml-2 text-xs font-normal text-slate-400">{data.community.displayName}</a></p>
+            <img src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")} className="w-12 h-12 rounded-full object-cover" />
+            <div className="w-full">
+              <p className="font-bold">{data.title}</p>
               <p className="text-xs">{"by " + data.author.displayName}</p>
             </div>
+            <a href="" onClick={()=>navigate(`/c/${data.community.name}`)} className="flex items-center self-end text-xs font-normal dark:text-twilight-300 hover:text-moonlight-300 ml-auto">
+              <Users width={20} height={20}/>
+              {data.community.displayName}
+            </a>
           </div>
           <img src={CDN(data.content)} alt="" loading="lazy" className="rounded-lg mb-4 mt-2" />
           <div className="flex w-full">
@@ -84,12 +89,12 @@ const PostPage: FC = () => {
             </div>
           </div>
         </section>
-        <section className="postCard">
+        <section className="card">
           <div>
             <p>Comment</p>
             <form className="flex flex-col">
               <textarea
-                className="w-full p-2 rounded-md resize-none form-input outline-none "
+                className="w-full p-2 rounded-md resize-none form-input outline-none shadow-twilight "
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Leave a comment..."
                 name=""
@@ -97,14 +102,7 @@ const PostPage: FC = () => {
               />
               <div className="flex items-center mt-2">
                 <FaceSmileIcon width={32} />
-                <input
-                  className="ml-auto button-colored"
-                  required={true}
-                  type="submit"
-                  name=""
-                  id=""
-                  onClick={submitComment}
-                />
+                <input className="ml-auto button-colored" required={true} type="submit" name="" id="" onClick={submitComment} />
               </div>
             </form>
           </div>

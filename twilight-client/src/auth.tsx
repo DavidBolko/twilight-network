@@ -14,11 +14,11 @@ export const Auth = () =>{
   }
   else if(!data){
     return (
-      <div className="flex flex-col justify-center items-center h-screen">
-        <div className='flex flex-row-reverse bg-nord-snow-100 dark:bg-nord-night-200 rounded-md min-h-[400px] drop-shadow-md'>
+      <div className="flex flex-col md:p-4 m-auto">
+        <div className='flex flex-col sm:flex-row-reverse bg-twilight-100 dark:bg-twilight-800 dark:shadow-glow rounded-md min-h-[400px] shadow-twilight'>
           <div className='flex flex-col gap-2 text-right p-12'>
-            <h1 className='text-8xl'>Twilight</h1>
-            <p className='text-nord-frost-200 mt-auto text-xl text-center'>Modern connection with world</p>
+            <h1 className='text-6xl md:text-8xl dark:text-white text-twilight-600 dark:text-glow text-center'>Twilight</h1>
+            <p className='dark:text-twilight-white-300 text-twilight-400 mt-auto text-xl text-center'>Modern connection with world</p>
             <div className='ml-auto mr-auto'><DarkModeToggler/></div>
           </div>
           <AuthCard refetch={refetch}/>

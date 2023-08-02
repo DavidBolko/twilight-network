@@ -22,6 +22,6 @@ cdnRouter.get("/:id", async function(req:Request, res:Response) {
         res.sendFile(path.resolve(__dirname, "../", file))
     }
     else{
-        res.sendStatus(404).json({"Not Found": true})
+        res.sendStatus(404)
     }
 })

@@ -9,6 +9,7 @@ import { verifyPassword } from "./auth";
 import { CommunityRouter } from "./routes/Community";
 import { cdnRouter } from "./cdn";
 import { postRouter } from "./routes/Post";
+import { UserRouter } from "./routes/User";
 
 const LocalStrategy = passportLocal.Strategy;
 
@@ -40,10 +41,12 @@ passport.use(new LocalStrategy(
   }
 ));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(require('express-status-monitor')());
 app.use("/auth", AuthRouter);
 app.use("/c", CommunityRouter);
 app.use("/cdn", cdnRouter)
 app.use("/p", postRouter)
+app.use("/user", UserRouter)
 
 
 passport.serializeUser<any, any>((req, user:{id:string}, done) => {

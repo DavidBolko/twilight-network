@@ -1,5 +1,5 @@
 export const CDN = (id: string) => {
-  return "http://localhost:5173" + "/api/cdn/" + id;
+  return "http://192.168.0.141:5173" + "/api/cdn/" + id;
 };
 
 

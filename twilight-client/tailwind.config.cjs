@@ -11,37 +11,47 @@ module.exports = {
         'Nunito': ['Nunito', 'sans-serif']
       },
       colors:{
-        "nord-night":{
-          400: "#2E3440",
-          300: "#3B4252",
-          200: "#434C5E",
-          100: "#4C566A",
+        "twilight-white":
+        {
+          100: "#F5F5F5",
+          200: "#EBEBEB",
+          300: "#E0E0E0"
         },
-        "nord-snow":{
-          300: "#D8DEE9",
-          200: "#E5E9F0",
-          100: "#ECEFF4"
+        "twilight-dark":{
+          100: "#185098",
+          200: "#091234",
+          300: "#060C23",
+          400: "#030611",
+          500: "#216ED4"
         },
-        "nord-frost":{
-          100: "#5E81AC",
-          200: "#81A1C1",
-          300: "#88C0D0",
-          400: "#8FBCBB",
+        "twilight":{
+          100: "#F2F3F8",
+          200: "#E4E7F1",
+          300: "#D7DAEA",
+          400: "#8792C0",
+          500: "#4D5B93",
+          600: "#3F4A78",
+          700: "#31395E",
+          800: "#232943",
+          900: "#151929"
         },
-        "aurora":{
-          100: "#BF616A",
-          200: "#A3BE8C"
+        "moonlight":{
+          100: "#72B1E9",
+          200: "#4F9EE3",
+          300: "#2B8BDE",
+          400: "#1C6BB0",
+          500: "#16568D"
         }
       },
       boxShadow:{
-        "shadowNord": '0 5px 12px 2px rgb(0 0 0 / 0.15)',
-        "shadowFrost": '0 5px 12px 2px rgb(136 192 208 / 0.30)'
+        "twilight": '0 5px 12px 2px rgb(0 0 0 / 0.15)',
+        "glowTwilight": '0 0px 3px 1px rgb(137 76 250 / 0.50)',
+        "glow": '0 0px 3px 1px rgb(43 139 222 / 1)'
       },
       dropShadow:{
-        "shadowFrost": '0 5px 12px 2px rgb(136 192 208 / 0.30)'
-      }
+        "glow": '0 0px 3px 1px rgb(61, 147, 224, 1)'
+      },
       
-
     },
   },
   plugins: [],

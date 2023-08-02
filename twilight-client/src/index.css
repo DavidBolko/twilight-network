@@ -9,143 +9,124 @@
   html,
   body {
     @apply box-border;
-    @apply bg-nord-snow-300;
-    @apply dark:bg-nord-night-400;
-    @apply text-neutral-800;
+    @apply dark:bg-twilight-900;
+    @apply bg-twilight-200;
     @apply dark:text-white;
     @apply font-Nunito;
-    @apply min-h-screen;
+    @apply h-[calc(100dvh)]
   }
   input:not([type="submit"]) {
     @apply outline-none;
-    @apply bg-transparent;
+  }
+  *{
+    @apply transition-all;
+    @apply duration-[50ms] !important;
+    @apply ease-in;
+  }
+  #root{
+    @apply flex;
+    @apply min-h-full;
   }
 }
 
 @layer components {
-  .form-input-w-svg {
-    @apply outline-none !important;
-    @apply bg-nord-snow-200;
-    @apply dark:bg-nord-night-300;
-    @apply focus-within:bg-nord-snow-100 !important;
-    @apply dark:focus-within:bg-nord-night-200 !important;
-    @apply rounded-md;
-    @apply shadow-shadowNord;
-    @apply text-base;
-    @apply p-2.5;
-  }
   .form-input {
     @apply outline-none !important;
-    @apply bg-nord-snow-200;
-    @apply dark:bg-nord-night-300;
-    @apply focus-within:bg-nord-snow-100 !important;
-    @apply dark:focus-within:bg-nord-night-200 !important;
+    @apply bg-twilight-100;
+    @apply dark:bg-twilight-700;
+    @apply focus-within:bg-twilight-200 !important;
+    @apply dark:focus-within:bg-twilight-600/70 !important;
     @apply rounded-md;
-    @apply shadow-shadowNord; 
+    @apply dark:shadow-glow; 
+    @apply shadow-md;
     @apply text-base;
   }
+  .form-input-w-svg {
+    @apply form-input;
+    @apply p-2.5;
+  }
   .form-input > svg{
-    @apply dark:bg-nord-night-100;
-    @apply bg-nord-snow-300;
+    @apply dark:bg-twilight-500;
+    @apply bg-twilight-200;
     @apply rounded-l-md;
     @apply p-1.5;
     @apply min-w-[35px];
   }
   .form-input > input{
     @apply p-2.5;
+    @apply bg-transparent;
+    @apply w-full;
   }
   .button-normal {
-    @apply bg-nord-snow-200;
-    @apply dark:bg-nord-night-300;
+    @apply bg-twilight-100;
+    @apply dark:bg-twilight-800;
     @apply flex;
-    @apply shadow-shadowNord;
+    @apply gap-2;
+    @apply shadow-twilight;
     @apply p-2;
     @apply rounded-md;
     @apply min-w-fit;
     @apply text-center;
     @apply cursor-pointer;
-    @apply hover:bg-slate-100;
-    @apply hover:dark:bg-nord-night-400;
+    @apply hover:bg-twilight-200;
+    @apply hover:dark:bg-twilight-900;
     @apply hover:transition-all;
+    @apply hover:scale-105;
   }
   .button-colored {
-    @apply bg-nord-frost-200;
-    @apply cursor-pointer;
-    @apply p-2;
-    @apply rounded-md;
-    @apply w-fit;
-    @apply min-w-[100px];
-    @apply text-center;
-    @apply shadow-shadowNord;
-    @apply hover:bg-nord-frost-300;;
-    @apply hover:shadow-shadowFrost;
-    @apply hover:transition-all;
+    @apply button-normal;
+    @apply place-content-center;
+    @apply bg-moonlight-200/80 !important;
   }
   .button-colored-green {
-    @apply bg-aurora-200;
-    @apply cursor-pointer;
-    @apply p-2;
-    @apply rounded-md;
-    @apply w-fit;
-    @apply min-w-[100px];
-    @apply text-center;
-    @apply shadow-shadowNord;
-    @apply hover:bg-nord-frost-300;;
-    @apply hover:shadow-shadowFrost;
-    @apply hover:transition-all;
+    @apply button-normal;
+    @apply hover:bg-emerald-500 !important;
   }
   .button-colored-active {
-    @apply bg-nord-frost-300;
-    @apply p-2;
-    @apply rounded-md;
-    @apply w-fit;
-    @apply min-w-[100px];
-    @apply text-center;
-    @apply hover:bg-aurora-100;
-    @apply hover:scale-105;
-    @apply hover:transition-all;
+    @apply button-normal;
+    @apply bg-emerald-500 !important;
+    @apply hover:bg-rose-700 !important;
   }
   .radio-btn {
     @apply p-1.5;
-    @apply border-2;
-    @apply border-nord-frost-100;
+    @apply border;
+    @apply border-moonlight-500;
     @apply rounded-md;
     @apply hover:cursor-pointer;
-    @apply bg-nord-snow-200;
-    @apply dark:bg-nord-night-200;
+    @apply bg-twilight-white-200;
+    @apply dark:bg-twilight-700;
   }
   .radio-btn-active {
-    @apply p-1.5;
-    @apply border-2;
-    @apply border-nord-frost-300;
-    @apply rounded-md;
-    @apply shadow-shadowFrost;
-    @apply hover:cursor-pointer;
-    @apply bg-nord-snow-200;
-    @apply dark:bg-nord-night-200;
+    @apply radio-btn;
+    @apply shadow-glow;
+    @apply bg-twilight-200;
+    @apply dark:bg-twilight-800;
   }
-  .postCard{
+  .card{
     @apply flex;
     @apply flex-col;
     @apply gap-2;
-    @apply min-h-[300px];
-    @apply min-w-full;
-    @apply bg-nord-snow-200;
-    @apply dark:bg-nord-night-300;
+    @apply bg-twilight-100;
+    @apply dark:bg-twilight-700;
     @apply p-4;
     @apply rounded-lg;
     @apply hover:transition-all;
+    @apply shadow-twilight;
   }
-}
+  .text-glow{
+    text-shadow: 1px 1px 12px rgb(61 147 224 / 1)
+  }
 
+}
 
 .filepond--root{
   @apply rounded-md;
   @apply md:min-h-[450px];
   @apply w-full;
-  @apply shadow-shadowNord;
-  @apply bg-nord-snow-200;
-  @apply dark:bg-nord-night-300;
+  @apply dark:shadow-glow;
+  @apply shadow-twilight;
+  @apply bg-twilight-white-200;
+  @apply dark:bg-twilight-700;
 }
 
 .filepond--drop-label {
@@ -154,11 +135,11 @@
   @apply md:min-h-[450px] !important;
   @apply w-full;
   @apply font-Nunito !important;
-  @apply text-nord-frost-200 !important;
+  @apply text-moonlight-100 !important;
 }
 
 .filepond--panel-root {
   @apply items-center;
-  @apply bg-nord-snow-200;
-  @apply dark:bg-nord-night-300;
+  @apply bg-twilight-white-200;
+  @apply dark:bg-twilight-700;
 }

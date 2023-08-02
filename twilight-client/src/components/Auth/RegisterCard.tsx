@@ -32,7 +32,6 @@ export const RegisterCard: FC<Props> = (props) => {
       body: JSON.stringify(data)
     })
     if(res.ok){
-      timeout
       setPhase(2)
     }
   }
@@ -42,7 +41,7 @@ export const RegisterCard: FC<Props> = (props) => {
     )
   }
   return (
-    <form onSubmit={handleNext} className="flex flex-col justify-center min-w-[300px] gap-2 p-8 text-lg bg-nord-snow-200 dark:bg-nord-night-300 backdrop-blur-sm rounded-l-md text-center">
+    <form onSubmit={handleNext} className="flex flex-col justify-center min-w-[300px] gap-2 p-8 text-lg bg-twilight-300 dark:bg-twilight-700 rounded-l-md text-center">
       <p>Create an account</p>
       <div className="flex form-input">
         <label htmlFor="email" className="hidden">

@@ -36,7 +36,7 @@ const CreateCommunity = () => {
     <>
       <Navbar img="default.svg"/>
       <section className="p-6 pt-20">
-          <div className="flex gap-8 flex-col p-8 mr-auto ml-auto max-w-[800px] bg-nord-night-300 col-start-2 rounded-md">
+          <div className="flex gap-8 flex-col p-8 mr-auto ml-auto max-w-[800px] bg-twilight-300 dark:bg-twilight-700 shadow-twilight col-start-2 rounded-md">
             <div className="flex justify-between items-center">
               <h1 className="text-xl">Create a community</h1>
               <img src={photo} className="w-12 h-12 rounded-full object-cover" />

@@ -9,43 +9,43 @@ interface props {
 }
 
 const OptionsCard: FC<props> = (props) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return createPortal(
-    <div className={`flex items-center justify-center fixed top-20 right-4 ${props.visible ? "visible" : "hidden"}`}>
-      <div className="bg-nord-snow-200 shadow-shadowNord dark:shadow-shadowFrost dark:bg-nord-night-300 h-fit p-6 rounded-md">
+    <div className={`flex items-center justify-center fixed top-14 right-2 z-30 ${props.visible ? "visible expanded" : "hidden"}`}>
+      <div className={`relative card dark:shadow-glow dark:bg-twilight-600 options ${props.visible ? "expanded" : ""}`}>
         <div className="flex items-center justify-between">
           <p className="text-xl">Options</p>
-          <X width={24} height={24} className="hover:cursor-pointer hover:text-nord-frost-200" onClick={(e) => props.setVisible(false)}/>
         </div>
-        <ul className="flex flex-col gap-2 pt-2 text-md">
+        <ul className="flex flex-col gap-2 text-md relative">
           <li>
-            <a className="button-normal"  onClick={()=>navigate("/profile")}>
-              <User width={24} height={24} />
+            <a className="button-normal" onClick={() => navigate("/profile")}>
+              <User weight="fill" width={24} height={24} />
               <p>Profile</p>
             </a>
           </li>
           <li>
-            <a className="button-normal "  onClick={()=>navigate("/c/create")}>
-              <Users width={24} height={24} />
+            <a className="button-normal " onClick={() => navigate("/c/create")}>
+              <Users weight="fill" className="icon " width={24} height={24} />
               <p>Create a community</p>
             </a>
           </li>
           <li>
-            <a className="button-normal"  onClick={()=>navigate("/profile/settings")}>
-              <Gear width={24} height={24} />
+            <a className="button-normal" onClick={() => navigate("/profile/settings")}>
+              <Gear weight="fill" width={24} height={24} />
               <p>Settings</p>
             </a>
           </li>
           <li>
-            <a className="button-normal" onClick={()=>navigate("/auth/signout")}>
-              <SignOut width={24} height={24} />
+            <a className="button-normal" onClick={() => navigate("/auth/signout")}>
+              <SignOut weight="fill" width={24} height={24} />
               <p>Log out</p>
             </a>
           </li>
         </ul>
       </div>
-    </div>
-  ,document.body);
+    </div>,
+    document.body
+  );
 };
 
 export default OptionsCard;

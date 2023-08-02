@@ -1,5 +1,4 @@
 import { Switch } from "@headlessui/react";
-import { Moon } from "@phosphor-icons/react";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 
@@ -19,14 +18,17 @@ const DarkModeToggler = () => {
   }, [enabled])
   
   const handleChange = ()=>{
+    console.log("asdasd");
     localStorage.setItem("darkMode", String(!enabled))
     setEnabled(!enabled)
   }
+  if(enabled){
+    return (
+      <button type="button" onClick={handleChange}><MoonIcon className="text-glow" width={20} height={20}/></button>
+    );
+  }
   return (
-    <Switch checked={enabled} onChange={handleChange} className={`${enabled ? "bg-nord-frost-300 shadow-shadowFrost" : "bg-nord-snow-300"} relative inline-flex h-6 w-11 items-center rounded-full`}>
-      <span className="sr-only">Enable dark mode</span>
-      <span className={`${enabled ? "translate-x-6" : "translate-x-1"} flex items-center justify-center h-6 w-6 transform rounded-full bg-white transition`}>{enabled==true ? <SunIcon className="text-black"/>: <MoonIcon/>}</span>
-    </Switch>
+    <button type="button" onClick={handleChange}><SunIcon width={20} height={20}/></button>
   );
 };
 

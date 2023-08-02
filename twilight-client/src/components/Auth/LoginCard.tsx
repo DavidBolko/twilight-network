@@ -29,7 +29,7 @@ export const LoginCard: FC<Props> = (props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}  className="flex flex-col gap-2 p-8 text-lg min-w-[300px] justify-center bg-nord-snow-200 dark:bg-nord-night-300 rounded-l-md text-center">
+    <form onSubmit={handleSubmit}  className="flex flex-col gap-2 p-8 text-lg min-w-[300px] justify-center bg-twilight-300 dark:bg-twilight-700 rounded-b-md sm:rounded-b-none sm:rounded-l-md text-center">
       <p className="text-xl">Sign in to your account</p>
       <div className="flex form-input">
         <label htmlFor="email" className="hidden">
@@ -49,7 +49,7 @@ export const LoginCard: FC<Props> = (props) => {
       <div className="text-sm">
         <p>Don't have an account?</p>
         <a
-          className="font-bold hover:text-indigo-700 hover:cursor-pointer"
+          className="font-bold hover:text-twilight-dark-500 hover:cursor-pointer"
           onClick={(e) => props.toggleCard(true)}
         >
           Sign Up

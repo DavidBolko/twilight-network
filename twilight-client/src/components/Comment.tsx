@@ -14,7 +14,7 @@ type props = {
 
 const Comment: FC<props> = (props) => {
   return (
-    <li className="flex shadow-lg bg-nord-snow-200 dark:bg-nord-night-400 rounded-md p-2 mt-2">
+    <li className="flex shadow-twilight bg-twilight-100 dark:bg-twilight-800 rounded-md p-2 mt-2">
       <div>
         <div className="flex items-center gap-2">
           <img
