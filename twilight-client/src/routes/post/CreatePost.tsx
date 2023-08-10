@@ -1,4 +1,4 @@
-import photo from "../../../public/post.png"
+import photo from "../../../public/post.jpg"
 import { useState } from "react";
 import { LanguageIcon} from "@heroicons/react/24/solid";
 import { useSearchParams } from "react-router-dom";
@@ -14,7 +14,7 @@ const CreatePost = () => {
   return (
     <>
       <section className="p-6 pt-20">
-          <div className="flex gap-2 flex-col p-8 mr-auto ml-auto max-w-[900px] bg-twilight-300 dark:bg-twilight-800 col-start-2 rounded-md shadow-twilight">
+          <div className="flex gap-2 flex-col p-8 mr-auto ml-auto max-w-[700px] bg-twilight-300 dark:bg-twilight-800 col-start-2 rounded-md shadow-twilight">
             <div className="flex justify-between items-center">
               <h1 className="text-xl">Create a post</h1>
               <img src={photo} className="w-12 h-12 rounded-full object-cover" />

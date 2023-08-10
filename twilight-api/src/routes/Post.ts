@@ -230,3 +230,22 @@ postRouter.post("/create", upload.single("file"), async function (req: Request, 
     }
   }
 });
+
+postRouter.get("/", verifyAuth, async function (req: Request, res: Response) {
+  const user = req.query.user as string
+  console.log(user);
+  
+  if(user){
+    const posts = await prisma.post.findMany({
+      where:{
+        author: {
+          displayName: user
+        }
+      }
+    })
+    if(posts){
+      return res.status(200).json(posts)
+    }
+  }
+  return res.status(404).json("User doesn't exist")
+});

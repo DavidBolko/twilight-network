@@ -41,7 +41,7 @@ export const Index = () => {
   if (data) {
     console.log(data);
     return (
-      <section className="flex p-4 pt-16 mr-auto ml-auto max-w-[800px] lg:col-start-2">
+      <section className="flex p-4 pt-16 mr-auto ml-auto max-w-[700px] lg:col-start-2">
         <ul className="flex flex-col-reverse w-full gap-2">
           {data?.map((ele) => (
             <PostCard

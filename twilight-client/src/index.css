@@ -13,7 +13,7 @@
     @apply bg-twilight-200;
     @apply dark:text-white;
     @apply font-Nunito;
-    @apply h-[calc(100dvh)]
+    @apply min-h-screen;
   }
   input:not([type="submit"]) {
     @apply outline-none;
@@ -24,8 +24,7 @@
     @apply ease-in;
   }
   #root{
-    @apply flex;
-    @apply min-h-full;
+    @apply min-h-screen;
   }
 }
 
