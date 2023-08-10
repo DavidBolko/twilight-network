@@ -52,7 +52,7 @@
     @apply min-w-[35px];
   }
   .form-input > input{
-    @apply p-2.5;
+    @apply p-2;
     @apply bg-transparent;
     @apply w-full;
   }

@@ -10,8 +10,15 @@ import { CommunityRouter } from "./routes/Community";
 import { cdnRouter } from "./cdn";
 import { postRouter } from "./routes/Post";
 import { UserRouter } from "./routes/User";
+import genFunc from 'connect-pg-simple';
 
 const LocalStrategy = passportLocal.Strategy;
+
+const PostgresqlStore = genFunc(session);
+const sessionStore = new PostgresqlStore({
+  conString: process.env.DATABASE_URL_AUTH,
+  createTableIfMissing:true,
+});
 
 //variables
 const app = express();
@@ -23,8 +30,9 @@ app.use(express.json());
 app.use(session({
   secret: 'dsw&1LM3)CD*zrwrtGpxrwwrxeQhc35#',
   resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
+  saveUninitialized: false,
+  cookie: { maxAge: 60 * 60 * 1000 }, // 1 hour
+  store: sessionStore,
 }));
 app.use(passport.initialize())
 app.use(passport.session())

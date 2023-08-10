@@ -67,7 +67,7 @@ const PostPage: FC = () => {
     console.log(data);
 
     return (
-      <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[800px] lg:col-start-2">
+      <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[900px] lg:col-start-2">
         <section className="card">
           <div className="flex items-center gap-2">
             <img src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")} className="w-12 h-12 rounded-full object-cover" />

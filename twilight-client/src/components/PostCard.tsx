@@ -5,6 +5,7 @@ import avatar from "../../public/post.png";
 import { FC } from "react";
 import { CDN } from "../utils";
 import { useNavigate } from "react-router-dom";
+import { Users } from "@phosphor-icons/react";
 
 type props = {
   author: {
@@ -46,7 +47,7 @@ const PostCard: FC<props> = (props) => {
     return (
       <li className="min-w-full">
         <div className="card">
-          <a onClick={() => navigate(`/p/${props.id}`)} className="hover:cursor-pointer">
+          <a href={`/p/${props.id}`} onClick={(e) => {e.preventDefault(), navigate(`/p/${props.id}`)}} className="hover:cursor-pointer">
             <img src={CDN(props.content)} alt="" className="rounded-lg scale-[.98] hover:scale-100 transition-all" />
           </a>
           <div className="flex w-full">
@@ -69,14 +70,18 @@ const PostCard: FC<props> = (props) => {
   return (
     <li className="min-w-full">
       <div className="card">
-        <div className="flex items-center">
-          <img src={CDN(props.community!.Img)} alt="" className="rounded-full p-2 w-16 h-16 object-cover" />
-          <div>
+        <div className="flex items-center gap-2">
+          <img src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")} className="w-12 h-12 rounded-full object-cover" />
+          <div className="w-full">
             <p className="font-bold">{props.title}</p>
-            <p className="text-xs">by {props.author.displayName}</p>
+            <p className="text-xs">{"by " + props.author.displayName}</p>
           </div>
+          <a href="" onClick={()=>navigate(`/c/${props.community!.displayName}`)} className="flex items-center self-end text-xs font-normal dark:text-twilight-300 hover:text-moonlight-300 ml-auto">
+            <Users width={20} height={20}/>
+            {props.community!.displayName}
+          </a>
         </div>
-        <a onClick={() => navigate(`/p/${props.id}`)} className="hover:cursor-pointer">
+        <a href={`/p/${props.id}`} onClick={(e) => {e.preventDefault(), navigate(`/p/${props.id}`)}} className="hover:cursor-pointer">
           <img src={CDN(props.content)} alt="" className="rounded-lg scale-[.98] hover:scale-100 transition-all" />
         </a>
         <div className="flex w-full">
