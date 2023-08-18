@@ -6,33 +6,7 @@ import { ChatBubbleOvalLeftIcon, HandThumbUpIcon as LikeSolid } from "@heroicons
 import { FaceSmileIcon, HandThumbUpIcon as LikeOutline } from "@heroicons/react/24/outline";
 import Comment from "../../components/Comment";
 import { Users } from "@phosphor-icons/react";
-
-type comment = [
-  {
-    content: string;
-    author: User;
-  }
-];
-
-type User = {
-  displayName: string;
-  img: string;
-};
-
-type Community = {
-  displayName: string;
-  name: string;
-};
-
-type data = {
-  title: string;
-  type: string;
-  content: string;
-  author: User;
-  comments: comment;
-  community: Community;
-  comID: string;
-};
+import PostCard from "../../components/PostCard";
 
 const PostPage: FC = () => {
   const navigate = useNavigate()
@@ -58,36 +32,17 @@ const PostPage: FC = () => {
         body: JSON.stringify({ comment, id: params.id }),
       });
       if (res.ok) {
+        setComment("")
         refetch();
       }
     }
   };
 
-  if (data?.type == "picture") {
-    console.log(data);
-
+  if (data) {
     return (
-      <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[900px] lg:col-start-2">
-        <section className="card">
-          <div className="flex items-center gap-2">
-            <img src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")} className="w-12 h-12 rounded-full object-cover" />
-            <div className="w-full">
-              <p className="font-bold">{data.title}</p>
-              <p className="text-xs">{"by " + data.author.displayName}</p>
-            </div>
-            <a href="" onClick={()=>navigate(`/c/${data.community.name}`)} className="flex items-center self-end text-xs font-normal dark:text-twilight-300 hover:text-moonlight-300 ml-auto">
-              <Users width={20} height={20}/>
-              {data.community.displayName}
-            </a>
-          </div>
-          <img src={CDN(data.content)} alt="" loading="lazy" className="rounded-lg mb-4 mt-2" />
-          <div className="flex w-full">
-            <LikeOutline width={24} />
-            <div className="flex ml-auto items-center">
-              <ChatBubbleOvalLeftIcon width={24} />
-              <p className="text-sm">{data.comments.length}</p>
-            </div>
-          </div>
+      <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[750px] lg:col-start-2">
+        <section>
+          <PostCard author={data.author} title={data.title} type={data.type} community={data.community} cardType="" comments={data.comments.length} content={data.content} likeCount={data.likedBy.length} id={data.id} refetch={refetch} />
         </section>
         <section className="card">
           <div>
@@ -96,6 +51,7 @@ const PostPage: FC = () => {
               <textarea
                 className="w-full p-2 rounded-md resize-none form-input outline-none shadow-twilight "
                 onChange={(e) => setComment(e.target.value)}
+                value={comment}
                 placeholder="Leave a comment..."
                 name=""
                 id=""
@@ -109,18 +65,47 @@ const PostPage: FC = () => {
           <p>Comments</p>
           <ul className="flex flex-col-reverse">
             {data.comments?.map((ele) => (
-              <Comment author={ele.author} content={ele.content} />
+              <li>
+                <Comment author={ele.author} content={ele.content} />
+              </li>
             ))}
           </ul>
         </section>
       </main>
     );
   }
-  return (
-    <main className="flex p-4 pt-20 mr-auto ml-auto max-w-[800px] lg:col-start-2">
-      <img></img>
-    </main>
-  );
 };
 
 export default PostPage;
+
+
+type data = {
+  author: {
+    displayName: string;
+  };
+  comments: [
+    {
+      content: string,
+      author: {
+        displayName: string
+        img: string
+      }
+    }
+  ];
+  community: {
+    displayName: string;
+    id: string;
+    Img: string;
+  };
+  content: string;
+  type: string;
+  id: string;
+  likedBy:[{
+    displayName: string,
+    avatar: string,
+    id:string
+  }]
+  title: string;
+  userId: string;
+  liked:boolean
+};

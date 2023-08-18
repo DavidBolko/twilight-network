@@ -13,14 +13,20 @@
     @apply bg-twilight-200;
     @apply dark:text-white;
     @apply font-Nunito;
-    @apply min-h-screen;
+    @apply min-h-full;
+  }
+  html{
+    @apply overflow-auto;
+  }
+  body{
+    @apply overflow-hidden;
   }
   input:not([type="submit"]) {
     @apply outline-none;
   }
   *{
     @apply transition-all;
-    @apply duration-[50ms] !important;
+    @apply duration-[150ms] !important;
     @apply ease-in;
   }
   #root{
@@ -109,11 +115,15 @@
     @apply dark:bg-twilight-700;
     @apply p-4;
     @apply rounded-lg;
+    @apply max-w-[750px];
     @apply hover:transition-all;
     @apply shadow-twilight;
   }
   .text-glow{
     text-shadow: 1px 1px 12px rgb(61 147 224 / 1)
+  }
+  .expanded{
+    @apply animate-expand;
   }
 
 }

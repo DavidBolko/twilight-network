@@ -16,17 +16,17 @@ const Layout: FC = () => {
 
   if (data) {
     return (
-      <div className="flex flex-col">
+      <>
         <Navbar img="default.svg" />
         <Outlet />
-      </div>
+      </>
     );
   }
   return (
-    <div className="flex flex-col">
+    <>
       <Navbar img="default.svg" />
       <Outlet />
-    </div>
+    </>
   );
 };
 

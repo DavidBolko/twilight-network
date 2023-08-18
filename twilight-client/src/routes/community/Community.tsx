@@ -14,7 +14,8 @@ type Posts = [
     likes: number;
     comments: number;
     content: string;
-    types: string;
+    title: string;
+    type: string;
     author: {
       displayName: string;
     };
@@ -91,13 +92,13 @@ const Community = () => {
       </section>
     );
   }
-
+  console.log(data);
   return (
-    <section className="flex flex-col-reverse lg:grid grid-cols-4 pt-20 p-4 gap-4">
-      <main className="flex col-span-2 col-start-2">
+    <section className="flex flex-col-reverse lg:grid grid-cols-4 pt-20 p-4 gap-4 ">
+      <main className="flex col-span-2 col-start-2 justify-center">
         <ul className="flex flex-col-reverse gap-6">
           {data?.community.Posts.map((ele) => (
-            <PostCard author={ele.author} comments={ele.comments} refetch={refetch} content={ele.content} id={ele.id} likeCount={ele._count.likedBy} cardType="com" />
+            <PostCard author={ele.author} type={ele.type} comments={ele.comments} refetch={refetch}  title={ele.title} content={ele.content} id={ele.id} likeCount={ele._count.likedBy} cardType="com" />
           ))}
         </ul>
       </main>

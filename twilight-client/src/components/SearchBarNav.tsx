@@ -15,6 +15,7 @@ type data = {
 
 type props = {
   setCom?: Function
+  value?: string
 }
 
 const SearchBarNav:FC<props> = (props) => {
@@ -69,7 +70,7 @@ const SearchBarNav:FC<props> = (props) => {
       <Combobox value={selectedCom} onChange={setSelectedCom}>
         <div className="flex flex-col">
           <div className="flex justify-between">
-            <Combobox.Input className="w-full bg-transparent" onChange={(event)=>handleChange(event.target.value)} />
+            <Combobox.Input className="w-full bg-transparent" placeholder={props.value} onChange={(event)=>handleChange(event.target.value)} />
             <Combobox.Button>
               <MagnifyingGlassIcon width={24}/>
             </Combobox.Button>

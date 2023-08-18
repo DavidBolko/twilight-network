@@ -20,7 +20,7 @@ const CreatePost = () => {
               <img src={photo} className="w-12 h-12 rounded-full object-cover" />
             </div>
             <div className="flex relative gap-2 items-center w-full">
-              <SearchBarNav setCom={setCom}/>
+              <SearchBarNav value={com} setCom={setCom}/>
               <div className="flex ml-auto gap-2">
                 <input name="postType" id="textPost" className="hidden" type="radio" value="textPost" onChange={(e)=>setType(e.target.value)}/>
                 <label htmlFor="textPost" className={`${type=="textPost" ? "radio-btn-active":"radio-btn"}`}><LanguageIcon width={24}/></label>

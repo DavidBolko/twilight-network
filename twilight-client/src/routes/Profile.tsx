@@ -4,6 +4,7 @@ import { useQuery } from "react-query";
 import { useSearchParams } from "react-router-dom";
 import PostCard from "../components/PostCard";
 import { CDN, fetcher } from "../utils";
+import Communities from "../components/Communities";
 
 const Profile = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,12 +58,20 @@ const Tabs: FC<tabsProps> = (tabsProps) => {
         <Tab.Panel>
           <PostTab user={tabsProps.user} />
         </Tab.Panel>
-        <Tab.Panel>Content 2</Tab.Panel>
+        <Tab.Panel className="mt-2">
+          <Communities/>
+        </Tab.Panel>
         <Tab.Panel>Content 3</Tab.Panel>
       </Tab.Panels>
     </Tab.Group>
   );
 };
+
+type community = {
+  displayName: string;
+  id: string;
+  Img: string;
+}
 
 type data = [
   {
@@ -70,11 +79,7 @@ type data = [
       displayName: string;
     };
     comments: number;
-    community: {
-      displayName: string;
-      id: string;
-      Img: string;
-    };
+    community: community
     content: string;
     type: string;
     id: string;
@@ -84,6 +89,7 @@ type data = [
     liked: boolean;
   }
 ];
+
 
 const PostTab: FC<tabsProps> = (tabsProps) => {
   const { isLoading, isError, error, data, refetch } = useQuery<data, Error>({

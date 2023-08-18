@@ -43,6 +43,7 @@ CommunityRouter.get("/:cName", async function(req:Request, res:Response) {
       Posts:{
         select:{
           id:true,
+          title:true,
           _count:{
             select:{
               likedBy: true,

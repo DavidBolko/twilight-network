@@ -1,12 +1,71 @@
-import { MagnifyingGlassIcon, UserCircleIcon } from "@heroicons/react/24/outline";
-import { Sidebar } from "./components/Sidebar";
-import Navbar from "./components/Navbar";
 import PostCard from "./components/PostCard";
-import { fetcher } from "./utils";
-import { useQuery } from "react-query";
+import { useInfiniteQuery, useQuery } from "react-query";
 import PostCardSkeleton from "./components/Skeletons/PostCardSkeleton";
-import ErrorPage from "./routes/ErrorPage";
+import { useInView } from 'react-intersection-observer'
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import ErrorPage from "./routes/ErrorPage";
+
+export const Index = () => {
+  const navigate = useNavigate()
+  const { fetchNextPage, fetchPreviousPage, hasNextPage, hasPreviousPage, isFetchingNextPage,isFetchingPreviousPage, data, refetch, error} = useInfiniteQuery(['posts'], ({ pageParam = '' }) => fetchPosts({pageParam}), {
+    getNextPageParam: (lastPage, allPages) => lastPage.nextId ?? false,
+  })
+  
+  const { inView, ref } = useInView()
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage])
+
+
+  if (data && data?.pages[0].posts.length>0) {
+    console.log(data.pages);
+    return (
+      <main className="flex p-1 md:p-4 mr-auto ml-auto max-w-[750px] lg:col-start-2">
+        <section className="flex flex-col gap-2 pt-12 w-full ">
+          {data.pages.flatMap((page, i)=>{
+            return(
+              <ul className="flex flex-col gap-2">
+                {page.posts.map((ele)=>{
+                  return <li key={ele.id}><PostCard cardType="" author={ele.author} comments={ele.comments} community={ele.community} refetch={refetch} content={ele.content} id={ele.id} likeCount={ele.likeCount} title={ele.title} type={ele.type} userId={ele.userId} liked={ele.liked}/></li>
+                })}
+              </ul>
+            )
+          })}
+          <div className="mx-auto flex max-w-6xl justify-center opacity-0" ref={ref}/>
+        </section>
+      </main>
+    );
+  }
+  if(error){
+    return (
+      <main className="flex p-1 md:p-4 relative top-12 mr-auto ml-auto max-w-[750px] lg:col-start-2">
+        <section className="w-full">
+          <ul className="flex flex-col gap-6 w-full">
+            <PostCardSkeleton />
+            <PostCardSkeleton />
+            <PostCardSkeleton />
+            <PostCardSkeleton />
+          </ul>
+        </section>
+      </main>
+    );
+  }
+  return (
+    <main className="flex p-1 md:p-4 relative top-12 mr-auto ml-auto max-w-[750px] lg:col-start-2">
+      <section className="w-full">
+        <ul className="flex flex-col gap-6 w-full">
+          <PostCardSkeleton />
+          <PostCardSkeleton />
+          <PostCardSkeleton />
+          <PostCardSkeleton />
+        </ul>
+      </section>
+    </main>
+  );
+};
 
 type data = [
   {
@@ -29,59 +88,8 @@ type data = [
   }
 ];
 
-export const Index = () => {
-  const navigate = useNavigate()
-  const { isLoading, isError, error, data, refetch } = useQuery<data, Error>({
-    queryFn: () => fetcher(`/api/user/followed`),
-    queryKey: ["followed"],
-    refetchOnWindowFocus: false,
-    retry:false
-  });
-
-  if (data) {
-    console.log(data);
-    return (
-      <section className="flex p-4 pt-16 mr-auto ml-auto max-w-[900px] lg:col-start-2">
-        <ul className="flex flex-col-reverse w-full gap-2">
-          {data?.map((ele) => (
-            <PostCard
-              cardType=""
-              author={ele.author}
-              comments={ele.comments}
-              community={ele.community}
-              refetch={refetch}
-              content={ele.content}
-              id={ele.id}
-              likeCount={ele.likeCount}
-              title={ele.title}
-              type={ele.type}
-              userId={ele.userId}
-              liked={ele.liked}
-            />
-          ))}
-        </ul>
-      </section>
-    );
-  }
-  if (isError && JSON.parse(error?.message).status == 401) {
-    navigate("/auth")
-  }
-  if (isError && JSON.parse(error?.message).status == 404) {
-    return (
-      <section className="flex flex-col items-center justify-center p-4 pt-20 mr-auto ml-auto max-w-[800px] lg:col-start-2 gap-2">
-        <p>You don't follow any communities</p>
-        <a href="" className="button-colored">Let's explore</a>
-      </section>
-    );
-  }
-  return (
-    <section className="flex p-4 pt-16 mr-auto ml-auto max-w-[800px] lg:col-start-2">
-      <ul className="flex flex-col gap-6 w-full">
-        <PostCardSkeleton />
-        <PostCardSkeleton />
-        <PostCardSkeleton />
-        <PostCardSkeleton />
-      </ul>
-    </section>
-  );
-};
+const fetchPosts = async ({pageParam = ''}: {pageParam: string}): Promise<{ posts: data; nextId: string }> => {
+  const res = await fetch(`/api/p?cursor=${pageParam}`)
+  const data = await res.json()
+  return data
+}

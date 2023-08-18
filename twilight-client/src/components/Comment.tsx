@@ -14,19 +14,17 @@ type props = {
 
 const Comment: FC<props> = (props) => {
   return (
-    <li className="flex shadow-twilight bg-twilight-100 dark:bg-twilight-800 rounded-md p-2 mt-2">
-      <div>
-        <div className="flex items-center gap-2">
-          <img
-            src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")}
-            className="w-12 h-12 rounded-full object-cover"
-            alt=""
-          />
-          <p>{props.author.displayName}</p>
-        </div>
-        <p className="text-justify">{props.content}</p>
+    <div className="flex flex-col gap-2 h-fit shadow-twilight bg-twilight-100 dark:bg-twilight-800 rounded-md p-2 mt-2">
+      <div className="flex items-center gap-2">
+        <img
+          src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")}
+          className="w-8 h-8 rounded-full object-cover"
+          alt=""
+        />
+        <p>{props.author.displayName}</p>
       </div>
-    </li>
+      <p className="text-justify text-base break-words">{props.content}</p>
+    </div>
   );
 };
 

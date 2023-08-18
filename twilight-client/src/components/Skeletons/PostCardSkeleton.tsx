@@ -8,22 +8,19 @@ import { FC } from "react";
 const PostCardSkeleton:FC= () => {
   return (
     <li className="w-full">
-      <div className="postCard">
-        <div className="flex items-center w-full">
-          <span className="h-16 w-16 rounded-full bg-nord-snow-300 dark:bg-nord-night-400 animate-pulse"/>
-          <div className="flex flex-col gap-1">
-            <span className="ml-1 w-16 h-4 rounded-md  bg-nord-snow-300 dark:bg-nord-night-400 animate-pulse"/>
-            <span className="ml-1 w-8 h-3 rounded-md bg-nord-snow-300 dark:bg-nord-night-400 animate-pulse"/>
+      <div className="card">
+        <div className="flex gap-2">
+          <div className="w-[48px] h-[48px] rounded-full bg-twilight-white-300 dark:bg-twilight-dark-300"></div>
+          <div className="flex flex-col gap-1 justify-center">
+            <span className="bg-twilight-white-300 dark:bg-twilight-dark-300 rounded-md w-fit text-transparent animate-pulse select-none text-sm">Loremipsum</span>
+            <span className="bg-twilight-white-300 dark:bg-twilight-dark-300 rounded-md w-fit text-transparent animate-pulse select-none text-xs">Lorem</span>
           </div>
         </div>
-        <span className="h-[400px] w-full rounded-md  bg-nord-snow-300 dark:bg-nord-night-400 animate-pulse"/>
-        <div className="flex w-full">
-          <LikeOutline width={24} />
-          <span className="ml-1 w-8 h-6 rounded-md bg-nord-snow-300  dark:bg-nord-night-400 animate-pulse"/>
-          <div className="flex ml-auto items-center">
-            <ChatBubbleOvalLeftIcon width={24} />
-            <span className="ml-1 w-8 h-6 rounded-md bg-nord-snow-300 dark:bg-nord-night-400 animate-pulse"/>
-          </div>
+        <div className="flex flex-col gap-2">
+          <span className="bg-twilight-white-300 dark:bg-twilight-dark-300 rounded-md w-fit text-transparent animate-pulse select-none">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eaque, laudantium namn</span>
+          <span className="bg-twilight-white-300 dark:bg-twilight-dark-300 rounded-md w-fit text-transparent animate-pulse select-none">Lorem ipsum dolor sit amet consectetur, adipisicing elit.</span>
+          <span className="bg-twilight-white-300 dark:bg-twilight-dark-300 rounded-md w-fit text-transparent animate-pulse select-none">Lorem ipsum dolor sit amet consectetur.</span>
+          <span className="bg-twilight-white-300 dark:bg-twilight-dark-300 rounded-md w-fit text-transparent animate-pulse select-none">Lorem ipsum dolor sit amet consectetur. Lorem ipsum dolor sit.</span>
         </div>
       </div>
     </li>

@@ -7,6 +7,15 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      animation:{
+        "expand": "expand 0.5s ease-in",
+      },
+      keyframes:{
+        "expand":{
+          "0%": {transform: "translateX(60px)"},
+          "100": {transform: "translateX(0px)"},
+        }
+      },
       fontFamily:{
         'Nunito': ['Nunito', 'sans-serif']
       },

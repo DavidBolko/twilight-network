@@ -11,8 +11,8 @@ interface props {
 const OptionsCard: FC<props> = (props) => {
   const navigate = useNavigate();
   return createPortal(
-    <div className={`flex items-center justify-center fixed top-14 right-2 z-30 ${props.visible ? "visible expanded" : "hidden"}`}>
-      <div className={`relative card dark:shadow-glow dark:bg-twilight-600 options ${props.visible ? "expanded" : ""}`}>
+    <div className={`flex items-center justify-center fixed top-14 right-0 z-30 h-full ${props.visible ? "visible expanded" : "hidden"}`}>
+      <div className={`relative card rounded-none shadow-none dark:bg-twilight-700/80 backdrop-blur-md options h-full ${props.visible ? "expanded" : ""}`}>
         <div className="flex items-center justify-between">
           <p className="text-xl">Options</p>
         </div>

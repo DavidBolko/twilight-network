@@ -11,6 +11,7 @@ import { cdnRouter } from "./cdn";
 import { postRouter } from "./routes/Post";
 import { UserRouter } from "./routes/User";
 import genFunc from 'connect-pg-simple';
+import cors from "cors"
 
 const LocalStrategy = passportLocal.Strategy;
 
@@ -26,12 +27,14 @@ export const prisma = new PrismaClient();
 
 
 //middleware
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.set('trust proxy', 1)
 app.use(express.json());
 app.use(session({
   secret: 'dsw&1LM3)CD*zrwrtGpxrwwrxeQhc35#',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 60 * 60 * 1000 }, // 1 hour
+  cookie: { maxAge: 60 * 60 * 1000, httpOnly:true, sameSite:"lax", secure:false}, // 1 hour
   store: sessionStore,
 }));
 app.use(passport.initialize())
