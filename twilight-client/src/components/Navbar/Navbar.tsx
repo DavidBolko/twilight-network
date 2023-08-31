@@ -1,19 +1,20 @@
-import OptionsCard from "./OptionsCard";
-import { FC, useState } from "react";
-import { CDN,} from "../utils";
-import SearchBarNav from "./SearchBarNav";
-import DarkModeToggler from "./Navbar/DarkModeToggler";
+import OptionsCard from "../OptionsCard";
+import { FC, useContext, useState } from "react";
+import { CDN,} from "../../utils";
+import SearchBarNav from "../SearchBarNav";
+import DarkModeToggler from "./DarkModeToggler";
 import { useNavigate } from "react-router-dom";
 import { ArrowDownIcon } from "@heroicons/react/24/solid";
 import { CaretDownIcon, Cross1Icon } from "@radix-ui/react-icons";
+import { UserContext } from "../../store";
+import OptionsButton from "./OptionsButton";
 
-type props = {
-  img: string
-}
 
-const Navbar:FC<props> = (props) => {
+const Navbar:FC = () => {
   const navigate = useNavigate()
   const [options, openOptions] = useState(false)
+
+  const user = useContext(UserContext);
   return (
     <>
       <OptionsCard visible={options} setVisible={()=>openOptions(!options)}/>
@@ -24,13 +25,10 @@ const Navbar:FC<props> = (props) => {
         <SearchBarNav/>
         <div className="flex items-center gap-2 ml-auto">
           <DarkModeToggler/>
-          <button className={`flex items-center align-middle hover:dark:bg-twilight-600 hover:bg-twilight-300 p-1 pl-2 rounded-md ${options?" bg-twilight-300 dark:bg-twilight-500 hover:dark:bg-twilight-500 hover:bg-twilight-300":"bg-transparent"}`} onClick={(e)=>openOptions(!options)}>
-            <img src={CDN(props.img)} alt="" className="w-8 h-8 border border-nord-frost-300/50 rounded-full"/>
-            {options?
-            <Cross1Icon width={20} height={12}/> 
-            :<CaretDownIcon width={20} height={16}/>
-            }
-          </button>
+          {user.id
+          ? <OptionsButton open={openOptions} avatar={user.avatar} options={options}/>
+          : <a href="/auth" className="button-colored">Log In</a>
+          }
         </div>
       </div>
     </>
@@ -38,3 +36,4 @@ const Navbar:FC<props> = (props) => {
 };
 
 export default Navbar;
+

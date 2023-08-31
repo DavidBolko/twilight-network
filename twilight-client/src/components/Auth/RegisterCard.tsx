@@ -1,7 +1,6 @@
 import { AtSymbolIcon, KeyIcon, UserIcon } from "@heroicons/react/24/solid";
 import { FC, useState } from "react";
 import ProfileInformation from "./ProfileInformation";
-import AdditionalInformationCard from "./AdditionalInformationCard";
 import SubmitButton from "../elements/SubmitButton";
 
 interface Props {

@@ -12,22 +12,24 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(uuid())
-  displayName  String
-  email     String  @unique
-  password  String
+  id           String  @id @default(uuid())
+  name         String  @unique
+  displayName  String?
+  email        String  @unique
+  password     String
   ModeratorOf Community[] @relation(name: "ModeratorOf")
   Followed Community[]
   Posts Post[]
   comments Comment[]
   avatar String @default("default.svg")
   likes Post[] @relation(name: "likedBy")
+  description String?
 }
 
 model Community{
   id String @id @default(cuid())
-  name String
-  name String @unique
+  name        String  @unique
+  displayName String?
   desc String
   Moderators User[]  @relation(name: "ModeratorOf")
   Users User[]

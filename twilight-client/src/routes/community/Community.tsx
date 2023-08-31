@@ -1,6 +1,4 @@
-import { useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
-import useSWR from "swr";
+import { useParams } from "react-router-dom";;
 import { CDN, fetcher } from "../../utils";
 import ErrorPage from "../ErrorPage";
 import { useQuery } from "react-query";
@@ -8,47 +6,17 @@ import { CheckIcon } from "@heroicons/react/24/outline";
 import PostCard from "../../components/PostCard";
 import PostCardSkeleton from "../../components/Skeletons/PostCardSkeleton";
 
-type Posts = [
-  {
-    id: string;
-    likes: number;
-    comments: number;
-    content: string;
-    title: string;
-    type: string;
-    author: {
-      displayName: string;
-    };
-    _count:{
-      likedBy:number
-    }
-  }
-];
-
-interface commuity {
-  displayName: string;
-  desc: string;
-  Img: string;
-  likes: number;
-  Users: string[];
-  Posts: Posts;
-}
-
-type data = {
-  community: commuity;
-  followed: boolean;
-};
-
 const Community = () => {
   const params = useParams();
 
-  const { isLoading, isError, error, data, refetch } = useQuery<data, Error>({
-    queryFn: () => fetcher(`/api/c/${params.cName}`),
+  const { isLoading, isError, error, data, refetch } = useQuery<api_data, Error>({
+    queryFn: () => fetcher(`/api/c/${params.name}`),
     refetchOnWindowFocus: false,
   });
 
+
   const handleFollow = async () => {
-    const res = await fetch(`/api/c/${params.cName}/follow`, {
+    const res = await fetch(`/api/c/${params.name}/follow`, {
       method: "PUT",
       body: "",
     });
@@ -56,8 +24,7 @@ const Community = () => {
       refetch();
     }
   };
-
-  console.log(data);
+  
   if (isError) {
     return <ErrorPage error={JSON.parse(error.message)} />;
   } else if (isLoading) {
@@ -92,13 +59,12 @@ const Community = () => {
       </section>
     );
   }
-  console.log(data);
   return (
     <section className="flex flex-col-reverse lg:grid grid-cols-4 pt-20 p-4 gap-4 ">
       <main className="flex col-span-2 col-start-2 justify-center">
         <ul className="flex flex-col-reverse gap-6">
           {data?.community.Posts.map((ele) => (
-            <PostCard author={ele.author} type={ele.type} comments={ele.comments} refetch={refetch}  title={ele.title} content={ele.content} id={ele.id} likeCount={ele._count.likedBy} cardType="com" />
+            <PostCard  author={ele.author} type={ele.type} comments={ele._count.comments >= 0 ? ele._count.comments : 0} refetch={refetch}  title={ele.title} content={ele.content} id={ele.id} likeCount={ele._count.likedBy} cardType="com" />
           ))}
         </ul>
       </main>
@@ -112,7 +78,7 @@ const Community = () => {
         </div>
         <p>{data?.community.desc}</p>
         <div className="flex gap-2">
-          <a className="button-normal" href={`/p/create?com=${params.cName}`}>
+          <a className="button-normal" href={`/p/create?com=${params.name}`}>
             Make a post
           </a>
           {data?.followed == true ? (
@@ -136,3 +102,33 @@ const Community = () => {
 };
 
 export default Community;
+
+interface api_data{
+  community: {
+    name: string
+    displayName: string
+    desc: string
+    Img: string
+    Users: Array<{
+      id: string
+    }>
+    Posts: Array<{
+      id: string
+      title: string
+      content: string
+      type: string
+      author: {
+        name: string;
+        displayName: string
+      }
+      likedBy: Array<{
+        id: string
+      }>
+      _count: {
+        likedBy: number
+        comments: number
+      }
+    }>
+  }
+  followed: boolean
+}

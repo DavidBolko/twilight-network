@@ -54,6 +54,7 @@ CommunityRouter.get("/:cName", async function(req:Request, res:Response) {
           type: true,
           author:{
             select:{
+              name: true,
               displayName: true,
             }
           },
@@ -171,7 +172,7 @@ CommunityRouter.post( "/create", upload.single('avatar'), async function (req: R
   });
   await prisma.community.create({
     data: {
-      name: payload.title.toLowerCase(),
+      name: payload.title,
       displayName: payload.title,
       desc: payload.desc,
       Img: file.filename,

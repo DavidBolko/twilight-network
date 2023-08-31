@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { useQuery } from "react-query";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { CDN, fetcher } from "../../utils";
@@ -7,6 +7,8 @@ import { FaceSmileIcon, HandThumbUpIcon as LikeOutline } from "@heroicons/react/
 import Comment from "../../components/Comment";
 import { Users } from "@phosphor-icons/react";
 import PostCard from "../../components/PostCard";
+import PostCardSkeleton from "../../components/Skeletons/PostCardSkeleton";
+import { UserContext } from "../../store";
 
 const PostPage: FC = () => {
   const navigate = useNavigate()
@@ -18,6 +20,8 @@ const PostPage: FC = () => {
     queryFn: () => fetcher(`/api/p/${params.id}`),
     refetchOnWindowFocus: false,
   });
+
+  const user = useContext(UserContext);  
 
   const submitComment = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -37,12 +41,12 @@ const PostPage: FC = () => {
       }
     }
   };
-
+  
   if (data) {
     return (
       <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[750px] lg:col-start-2">
         <section>
-          <PostCard author={data.author} title={data.title} type={data.type} community={data.community} cardType="" comments={data.comments.length} content={data.content} likeCount={data.likedBy.length} id={data.id} refetch={refetch} />
+          <PostCard author={data.author} likedBy={data.likedBy} liked={data.likedBy.some((e)=>{return e.id == user.id})} title={data.title} type={data.type} community={data.community} cardType="" comments={data.comments.length >= 0 ? data.comments.length : 0 } content={data.content} likeCount={data.likedBy.length} id={data.id} refetch={refetch} />
         </section>
         <section className="card">
           <div>
@@ -64,8 +68,8 @@ const PostPage: FC = () => {
           </div>
           <p>Comments</p>
           <ul className="flex flex-col-reverse">
-            {data.comments?.map((ele) => (
-              <li>
+            {data.comments?.map((ele, i) => (
+              <li key={i}>
                 <Comment author={ele.author} content={ele.content} />
               </li>
             ))}
@@ -74,6 +78,16 @@ const PostPage: FC = () => {
       </main>
     );
   }
+  return (
+    <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[750px] lg:col-start-2">
+      <section>
+        <PostCardSkeleton/>
+      </section>
+      <section>
+        <PostCardSkeleton/>
+      </section>
+    </main>
+  );
 };
 
 export default PostPage;
@@ -81,6 +95,7 @@ export default PostPage;
 
 type data = {
   author: {
+    name: string
     displayName: string;
   };
   comments: [
@@ -93,6 +108,7 @@ type data = {
     }
   ];
   community: {
+    name:string;
     displayName: string;
     id: string;
     Img: string;

@@ -32,7 +32,8 @@ interface data {
   type: string;
 }
 
-postRouter.get("/:id", verifyAuth, async function (req: Request, res: Response) {
+
+postRouter.get("/:id", async function (req: Request, res: Response) {
   const post = await prisma.post.findFirst({
     where: {
       id: req.params.id,
@@ -162,14 +163,12 @@ postRouter.post("/create", upload.single("file"), async function (req: Request, 
   const file = req.file;
   const payload: data = req.body;
 
-  const filename = await handleImageUpload(file.mimetype, file.buffer, "post")
-
   const com = await prisma.community.findFirst({
     where: {
-      name: payload.com.toLowerCase(),
+      name: payload.com,
     },
   });
-
+  
   const user = await prisma.user.findFirst({
     where: {
       id: req.user,
@@ -189,13 +188,15 @@ postRouter.post("/create", upload.single("file"), async function (req: Request, 
         },
         community: {
           connect: {
-            id: com.id,
+            name: com.name,
           },
         },
       },
     });
-    res.json(post.id).status(200);
-  } else if (payload.type == "filePost") {
+    return res.json(post.id).status(200);
+  } 
+  else if (payload.type == "filePost") {
+    const filename = await handleImageUpload(file.mimetype, file.buffer, "post")
     if (file.mimetype.includes("video")) {
       const post = await prisma.post.create({
         data: {
@@ -209,13 +210,14 @@ postRouter.post("/create", upload.single("file"), async function (req: Request, 
           },
           community: {
             connect: {
-              id: com.id,
+              name: com.name,
             },
           },
         },
       });
-      res.json(post.id).status(200);
-    } else {
+      return res.json(post.id).status(200);
+    } 
+    else {
       const post = await prisma.post.create({
         data: {
           title: payload.title,
@@ -228,15 +230,99 @@ postRouter.post("/create", upload.single("file"), async function (req: Request, 
           },
           community: {
             connect: {
-              id: com.id,
+              name: com.name,
             },
           },
         },
       });
-      res.json(post.id).status(200);
+      return res.json(post.id).status(200);
     }
   }
 });
+
+postRouter.get("/", async function (req: Request, res: Response) {
+  const take = 4
+  const cursorQuery = (req.query.cursor as string) ?? undefined
+  const skip = cursorQuery ? 1 : 0
+  const cursor = cursorQuery ? { id: cursorQuery } : undefined
+
+  try {
+    const _posts = await prisma.post.findMany({
+      skip,
+      take,
+      cursor,
+      select: {
+        author: {
+          select: {
+            name: true,
+            displayName: true,
+          },
+        },
+        comments: {
+          select: {
+            id: true,
+          },
+        },
+        community: {
+          select: {
+            displayName: true,
+            id: true,
+            Img:true
+          },
+        },
+        content: true,
+        id: true,
+        title: true,
+        type: true,
+        userId: true,
+        comID: false,
+        _count:{
+          select:{
+            likedBy:true
+          }
+        },
+        likedBy:{
+          select:{
+            id:true
+          },
+        },
+      },
+    })
+
+    const nextId = _posts.length < take ? undefined : _posts[take - 1].id
+
+    const posts = _posts;
+    res.status(200).json({
+      posts,
+      nextId
+    })
+  } catch (error) {
+    res.status(400).end()
+  }
+});
+
+
+
+/*
+
+type post = {
+  author: {
+    displayName: string;
+  };
+  comments: number;
+  community: {
+    displayName: string;
+    id: string;
+    Img:string
+  };
+  content: string;
+  type: string;
+  id: string;
+  likeCount:number,
+  title: string;
+  userId: string;
+  liked:boolean
+};
 
 postRouter.get("/", async function (req: Request, res: Response) {
   const take = 4
@@ -342,21 +428,5 @@ postRouter.get("/", async function (req: Request, res: Response) {
 
 
 
-type post = {
-  author: {
-    displayName: string;
-  };
-  comments: number;
-  community: {
-    displayName: string;
-    id: string;
-    Img:string
-  };
-  content: string;
-  type: string;
-  id: string;
-  likeCount:number,
-  title: string;
-  userId: string;
-  liked:boolean
-};
+
+*/

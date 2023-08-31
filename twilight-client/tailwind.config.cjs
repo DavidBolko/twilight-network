@@ -12,12 +12,15 @@ module.exports = {
       },
       keyframes:{
         "expand":{
-          "0%": {transform: "translateX(60px)"},
-          "100": {transform: "translateX(0px)"},
+          "0%": {transform: "translateY(-20px)"},
+          "100": {transform: "translateY(0px)"},
         }
       },
       fontFamily:{
         'Nunito': ['Nunito', 'sans-serif']
+      },
+      gridTemplateColumns:{
+        "userCard": "auto 2fr"
       },
       colors:{
         "twilight-white":

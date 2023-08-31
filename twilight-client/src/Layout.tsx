@@ -1,30 +1,37 @@
-import { FC, ReactNode } from "react";
-import Navbar from "./components/Navbar";
+import { FC } from "react";
+import Navbar from "./components/Navbar/Navbar";
 import { Outlet } from "react-router-dom";
-import { fetcher } from "./utils";
 import { useQuery } from "react-query";
+import { UserContext } from "./store";
+import axios from "axios";
 
-type data = {
-  img: string;
-};
+type response = {
+  data:{
+    avatar: string,
+    id: string,
+    displayName: string,
+    logged:boolean
+  }
+}
 
 const Layout: FC = () => {
-  const { isLoading, isError, error, data, refetch } = useQuery<data, Error>({
-    queryFn: () => fetcher(`/api/auth/user`),
-    refetchOnWindowFocus: false,
-  });
+  const {data} = useQuery<response>("authData", {queryFn: () => axios.get(`/api/auth/user`), retry:false, refetchOnWindowFocus:false})
 
   if (data) {
     return (
-      <>
-        <Navbar img="default.svg" />
-        <Outlet />
-      </>
+      <div>
+        <UserContext.Provider value={data.data}>
+          <div>
+            <Navbar/>
+            <Outlet />
+          </div>
+        </UserContext.Provider>
+      </div>
     );
   }
   return (
     <>
-      <Navbar img="default.svg" />
+      <Navbar/>
       <Outlet />
     </>
   );

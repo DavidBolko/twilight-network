@@ -1,4 +1,4 @@
-import React, { createContext } from "react";
+import { StrictMode} from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { Index } from "./Index";
@@ -17,7 +17,13 @@ const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
     path: "/",
-    element: [<Layout />, <Index />],
+    element: <Layout/>,
+    children:[
+      {
+        path: "",
+        element: <Index />
+      }
+    ]
   },
   {
     path: "/auth",
@@ -27,7 +33,7 @@ const router = createBrowserRouter([
     path: "/p",
     element: <Layout />,
     children: [
-      {
+      { 
         path: "create",
         element: <CreatePost />,
       },
@@ -56,7 +62,7 @@ const router = createBrowserRouter([
         element: <CreateCommunity />,
       },
       {
-        path: ":cName",
+        path: ":name",
         element: <Community />,
       },
     ],
@@ -64,7 +70,9 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <QueryClientProvider client={queryClient}>
-    <RouterProvider router={router} />
-  </QueryClientProvider>
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  </StrictMode>
 );

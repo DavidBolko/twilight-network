@@ -1,15 +1,13 @@
 import { AuthCard } from './components/Auth/AuthCard'
 import { useQuery } from 'react-query'
 import DarkModeToggler from './components/Navbar/DarkModeToggler'
+import axios from 'axios'
 
 export const Auth = () =>{
-  const {isLoading, error, data, refetch} = useQuery(["authData"], {queryFn: async()=> (await fetch(`/api/auth/verify`)).json()})
+  const {error, data, refetch} = useQuery(["authData"], {queryFn: async()=> axios.get(`/api/auth/verify`), retry:false})
   console.log(data);
 
-  if(data){
-    window.location.replace("/")
-  }
-  else if(!data){
+  if(!data){
     return (
       <div className="flex flex-col md:p-4 h-screen">
         <div className='flex flex-col sm:flex-row-reverse m-auto  bg-twilight-100 dark:bg-twilight-800 dark:shadow-glow rounded-md min-h-[400px] shadow-twilight'>
@@ -23,11 +21,12 @@ export const Auth = () =>{
       </div>
     )
   }
-  else if(isLoading){
-    return(<h1>loading</h1>) 
+  else if(error){
+    return(
+      <h1>error</h1>
+    )
   }
-  else{
-    window.location.replace("/error")
-  }
+  return(
+    window.location.replace("/")
+  )
 }
-

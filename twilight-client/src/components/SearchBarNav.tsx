@@ -48,14 +48,14 @@ const SearchBarNav:FC<props> = (props) => {
             <Transition as={Fragment} enter="transition ease-in duration-100" enterFrom="opacity-0" enterTo="opacity-100" leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
               <Combobox.Options className={"flex flex-col gap-2 rounded-md mt-12 p-2 dark:shadow-glow shadow-twilight absolute left-0 bg-twilight-100 dark:bg-twilight-800/90 z-0 w-full"}>
                 {query!.map((com) => (
-                  <Combobox.Option key={com.id} value={com.name} className={"hover:shadow-twilight hover:bg-moonlight-300/40 hover:cursor-pointer p-1.5 rounded-md hover:animate-pulse"} onClick={()=>{window.location.replace("/c/"+com.name)}}>
-                    <div className="flex gap-2 items-center">
+                  <Combobox.Option key={com.id} value={com.name} className={"hover:shadow-twilight hover:bg-moonlight-300/40 hover:cursor-pointer p-1.5 rounded-md hover:animate-pulse"}>
+                    <a href={"/c/"+com.name} className="flex gap-2 items-center">
                       <img src={CDN("default.svg")} className="w-8 h-8 border border-twilight-200/70 rounded-full"></img>
                       <div className="flex flex-col">
                         <p>{com.displayName}</p>
                         <p className="text-xs text-twilight-400">{com._count.Users} members</p>
                       </div>
-                    </div>
+                    </a>
                   </Combobox.Option>
                 ))}
               </Combobox.Options>

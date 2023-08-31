@@ -3,29 +3,35 @@ import { HeartIcon as HeartIconSolid, ChatBubbleOvalLeftIcon } from "@heroicons/
 import { FC } from "react";
 import { CDN, previewCDN } from "../utils";
 import { useNavigate } from "react-router-dom";
-import { HeartStraight, Users } from "@phosphor-icons/react";
+import { Users } from "@phosphor-icons/react";
 import { ChatBubbleIcon, DownloadIcon } from "@radix-ui/react-icons";
 
 type props = {
   author: {
+    name:string;
     displayName: string;
   };
   comments: number;
   community?: {
+    name:string;
     displayName: string;
     id: string;
     Img: string;
   };
+  likedBy:[
+    {
+      id: string
+    }
+  ]
   content: string;
   id: string;
   likeCount: number;
   title: string;
-  userId?: string;
-  liked?:boolean,
   refetch: Function
   cardType: string,
-  type: string
-  preview?: boolean
+  type: string,
+  preview?: boolean,
+  liked: boolean
 };
 
 const PostCard: FC<props> = (props) => {
@@ -50,11 +56,11 @@ const PostCard: FC<props> = (props) => {
         <img src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")} loading="lazy" className="w-12 h-12 rounded-full object-cover" />
         <div className="w-full">
           <p className="font-bold">{props.title}</p>
-          <p className="text-xs">{"by " + props.author.displayName}</p>
+          <p className="text-xs">{"by " + props.author.name}</p>
         </div>
         {props.cardType == "com"
         ? ""
-        : <a href="" onClick={()=>navigate(`/c/${props.community!.displayName}`)} className="flex items-center self-end text-xs font-normal dark:text-twilight-300 hover:text-moonlight-300 ml-auto"> <Users width={20} height={20}/> {props.community!.displayName}</a>
+        : <a href="" onClick={()=>navigate(`/c/${props.community!.name}`)} className="flex items-center self-end text-xs font-normal dark:text-twilight-300 hover:text-moonlight-300 ml-auto"> <Users width={20} height={20}/> {props.community!.displayName}</a>
         }
       </div>
       <a href={`/p/${props.id}`} onClick={(e) => {e.preventDefault(), navigate(`/p/${props.id}`)}} className="hover:cursor-pointer h-fit">
@@ -65,7 +71,7 @@ const PostCard: FC<props> = (props) => {
       </a>
       <div className="flex w-full">
         <div className="flex items-center gap-1 text-xs">
-          {props.liked
+          {props.liked == true
           ?<button onClick={()=>likePost(props.id)}><HeartIconSolid width={24} height={24} className="text-moonlight-200 dark:text-glow hover:text-moonlight-300"/></button>
           :<button onClick={()=>likePost(props.id)}><HeartIcon width={24} height={24} className="hover:text-moonlight-300"/></button>
           }
