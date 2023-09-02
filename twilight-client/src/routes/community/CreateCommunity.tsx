@@ -1,5 +1,5 @@
 import Navbar from "../../components/Navbar/Navbar";
-import photo from "../../../public/post.png"
+import photo from "../../../public/post.jpg"
 import { useState } from "react";
 
 const CreateCommunity = () => {

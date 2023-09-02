@@ -1,17 +1,21 @@
-import { Switch } from "@headlessui/react";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { useContext, useState } from "react";
+import { FC, useContext } from "react";
 import { ThemeContext } from "../../store";
 
-const DarkModeToggler = () => {
-  const theme = useContext(ThemeContext)
-  const [enabled, setEnabled] = useState(theme);
-  
-  const handleChange = ()=>{
-    localStorage.setItem("darkMode", String(!enabled))
-    setEnabled(!enabled)
+
+const DarkModeToggler:FC = () => {
+  const [darkMode, setTheme] = useContext(ThemeContext);
+  const handleChange = () =>{
+    if(darkMode == "false"){
+      setTheme("true")
+      localStorage.setItem('darkMode', "true")
+    }
+    else{
+      setTheme("false")
+      localStorage.setItem('darkMode', "false")
+    }
   }
-  if(enabled){
+  if(darkMode=="true"){
     return (
       <button type="button" onClick={handleChange}><MoonIcon className="text-glow" width={20} height={20}/></button>
     );

@@ -1,8 +1,8 @@
 export const CDN = (id: string) => {
-  return "http://192.168.0.103:5173" + "/api/cdn/" + id;
+  return "http://172.20.10.7:5173" + "/api/cdn/" + id;
 };
 export const previewCDN = (id: string) => {
-  return "http://192.168.0.103:5173" + "/api/cdn/preview/" + id;
+  return "http://172.20.10.7:5173" + "/api/cdn/preview/" + id;
 };
 
 

@@ -14,5 +14,8 @@ export const UserContext = createContext<user>({
   name: ""
 });
 
-const DarkMode = false;
-export const ThemeContext = createContext<boolean>(DarkMode);
+type theme = [
+  darkMode: string,
+  setTheme: Function
+]
+export const ThemeContext = createContext<theme>(["true", ()=>{}]);

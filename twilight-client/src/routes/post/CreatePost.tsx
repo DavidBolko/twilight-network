@@ -1,4 +1,4 @@
-import photo from "../../../public/post.png"
+import photo from "../../../public/post.jpg"
 import { useState } from "react";
 import { LanguageIcon} from "@heroicons/react/24/solid";
 import { useSearchParams } from "react-router-dom";
