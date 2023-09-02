@@ -2,7 +2,7 @@ import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/solid";
 import { FC } from "react";
 import { CDN, previewCDN } from "../utils";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Users } from "@phosphor-icons/react";
 import { ChatBubbleIcon, DownloadIcon } from "@radix-ui/react-icons";
 
@@ -10,6 +10,7 @@ type props = {
   author: {
     name:string;
     displayName: string;
+    avatar: string
   };
   comments: number;
   community?: {
@@ -53,10 +54,13 @@ const PostCard: FC<props> = (props) => {
   return (
     <div className="card">
       <div className="flex items-center gap-2">
-        <img src={CDN("898dde0c5e4360f80d790a1a92c18503.jpg")} loading="lazy" className="w-12 h-12 rounded-full object-cover" />
-        <div className="w-full">
-          <p className="font-bold">{props.title}</p>
-          <p className="text-xs">{"by " + props.author.name}</p>
+        {props.cardType == "profile"
+        ? ""
+        : <img src={CDN(props.author.avatar)} loading="lazy" className="w-12 h-12 rounded-full object-cover" />
+        }
+        <div className="flex flex-col w-full">
+          <p className="font-bold text-base">{props.title}</p>
+          <Link to={`/profile?user=${props.author.name}`} className="text-xs font-light text-twilight-300">{props.author.name}</Link>
         </div>
         {props.cardType == "com"
         ? ""

@@ -1,5 +1,5 @@
-import express, { Request, Response, NextFunction } from "express";
-import { PrismaClient, User } from "@prisma/client";
+import express  from "express";
+import { PrismaClient } from "@prisma/client";
 import path from "path";
 import AuthRouter from "./routes/Auth";
 import session from "express-session";
@@ -52,7 +52,6 @@ passport.use(new LocalStrategy(
   }
 ));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(require('express-status-monitor')());
 app.use("/auth", AuthRouter);
 app.use("/c", CommunityRouter);
 app.use("/cdn", cdnRouter)
@@ -77,6 +76,6 @@ passport.deserializeUser(async(user:{id:string}, done) => {
 
 
 //start server
-app.listen(process.env.PORT || 5126, () => console.log("Server ready"));
+app.listen(process.env.PORT || 5126, () => console.log("⚡ Twilight Network Server Running! PORT: 5126"));
 
 export default app;

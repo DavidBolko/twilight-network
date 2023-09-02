@@ -68,4 +68,5 @@ const mutateLikes = async(req_user: User, dbQuery: post[]) =>{
         posts.push(object);
       }
     });
+  }
 }

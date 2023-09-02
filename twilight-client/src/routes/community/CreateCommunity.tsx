@@ -21,10 +21,6 @@ const CreateCommunity = () => {
         form_data.append('desc', desc)
         form_data.append('avatar', image as Blob)
 
-        for (var [key, value] of form_data.entries()) { 
-          console.log(key, value);
-        }
-
         await fetch("/api/c/create", {
           method: "POST",
 

@@ -10,7 +10,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 UserRouter.get("/followed", verifyAuth, async function (req: Request, res: Response) {
-  console.log(req.user);
   const user = await prisma.user.findFirst({
     where: {
       id: req.user,
@@ -120,7 +119,6 @@ UserRouter.get("/followed", verifyAuth, async function (req: Request, res: Respo
 });
 
 UserRouter.get("/:name/created", verifyAuth, async function (req: Request, res: Response) {
-  console.log(req.user);
   const user = await prisma.user.findFirst({
     where: {
       id: req.user,
@@ -258,3 +256,48 @@ UserRouter.post("/update", verifyAuth, upload.single("file"),  async function (r
   }
   return res.status(401)
 })
+
+UserRouter.get("/:name", async function (req: Request, res: Response) {
+  console.log("asds");
+  
+  const user = await prisma.user.findFirst({
+    where: {
+      name: req.params.name,
+    },
+    include: {
+      Posts:{
+        where:{
+          author:{
+            name: req.params.name
+          }
+        },
+        select:{
+          community:{
+            select:{
+              name:true,
+              displayName:true
+            }
+          },
+          likedBy:{
+            select:{
+              displayName:true,
+              name:true,
+              id:true
+            }
+          },
+          id:true,
+          title:true,
+          content:true,
+          type:true,
+          _count:{
+            select:{
+              comments:true
+            }
+          }
+        }
+      },
+      Followed: true,
+    },
+  });
+  return res.json(user)
+});

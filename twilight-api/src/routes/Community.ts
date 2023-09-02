@@ -93,7 +93,7 @@ CommunityRouter.put("/:cName/follow", async function(req:Request, res:Response) 
       id: req.user
     }
   })
-  console.log(user);
+
 
   const doesFollow = await prisma.community.findFirst({
     where:{

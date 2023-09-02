@@ -19,7 +19,8 @@ export const Index = () => {
   }, [inView, hasNextPage])
   
   const user = useContext(UserContext);  
-
+  console.log(user);
+  
 
   if (data && data?.pages[0].posts.length>0) {
     return (

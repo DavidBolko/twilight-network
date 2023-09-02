@@ -25,9 +25,6 @@
     @apply outline-none;
   }
   *{
-    @apply transition-all;
-    @apply duration-[150ms] !important;
-    @apply ease-in;
   }
   #root{
     @apply min-h-screen;

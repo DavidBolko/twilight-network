@@ -256,6 +256,7 @@ postRouter.get("/", async function (req: Request, res: Response) {
           select: {
             name: true,
             displayName: true,
+            avatar: true
           },
         },
         comments: {

@@ -13,14 +13,12 @@ cdnRouter.get("/:id", async function(req:Request, res:Response) {
     let file
     files.forEach(element => {
         if(element.includes(params)){
-            console.log(element);
             if(!element.includes("Thumbnails")){
                 file = element
             }
         }
     });
     if(file){
-        console.log(path.resolve(__dirname, "../", file).toString());
         res.sendFile(path.resolve(__dirname, "../", file))
     }
     else{
@@ -35,12 +33,10 @@ cdnRouter.get("/preview/:id", async function(req:Request, res:Response) {
     let file
     files.forEach(element => {
         if(element.includes(params)){
-            console.log(element);
             file = element
         }
     });
     if(file){
-        console.log(path.resolve(__dirname, "../", file).toString());
         res.sendFile(path.resolve(__dirname, "../", file))
     }
     else{

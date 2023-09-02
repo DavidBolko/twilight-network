@@ -36,8 +36,6 @@ const hashPassword = async (passwordRaw: string) => {
 };
 
 AuthRouter.post("/signup", async function (req: Request, res: Response) {
-  console.log(req.body);
-
   const payload: data = req.body;
   const existingUser = await prisma.user.findFirst({
     where: {
@@ -80,13 +78,11 @@ AuthRouter.post("/signupstepone", async function (req: Request, res: Response) {
 });
 
 AuthRouter.post("/signin", passport.authenticate("local", {}), function (req: Request, res: Response) {
-  console.log(req.isAuthenticated());
   res.sendStatus(200);
 });
 
 AuthRouter.get("/verify", function (req: Request, res: Response) {
   if (req.isAuthenticated()) {
-    console.log(req.user);
     res.json(req.user);
   } else {
     return res.status(401).json("Authorization required!");
@@ -102,11 +98,11 @@ AuthRouter.get("/user", async function (req: Request, res: Response) {
       select:{
         id:true,
         displayName:true,
-        avatar:true
+        avatar:true,
+        name:true
       }
     });
-    console.log(user);
-    return res.json({avatar:user.avatar, id:user.id, displayName:user.displayName, logged:true});
+    return res.json({name:user.name, avatar:user.avatar, id:user.id, displayName:user.displayName, logged:true});
   } else {
     return res.status(401).json("Authorization required!");
   }

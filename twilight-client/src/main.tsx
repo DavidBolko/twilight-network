@@ -1,4 +1,4 @@
-import { StrictMode} from "react";
+import { StrictMode, useContext} from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { Index } from "./Index";
@@ -11,8 +11,10 @@ import CreatePost from "./routes/post/CreatePost";
 import PostPage from "./routes/post/PostPage";
 import Layout from "./Layout";
 import Profile from "./routes/Profile";
+import { ThemeContext } from "./store";
 
 const queryClient = new QueryClient();
+const theme = useContext(ThemeContext)
 
 const router = createBrowserRouter([
   {
@@ -71,8 +73,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <ThemeContext.Provider value={theme}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeContext.Provider>
   </StrictMode>
 );

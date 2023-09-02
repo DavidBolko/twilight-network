@@ -5,8 +5,6 @@ import axios from 'axios'
 
 export const Auth = () =>{
   const {error, data, refetch} = useQuery(["authData"], {queryFn: async()=> axios.get(`/api/auth/verify`), retry:false})
-  console.log(data);
-
   if(!data){
     return (
       <div className="flex flex-col md:p-4 h-screen">

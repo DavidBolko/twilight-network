@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import Navbar from "./components/Navbar/Navbar";
 import { Outlet } from "react-router-dom";
 import { useQuery } from "react-query";
@@ -9,24 +9,27 @@ type response = {
   data:{
     avatar: string,
     id: string,
+    name:string,
     displayName: string,
     logged:boolean
   }
 }
 
 const Layout: FC = () => {
-  const {data} = useQuery<response>("authData", {queryFn: () => axios.get(`/api/auth/user`), retry:false, refetchOnWindowFocus:false})
+  const {data, status, isLoading} = useQuery<response>("authData", {queryFn: () => axios.get(`/api/auth/user`), retry:false, refetchOnWindowFocus:false})
+  console.log(status);
 
-  if (data) {
+  if(isLoading){
+    return(
+      <h1>loading</h1>
+    )
+  }
+  else if (data) {
     return (
-      <div>
-        <UserContext.Provider value={data.data}>
-          <div>
-            <Navbar/>
-            <Outlet />
-          </div>
-        </UserContext.Provider>
-      </div>
+      <UserContext.Provider value={data.data}>
+        <Navbar/>
+        <Outlet />
+      </UserContext.Provider>
     );
   }
   return (
