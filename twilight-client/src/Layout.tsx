@@ -4,7 +4,6 @@ import { Outlet } from "react-router-dom";
 import { useQuery } from "react-query";
 import { UserContext } from "./store";
 import axios from "axios";
-import useTheme from "./hooks/darkMode";
 import Loader from "./components/elements/Loader";
 
 const Layout: FC = () => {
@@ -41,7 +40,6 @@ type response = {
     avatar: string,
     id: string,
     name:string,
-    displayName: string,
     logged:boolean
   }
 }

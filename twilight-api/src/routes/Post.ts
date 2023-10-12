@@ -7,31 +7,49 @@ import { handleImageUpload } from "../fileUpload";
 
 export const postRouter = Router();
 
-/* var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    if (file.mimetype.includes("video")) {
-      cb(null, "../twilight-uploads/Posts/Videos");
-    } else if (file.mimetype.includes("image")) {
-      cb(null, "../twilight-uploads/Posts/Images");
-    } else {
-      cb(null, null);
-    }
-  },
-  filename: function (req, file, cb) {
-    cb(null, randomBytes(16).toString("hex") + path.extname(file.originalname)); //Appending .jpg
-  },
-}); */
-
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-interface data {
-  com: string;
-  title: string;
-  text: string;
-  type: string;
-}
 
+postRouter.get("/createdById/:id", async function (req: Request, res: Response) {
+  try {
+    const user = await prisma.user.findFirst({
+      where:{
+        id: req.params.id
+      }
+    })
+    const posts = await prisma.post.findMany({
+      where:{
+        author:{
+          id: user.id
+        },
+      },
+      include:{
+        likedBy:{
+          select:{
+            id:true
+          }
+        },
+        community:{
+          select:{
+            name:true,
+            id:true,
+          }
+        },
+        _count:{
+          select:{
+            comments:true,
+            likedBy:true,
+          }
+        }
+      }
+    })
+
+    res.status(200).json(posts)
+  } catch (error) {
+    res.status(400).end()
+  }
+});
 
 postRouter.get("/:id", async function (req: Request, res: Response) {
   const post = await prisma.post.findFirst({
@@ -39,15 +57,10 @@ postRouter.get("/:id", async function (req: Request, res: Response) {
       id: req.params.id,
     },
     include: {
-      author: {
-        select: {
-          displayName: true,
-        },
-      },
+      author: true,
       likedBy: {
         select:{
           id:true,
-          displayName:true,
           avatar: true
         }
       },
@@ -55,14 +68,13 @@ postRouter.get("/:id", async function (req: Request, res: Response) {
         include: {
           author: {
             select: {
-              displayName: true,
+              name:true
             },
           },
         },
       },
       community: {
         select: {
-          displayName: true,
           name: true,
         },
       },
@@ -159,69 +171,28 @@ postRouter.put("/like", verifyAuth, async function (req: Request, res: Response)
   }
 });
 
-postRouter.post("/create", upload.single("file"), async function (req: Request, res: Response, next:NextFunction) {
+postRouter.post("/create", upload.single("file"), verifyAuth, async function (req: Request, res: Response, next:NextFunction) {
   const file = req.file;
-  const payload: data = req.body;
+  const payload: {title:string, text:string, type:string, com:string} = req.body;
 
-  const com = await prisma.community.findFirst({
-    where: {
-      name: payload.com,
-    },
-  });
-  
+  const existCom = await prisma.community.findFirst({
+    where:{id: payload.com}
+  })
   const user = await prisma.user.findFirst({
-    where: {
-      id: req.user,
-    },
-  });
+    where:{id:req.user}
+  })
 
-  if (payload.type == "textPost") {
-    const post = await prisma.post.create({
-      data: {
-        title: payload.title,
-        type: "text",
-        content: payload.text,
-        author: {
-          connect: {
-            id: user.id,
-          },
-        },
-        community: {
-          connect: {
-            name: com.name,
-          },
-        },
-      },
-    });
-    return res.json(post.id).status(200);
-  } 
-  else if (payload.type == "filePost") {
-    const filename = await handleImageUpload(file.mimetype, file.buffer, "post")
-    if (file.mimetype.includes("video")) {
+  if(existCom){
+    if(payload.type == "file"){
+      if(!file){
+        return res.status(400).json("Required file was not provided.")
+      }
+      if(!payload.title){return res.status(400).json("Please fill all required files")}
+      const filename = await handleImageUpload(file.mimetype, file.buffer, "post")
       const post = await prisma.post.create({
         data: {
           title: payload.title,
-          type: "video",
-          content: file.filename,
-          author: {
-            connect: {
-              id: user.id,
-            },
-          },
-          community: {
-            connect: {
-              name: com.name,
-            },
-          },
-        },
-      });
-      return res.json(post.id).status(200);
-    } 
-    else {
-      const post = await prisma.post.create({
-        data: {
-          title: payload.title,
-          type: "picture",
+          type: file.mimetype,
           content: filename,
           author: {
             connect: {
@@ -230,69 +201,201 @@ postRouter.post("/create", upload.single("file"), async function (req: Request, 
           },
           community: {
             connect: {
-              name: com.name,
+              id: payload.com,
             },
           },
         },
       });
-      return res.json(post.id).status(200);
+      return res.status(200).json(post.id)
     }
+    else{
+      if(payload.title && payload.text){
+        const post = await prisma.post.create({
+          data: {
+            title: payload.title,
+            type: "text",
+            content: payload.text,
+            author: {
+              connect: {
+                id: user.id,
+              },
+            },
+            community: {
+              connect: {
+                id: payload.com,
+              },
+            },
+          },
+        });
+        return res.json(post.id).status(200);
+      }
+      else{
+        return res.status(400).json("Please fill all required files")
+      }
+    }
+  }
+  else{
+    return res.status(404).json("This community doesn't exist, sent data couldn't be posted")
   }
 });
 
 postRouter.get("/", async function (req: Request, res: Response) {
   const take = 4
   const cursorQuery = (req.query.cursor as string) ?? undefined
+  const typeQuery = (req.query.type as string) ?? "trending"
   const skip = cursorQuery ? 1 : 0
   const cursor = cursorQuery ? { id: cursorQuery } : undefined
 
   try {
-    const _posts = await prisma.post.findMany({
-      skip,
-      take,
-      cursor,
-      select: {
-        author: {
-          select: {
-            name: true,
-            displayName: true,
-            avatar: true
-          },
-        },
-        comments: {
-          select: {
-            id: true,
-          },
-        },
-        community: {
-          select: {
-            displayName: true,
-            id: true,
-            Img:true
-          },
-        },
-        content: true,
-        id: true,
-        title: true,
-        type: true,
-        userId: true,
-        comID: false,
-        _count:{
-          select:{
-            likedBy:true
+    let posts
+    if(typeQuery == "recommended"){
+      posts = await prisma.post.findMany({
+        skip,
+        take,
+        cursor,
+        where:{
+          likedBy:{
+            some:{
+              id: req.user
+            }
           }
         },
-        likedBy:{
-          select:{
-            id:true
+        select: {
+          author: {
+            select: {
+              name: true,
+              avatar: true
+            },
+          },
+          comments: {
+            select: {
+              id: true,
+            },
+          },
+          community: {
+            select: {
+              id: true,
+              Img:true
+            },
+          },
+          content: true,
+          id: true,
+          title: true,
+          type: true,
+          userId: true,
+          comID: false,
+          _count:{
+            select:{
+              likedBy:true,
+              comments:true,
+            }
+          },
+          likedBy:{
+            select:{
+              id:true
+            },
           },
         },
-      },
-    })
+      })
+    }
+    else if(typeQuery == "followed"){
+      posts = await prisma.post.findMany({
+        skip,
+        take,
+        cursor,
+        where:{
+          community:{
+            Users:{
+              some:{
+                id: req.user
+              }
+            }
+          }
+        },
+        select: {
+          author: {
+            select: {
+              name: true,
+              avatar: true
+            },
+          },
+          comments: {
+            select: {
+              id: true,
+            },
+          },
+          community: {
+            select: {
+              id: true,
+              Img:true
+            },
+          },
+          content: true,
+          id: true,
+          title: true,
+          type: true,
+          userId: true,
+          comID: false,
+          _count:{
+            select:{
+              likedBy:true,
+              comments:true,
+            }
+          },
+          likedBy:{
+            select:{
+              id:true
+            },
+          },
+        },
+      })
+    }
+    else{
+      posts = await prisma.post.findMany({
+        skip,
+        take,
+        cursor,
+        select: {
+          author: {
+            select: {
+              name: true,
+              avatar: true
+            },
+          },
+          comments: {
+            select: {
+              id: true,
+            },
+          },
+          community: {
+            select: {
+              id: true,
+              name:true,
+              Img:true
+            },
+          },
+          content: true,
+          id: true,
+          title: true,
+          type: true,
+          userId: true,
+          comID: false,
+          _count:{
+            select:{
+              likedBy:true,
+              comments:true,
+            }
+          },
+          likedBy:{
+            select:{
+              id:true
+            },
+          },
+        },
+      })
+    }
 
-    const nextId = _posts.length < take ? undefined : _posts[take - 1].id
-
-    const posts = _posts;
+    const nextId = posts.length < take ? undefined : posts[take - 1].id
     res.status(200).json({
       posts,
       nextId
@@ -301,7 +404,6 @@ postRouter.get("/", async function (req: Request, res: Response) {
     res.status(400).end()
   }
 });
-
 
 
 /*

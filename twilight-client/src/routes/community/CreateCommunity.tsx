@@ -1,8 +1,12 @@
 import Navbar from "../../components/Navbar/Navbar";
-import photo from "../../../public/post.jpg"
+import photo from "../../../public/post.png"
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const CreateCommunity = () => {
+    const navigate = useNavigate()
+
     const [title, setTitle] = useState("");
     const [desc, setDesc] = useState("");
     const [image, setImage] = useState<File>();
@@ -21,10 +25,8 @@ const CreateCommunity = () => {
         form_data.append('desc', desc)
         form_data.append('avatar', image as Blob)
 
-        await fetch("/api/c/create", {
-          method: "POST",
-
-          body: form_data
+        await axios.post("/api/c/create", form_data).then(function (response) {
+          navigate(`/c/${response.data}`)
         })
       }
   
@@ -33,11 +35,13 @@ const CreateCommunity = () => {
       <div className="flex gap-8 flex-col p-8 mr-auto ml-auto max-w-[800px] bg-twilight-300 dark:bg-twilight-700 shadow-twilight col-start-2 rounded-md">
         <div className="flex justify-between items-center">
           <h1 className="text-xl">Create a community</h1>
-          <img src={photo} className="w-12 h-12 rounded-full object-cover" />
         </div>
         <form className="flex flex-col gap-4 w-full" encType="multipart/form-data" onSubmit={createCom}>
-          <label className="hidden">Title</label>
-          <input placeholder="Title" name="title" className="form-input-w-svg" onChange={(e)=>setTitle(e.target.value)}/>
+          <div className="flex gap-2 w-full items-center">
+            <img src={photo} className="w-16 h-16 rounded-full object-cover" />
+            <label className="hidden">Title</label>
+            <input placeholder="Title" name="title" className="form-input-w-svg w-full h-fit" onChange={(e)=>setTitle(e.target.value)}/>
+          </div>
 
           <label className="hidden">Description</label>
           <textarea placeholder="Describe your community..." name="desc" className="form-input-w-svg resize-none" onChange={(e)=>setDesc(e.target.value)}/>

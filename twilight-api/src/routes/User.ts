@@ -21,7 +21,7 @@ UserRouter.get("/followed", verifyAuth, async function (req: Request, res: Respo
             select: {
               author: {
                 select: {
-                  displayName: true,
+                  name: true,
                 },
               },
               comments: {
@@ -31,7 +31,7 @@ UserRouter.get("/followed", verifyAuth, async function (req: Request, res: Respo
               },
               community: {
                 select: {
-                  displayName: true,
+                  name: true,
                   id: true,
                   Img:true
                 },
@@ -61,11 +61,11 @@ UserRouter.get("/followed", verifyAuth, async function (req: Request, res: Respo
   if (user && user.Followed.length>0) {
     type data = {
       author: {
-        displayName: string;
+        name: string;
       };
       comments: number;
       community: {
-        displayName: string;
+        name: string;
         id: string;
         Img:string
       };
@@ -130,7 +130,7 @@ UserRouter.get("/:name/created", verifyAuth, async function (req: Request, res: 
             select: {
               author: {
                 select: {
-                  displayName: true,
+                  name: true,
                 },
               },
               comments: {
@@ -140,7 +140,7 @@ UserRouter.get("/:name/created", verifyAuth, async function (req: Request, res: 
               },
               community: {
                 select: {
-                  displayName: true,
+                  name: true,
                   id: true,
                   Img:true
                 },
@@ -170,11 +170,11 @@ UserRouter.get("/:name/created", verifyAuth, async function (req: Request, res: 
   if (user && user.Followed.length>0) {
     type data = {
       author: {
-        displayName: string;
+        name: string;
       };
       comments: number;
       community: {
-        displayName: string;
+        name: string;
         id: string;
         Img:string
       };
@@ -229,75 +229,67 @@ UserRouter.get("/:name/created", verifyAuth, async function (req: Request, res: 
 
 UserRouter.post("/update", verifyAuth, upload.single("file"),  async function (req: Request, res: Response){
   interface data {
-    _desc: string
+    desc: string
   }
   
   const file = req.file;
   const payload: data = req.body;
-  
-  const filename = await handleImageUpload(file.mimetype, file.buffer, "userAvatar")
-  
+  let desc = payload.desc
+
+
+  let filename
+  if(file){
+    filename = await handleImageUpload(file.mimetype, file.buffer, "userAvatar")
+  }
+
   const user = await prisma.user.findFirst({
     where:{
       id: req.user
     }
   })
-  if(user){
-    await prisma.user.update({
-      where: {
-        id: user.id
-      },
-      data:{
-        description: payload._desc,
-        avatar: filename
-      }
-    })
-    return res.status(200)
+  if(desc == null){
+    desc = user.description
   }
-  return res.status(401)
+  console.log(desc);
+  if(user){
+    if(file){
+      await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data:{
+          description: desc,
+          avatar: filename
+        }
+      })
+    }
+    else{
+      await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data:{
+          description: desc,
+          avatar: user.avatar
+        }
+      })
+    }
+    return res.sendStatus(200)
+  }
+  return res.sendStatus(401)
 })
 
-UserRouter.get("/:name", async function (req: Request, res: Response) {
-  console.log("asds");
-  
+UserRouter.get("/:id", async function (req: Request, res: Response) {
   const user = await prisma.user.findFirst({
     where: {
-      name: req.params.name,
+      id: req.params.id,
     },
-    include: {
-      Posts:{
-        where:{
-          author:{
-            name: req.params.name
-          }
-        },
-        select:{
-          community:{
-            select:{
-              name:true,
-              displayName:true
-            }
-          },
-          likedBy:{
-            select:{
-              displayName:true,
-              name:true,
-              id:true
-            }
-          },
-          id:true,
-          title:true,
-          content:true,
-          type:true,
-          _count:{
-            select:{
-              comments:true
-            }
-          }
-        }
-      },
-      Followed: true,
-    },
+    select:{
+      avatar:true,
+      name:true,
+      id:true,
+      description:true
+    }
   });
   return res.json(user)
 });

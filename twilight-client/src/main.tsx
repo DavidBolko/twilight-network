@@ -1,4 +1,4 @@
-import { StrictMode, useContext, useLayoutEffect, useState} from "react";
+import { StrictMode, useLayoutEffect, useState} from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { Index } from "./Index";
@@ -34,10 +34,6 @@ const router = createBrowserRouter([
     path: "/p",
     element: <Layout />,
     children: [
-      { 
-        path: "create",
-        element: <CreatePost />,
-      },
       {
         path: ":id",
         element: <PostPage />,
@@ -45,8 +41,8 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/profile",
-    element: <Layout />,
+    path: "/profile/:id",
+    element: <Layout/>,
     children: [
       {
         path: "",
@@ -63,8 +59,12 @@ const router = createBrowserRouter([
         element: <CreateCommunity />,
       },
       {
-        path: ":name",
+        path: ":id",
         element: <Community />,
+      },
+      {
+        path: ":id/create",
+        element: <CreatePost/>,
       },
     ],
   },

@@ -35,17 +35,19 @@
   .form-input {
     @apply outline-none !important;
     @apply bg-twilight-100;
-    @apply dark:bg-twilight-700;
+    @apply dark:bg-twilight-700/40;
     @apply focus-within:bg-twilight-200 !important;
-    @apply dark:focus-within:bg-twilight-600/70 !important;
+    @apply dark:focus-within:bg-twilight-700/60 !important;
     @apply rounded-md;
     @apply dark:shadow-glow; 
     @apply shadow-md;
     @apply text-base;
+    @apply backdrop-blur-sm;
   }
   .form-input-w-svg {
     @apply form-input;
-    @apply p-2.5;
+    @apply p-2;
+    @apply w-full;
   }
   .form-input > svg{
     @apply dark:bg-twilight-500;
@@ -90,7 +92,7 @@
     @apply hover:bg-rose-700 !important;
   }
   .radio-btn {
-    @apply p-1.5;
+    @apply p-2;
     @apply border;
     @apply border-moonlight-500;
     @apply rounded-md;
@@ -112,7 +114,7 @@
     @apply dark:bg-twilight-700;
     @apply p-4;
     @apply rounded-lg;
-    @apply max-w-[750px];
+    @apply w-full;
     @apply hover:transition-all;
     @apply shadow-twilight;
   }

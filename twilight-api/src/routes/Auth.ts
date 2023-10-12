@@ -49,12 +49,11 @@ AuthRouter.post("/signup", async function (req: Request, res: Response) {
       await prisma.user.create({
         data: {
           name: payload.displayName,
-          displayName: payload.displayName,
           email: payload.Email,
           password: hashedPass,
         },
       });
-      res.send(200);
+      res.sendStatus(200);
     } else {
       res.sendStatus(401);
     }
@@ -72,7 +71,7 @@ AuthRouter.post("/signupstepone", async function (req: Request, res: Response) {
     if (!existingUser) {
       res.sendStatus(200);
     } else {
-      res.status(401).json("Account already exists");
+      res.sendStatus(401).json("Account already exists");
     }
   }
 });
@@ -97,12 +96,11 @@ AuthRouter.get("/user", async function (req: Request, res: Response) {
       },
       select:{
         id:true,
-        displayName:true,
         avatar:true,
         name:true
       }
     });
-    return res.json({name:user.name, avatar:user.avatar, id:user.id, displayName:user.displayName, logged:true});
+    return res.json({name:user.name, avatar:user.avatar, id:user.id, logged:true});
   } else {
     return res.status(401).json("Authorization required!");
   }

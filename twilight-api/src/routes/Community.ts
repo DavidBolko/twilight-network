@@ -3,8 +3,7 @@ import { Request, Response, Router } from "express";
 import { prisma } from "../app";
 import multer from "multer"
 import path from "path";
-import sharp from "sharp";
-import { Community } from "@prisma/client";
+import { mutateArray } from "../utils";
 
 export const CommunityRouter = Router();
 
@@ -24,7 +23,36 @@ interface data {
   desc: string;
 }
 
-CommunityRouter.get("/:cName", async function(req:Request, res:Response) {
+CommunityRouter.get("/", async function(req:Request, res:Response){
+  const searchParam = req.query  
+  if(searchParam.followedBy){
+    const communities = await prisma.community.findMany({
+      where:{
+        Users:{
+          some:{
+            id: searchParam.followedBy.toString()
+          }
+        }
+      },
+      include:{
+        Moderators:{
+          select:{
+            id:true
+          }
+        }
+      }
+      
+    })
+
+    const response = mutateArray(searchParam.followedBy.toString(), communities)
+    return res.status(200).json(response)
+  }
+  return res.sendStatus(404)
+})
+
+CommunityRouter.get("/:id", async function(req:Request, res:Response) {
+  console.log(req.params.id);
+  
   const user = await prisma.user.findFirst({
     where:{
       id: req.user
@@ -32,7 +60,7 @@ CommunityRouter.get("/:cName", async function(req:Request, res:Response) {
   })
   const community = await prisma.community.findFirst({
     where:{
-      name: req.params.cName
+      id: req.params.id
     },
     include:{
       Users: {
@@ -55,7 +83,6 @@ CommunityRouter.get("/:cName", async function(req:Request, res:Response) {
           author:{
             select:{
               name: true,
-              displayName: true,
             }
           },
           likedBy:{
@@ -87,7 +114,7 @@ CommunityRouter.get("/:cName", async function(req:Request, res:Response) {
   }
 })
 
-CommunityRouter.put("/:cName/follow", async function(req:Request, res:Response) {
+CommunityRouter.put("/:id/follow", async function(req:Request, res:Response) {
   const user = await prisma.user.findFirst({
     where:{
       id: req.user
@@ -108,7 +135,7 @@ CommunityRouter.put("/:cName/follow", async function(req:Request, res:Response) 
   if(doesFollow){
     const community = await prisma.community.update({
       where:{
-        name: req.params.cName
+        id: req.params.id
       },
       data:{
         Users:{
@@ -122,7 +149,7 @@ CommunityRouter.put("/:cName/follow", async function(req:Request, res:Response) 
   else{
     const community = await prisma.community.update({
       where:{
-        name: req.params.cName
+        id: req.params.id
       },
       data:{
         Users:{
@@ -170,10 +197,9 @@ CommunityRouter.post( "/create", upload.single('avatar'), async function (req: R
       id: req.user,
     },
   });
-  await prisma.community.create({
+  const com = await prisma.community.create({
     data: {
       name: payload.title,
-      displayName: payload.title,
       desc: payload.desc,
       Img: file.filename,
       Moderators: {
@@ -187,5 +213,7 @@ CommunityRouter.post( "/create", upload.single('avatar'), async function (req: R
         }
       }
     },
-  }); 
+  });
+  return res.status(200).json(com.id)
 });
+

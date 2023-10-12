@@ -20,7 +20,8 @@ module.exports = {
         'Nunito': ['Nunito', 'sans-serif']
       },
       gridTemplateColumns:{
-        "userCard": "auto 2fr"
+        "userCard": "auto 2fr",
+        "feed": "1fr 2fr 1fr",
       },
       colors:{
         "twilight-white":

@@ -1,14 +1,13 @@
 import { FC, useContext, useState } from "react";
 import { useQuery } from "react-query";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { CDN, fetcher } from "../../utils";
-import { ChatBubbleOvalLeftIcon, HandThumbUpIcon as LikeSolid } from "@heroicons/react/24/solid";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaceSmileIcon, HandThumbUpIcon as LikeOutline } from "@heroicons/react/24/outline";
 import Comment from "../../components/Comment";
-import { Users } from "@phosphor-icons/react";
 import PostCard from "../../components/PostCard";
 import PostCardSkeleton from "../../components/Skeletons/PostCardSkeleton";
 import { UserContext } from "../../store";
+import axios from "axios";
+import { Smile } from "lucide-react";
 
 const PostPage: FC = () => {
   const navigate = useNavigate()
@@ -16,11 +15,8 @@ const PostPage: FC = () => {
 
   const params = useParams();
   console.log(`/api/p/${params.id}`);
-  const { isLoading, isError, error, data, refetch } = useQuery<data, Error>({
-    queryFn: () => fetcher(`/api/p/${params.id}`),
-    refetchOnWindowFocus: false,
-  });
 
+  const {data, refetch} = useQuery<data>("post", async ()=> await axios.get(`/api/p/${params.id}`).then((res) => res.data), {refetchOnWindowFocus:false})
   const user = useContext(UserContext);  
 
   const submitComment = async (e: React.SyntheticEvent) => {
@@ -61,7 +57,7 @@ const PostPage: FC = () => {
                 id=""
               />
               <div className="flex items-center mt-2">
-                <FaceSmileIcon width={32} />
+                <Smile width={32} />
                 <input className="ml-auto button-colored" required={true} type="submit" name="" id="" onClick={submitComment} />
               </div>
             </form>
@@ -97,6 +93,7 @@ type data = {
   author: {
     name: string
     displayName: string;
+    avatar:string,
   };
   comments: [
     {

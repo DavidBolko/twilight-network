@@ -13,8 +13,7 @@ datasource db {
 
 model User {
   id           String  @id @default(uuid())
-  name         String  @unique
-  displayName  String?
+  name         String  
   email        String  @unique
   password     String
   ModeratorOf Community[] @relation(name: "ModeratorOf")
@@ -24,17 +23,20 @@ model User {
   avatar String @default("default.svg")
   likes Post[] @relation(name: "likedBy")
   description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Community{
   id String @id @default(cuid())
-  name        String  @unique
-  displayName String?
+  name String  
   desc String
   Moderators User[]  @relation(name: "ModeratorOf")
   Users User[]
   Img String
   Posts Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Post{
@@ -42,6 +44,8 @@ model Post{
   title String
   type String
   content String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   community Community @relation(fields: [comID], references: [id])
   comID String
   author User @relation(fields: [userId], references: [id])
@@ -57,4 +61,6 @@ model Comment{
   authorId String
   post Post @relation(fields: [postID], references: [id])
   postID String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
