@@ -360,49 +360,26 @@ postRouter.get("/", async function (req: Request, res: Response) {
         skip,
         take,
         cursor,
-        where:{
-          likedBy:{
-            some:{
-              id: req.user
-            }
-          }
-        },
-        select: {
-          author: {
-            select: {
-              name: true,
-              avatar: true
-            },
+        include:{
+          author:{
+            select:{id:true, name:true, avatar:true}
           },
-          comments: {
-            select: {
-              id: true,
-            },
-          },
-          community: {
-            select: {
-              id: true,
-              Img:true
-            },
-          },
-          content: true,
-          id: true,
-          title: true,
-          type: true,
-          userId: true,
-          comID: false,
-          _count:{
+          _count: {
             select:{
-              likedBy:true,
-              comments:true,
+              likedBy: true,
+              comments:true
             }
           },
           likedBy:{
-            select:{
-              id:true
-            },
+            select:{id:true}
           },
-        },
+          savedBy:{
+            select:{id:true}
+          },
+          community:{
+            select:{id:true, name:true}
+          },
+        }
       })
     }
     else if(typeQuery == "followed"){
@@ -410,51 +387,26 @@ postRouter.get("/", async function (req: Request, res: Response) {
         skip,
         take,
         cursor,
-        where:{
-          community:{
-            Users:{
-              some:{
-                id: req.user
-              }
-            }
-          }
-        },
-        select: {
-          author: {
-            select: {
-              name: true,
-              avatar: true
-            },
+        include:{
+          author:{
+            select:{id:true, name:true, avatar:true}
           },
-          comments: {
-            select: {
-              id: true,
-            },
-          },
-          community: {
-            select: {
-              id: true,
-              Img:true
-            },
-          },
-          content: true,
-          id: true,
-          title: true,
-          type: true,
-          userId: true,
-          comID: false,
-          _count:{
+          _count: {
             select:{
-              likedBy:true,
-              comments:true,
+              likedBy: true,
+              comments:true
             }
           },
           likedBy:{
-            select:{
-              id:true
-            },
+            select:{id:true}
           },
-        },
+          savedBy:{
+            select:{id:true}
+          },
+          community:{
+            select:{id:true, name:true}
+          },
+        }
       })
     }
     else{
@@ -462,48 +414,26 @@ postRouter.get("/", async function (req: Request, res: Response) {
         skip,
         take,
         cursor,
-        select: {
-          savedBy:{
+        include:{
+          author:{
+            select:{id:true, name:true, avatar:true}
+          },
+          _count: {
             select:{
-              id:true
-            }
-          },
-          author: {
-            select: {
-              name: true,
-              avatar: true
-            },
-          },
-          comments: {
-            select: {
-              id: true,
-            },
-          },
-          community: {
-            select: {
-              id: true,
-              name:true,
-              Img:true
-            },
-          },
-          content: true,
-          id: true,
-          title: true,
-          type: true,
-          userId: true,
-          comID: false,
-          _count:{
-            select:{
-              likedBy:true,
-              comments:true,
+              likedBy: true,
+              comments:true
             }
           },
           likedBy:{
-            select:{
-              id:true
-            },
+            select:{id:true}
           },
-        },
+          savedBy:{
+            select:{id:true}
+          },
+          community:{
+            select:{id:true, name:true}
+          },
+        }
       })
     }
 
@@ -516,132 +446,3 @@ postRouter.get("/", async function (req: Request, res: Response) {
     res.status(400).end()
   }
 });
-
-
-/*
-
-type post = {
-  author: {
-    displayName: string;
-  };
-  comments: number;
-  community: {
-    displayName: string;
-    id: string;
-    Img:string
-  };
-  content: string;
-  type: string;
-  id: string;
-  likeCount:number,
-  title: string;
-  userId: string;
-  liked:boolean
-};
-
-postRouter.get("/", async function (req: Request, res: Response) {
-  const take = 4
-  const cursorQuery = (req.query.cursor as string) ?? undefined
-  const skip = cursorQuery ? 1 : 0
-  const cursor = cursorQuery ? { id: cursorQuery } : undefined
-
-  try {
-    const _posts = await prisma.post.findMany({
-      skip,
-      take,
-      cursor,
-      select: {
-        author: {
-          select: {
-            displayName: true,
-          },
-        },
-        comments: {
-          select: {
-            id: true,
-          },
-        },
-        community: {
-          select: {
-            displayName: true,
-            id: true,
-            Img:true
-          },
-        },
-        content: true,
-        id: true,
-        title: true,
-        type: true,
-        userId: true,
-        comID: false,
-        _count:{
-          select:{
-            likedBy:true
-          }
-        },
-        likedBy:{
-          select:{
-            id:true
-          },
-        },
-      },
-    })
-
-    const nextId = _posts.length < take ? undefined : _posts[take - 1].id
-
-    if(req.user){
-      const user = await prisma.user.findFirst({
-        where:{
-          id: req.user
-        }
-      })
-      let posts: post[] = [];
-      _posts.forEach((ele) => {
-        if(ele.likedBy.find(e=>e.id == user.id)){
-          const object: post = {
-            author: ele.author,
-            comments: ele.comments.length,
-            community: ele.community,
-            content: ele.content,
-            id: ele.id,
-            likeCount: ele._count.likedBy,
-            title: ele.title,
-            type: ele.type,
-            userId: ele.userId,
-            liked:true
-          };
-          posts.push(object);
-        }
-        else{
-          const object: post = {
-            author: ele.author,
-            comments: ele.comments.length,
-            community: ele.community,
-            content: ele.content,
-            id: ele.id,
-            likeCount: ele._count.likedBy,
-            title: ele.title,
-            type: ele.type,
-            userId: ele.userId,
-            liked:false
-          };
-          posts.push(object);
-        }
-      });
-      res.status(200).json({posts, nextId})
-    }
-
-    const posts = _posts;
-    res.status(200).json({
-      posts,
-      nextId
-    })
-  } catch (error) {
-    res.status(400).end()
-  }
-});
-
-
-
-
-*/

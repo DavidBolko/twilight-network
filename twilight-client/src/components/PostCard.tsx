@@ -4,7 +4,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { Users } from "@phosphor-icons/react";
 import { Bookmark, Download, Heart, MessageCircle } from "lucide-react";
 import axios from "axios";
+import { Post } from "../types";
 
+
+interface props extends Post {
+  comments: number
+  likeCount: number;
+  refetch: Function
+  cardType: string,
+  preview?: boolean,
+  liked: boolean
+  saved: boolean
+};
 
 const PostCard: FC<props> = (props) => {
   const navigate = useNavigate();
@@ -38,7 +49,7 @@ const PostCard: FC<props> = (props) => {
           <p className="font-bold text-base">{props.title}</p>
           {props.cardType == "profile"
           ? ""
-          : <Link to={`/profile?user=${props.author!.name}`} className="text-xs font-light text-twilight-300">{props.author!.name}</Link>
+          : <Link to={`/profile/${props.author.id}`} className="text-xs font-light text-twilight-300">{props.author!.name}</Link>
           }
         </div>
         {props.cardType == "com"
@@ -77,30 +88,3 @@ const PostCard: FC<props> = (props) => {
 };
 
 export default PostCard;
-
-type props = {
-  author?: {
-    name:string;
-    avatar: string
-  };
-  comments: number;
-  community: {
-    name :string;
-    id: string;
-  };
-  likedBy:[
-    {
-      id: string
-    }
-  ]
-  content: string;
-  id: string;
-  likeCount: number;
-  title: string;
-  refetch: Function
-  cardType: string,
-  type: string,
-  preview?: boolean,
-  liked: boolean
-  saved: boolean
-};

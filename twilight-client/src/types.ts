@@ -8,16 +8,24 @@ export interface Post {
   title: string;
   type: string;
   content: string;
-  comID: string;
-  userId: string;
-  savedBy: [{ id: string }];
   likedBy: [{ id: string }];
   community: {
     id: string;
     name: string;
   };
+}
+
+export interface ApiPost extends Post {
+  savedBy: [{ id: string }];
   _count: {
     comments: number;
     likedBy: number;
   };
+}
+
+export interface User {
+  avatar: string
+  name: string
+  id: string;
+  description: string;
 }

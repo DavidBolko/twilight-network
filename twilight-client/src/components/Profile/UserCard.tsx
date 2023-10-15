@@ -35,8 +35,8 @@ const UserCard:FC<props> = (props) =>{
   
   if(props.logged && editing==false){
     return(
-      <section className="grid grid-cols-userCard gap-2 pt-12">
-        <img src={CDN(props.user.avatar)} alt="" className="w-48 h-48 object-cover border-2 border-twilight-white-300/30 rounded-full sm:max-w-[200px] lg:max-h-[200px] "/>
+      <section className="grid grid-cols-userCard gap-4 pt-12">
+        <img src={CDN(props.user.avatar)} alt="" className="w-48 h-48 aspect-square object-cover border-2 border-twilight-white-300/30 rounded-full sm:max-w-[200px] lg:max-h-[200px] "/>
         <div className="flex flex-col md:gap-2 justify-evenly text-justify">
           <div className="flex items-center justify-between">
             <h1 className="text-xl">{props.user.name}</h1>
@@ -50,11 +50,11 @@ const UserCard:FC<props> = (props) =>{
   else if(props.logged && editing){
     return(
       <section>
-        <form className="grid grid-cols-userCard gap-2 pt-12">
+        <form className="grid grid-cols-userCard gap-4 pt-12">
           <div className="w-48 h-48 border border-nord-frost-300/50 rounded-full">
             <label htmlFor="avatar" className="hidden">Avatar Image</label>
             <input type="file" name="avatar" className="absolute opacity-0 h-[200px] w-[200px] z-20 cursor-pointer"  onChange={(e)=>setFile(e.target.files![0])}/>
-            <img src={CDN(props.user.avatar)} alt="" className="w-48 h-48 object-cover grayscale bg-twilight-white-300/30 animate-pulse rounded-full"/>
+            <img src={CDN(props.user.avatar)} alt="" className="w-48 h-48 aspect-square object-cover grayscale bg-twilight-white-300/30 animate-pulse rounded-full"/>
           </div>
           <div className="flex flex-col  justify-evenly text-justify">
             <div className="flex items-center justify-between">
@@ -70,8 +70,8 @@ const UserCard:FC<props> = (props) =>{
     )
   }
   return(
-    <section className="grid grid-cols-userCard gap-2 pt-12">
-      <img src={CDN(props.user.avatar)} alt="" className="object-cover border-2 border-twilight-white-300/30 rounded-full sm:max-w-[200px] lg:max-h-[200px] "/>
+    <section className="grid grid-cols-userCard gap-4 pt-12">
+      <img src={CDN(props.user.avatar)} alt="" className="w-48 h-48 aspect-squar object-cover border-2 border-twilight-white-300/30 rounded-full sm:max-w-[200px] lg:max-h-[200px] "/>
       <div className="flex flex-col md:gap-2 justify-evenly text-justify">
         <div className="flex items-center justify-between">
           <h1 className="text-xl">{props.user.name}</h1>
