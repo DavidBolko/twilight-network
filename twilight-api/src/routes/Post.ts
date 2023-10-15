@@ -11,44 +11,96 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 
-postRouter.get("/createdById/:id", async function (req: Request, res: Response) {
-  try {
-    const user = await prisma.user.findFirst({
-      where:{
-        id: req.params.id
-      }
-    })
-    const posts = await prisma.post.findMany({
-      where:{
-        author:{
-          id: user.id
-        },
-      },
-      include:{
-        likedBy:{
-          select:{
-            id:true
-          }
-        },
-        community:{
-          select:{
-            name:true,
-            id:true,
-          }
-        },
-        _count:{
-          select:{
-            comments:true,
-            likedBy:true,
-          }
+postRouter.get("/savedById/:id", verifyAuth, async function (req: Request, res: Response) {
+  const user = await prisma.user.findFirst({
+    where:{
+      id: req.params.id
+    }
+  })
+  console.log(user.id, "    ", req.params.id);
+  
+  const posts = await prisma.post.findMany({
+    where:{
+      savedBy:{
+        some: {
+          id:user.id
         }
       }
-    })
-
-    res.status(200).json(posts)
-  } catch (error) {
-    res.status(400).end()
+    },
+    include:{
+      savedBy:{
+        select:{
+          id:true
+        }
+      },
+      likedBy:{
+        select:{
+          id:true
+        }
+      },
+      community:{
+        select:{
+          name:true,
+          id:true,
+        }
+      },
+      _count:{
+        select:{
+          comments:true,
+          likedBy:true,
+        }
+      }
+    }
+  })
+  if(posts){
+    return res.status(200).json(posts)
   }
+  return res.sendStatus(404)
+});
+
+postRouter.get("/createdById/:id", async function (req: Request, res: Response) {
+  const user = await prisma.user.findFirst({
+    where:{
+      id: req.params.id
+    }
+  })
+  console.log(user.id, "    ", req.params.id);
+  
+  const posts = await prisma.post.findMany({
+    where:{
+      author:{
+        id: user.id
+      }
+    },
+    include:{
+      savedBy:{
+        select:{
+          id:true
+        }
+      },
+      likedBy:{
+        select:{
+          id:true
+        }
+      },
+      community:{
+        select:{
+          name:true,
+          id:true,
+        }
+      },
+      _count:{
+        select:{
+          comments:true,
+          likedBy:true,
+        }
+      }
+    }
+  })
+  if(posts){
+    return res.status(200).json(posts)
+  }
+  return res.sendStatus(404)
 });
 
 postRouter.get("/:id", async function (req: Request, res: Response) {
@@ -58,6 +110,11 @@ postRouter.get("/:id", async function (req: Request, res: Response) {
     },
     include: {
       author: true,
+      savedBy:{
+        select:{
+          id:true
+        }
+      },
       likedBy: {
         select:{
           id:true,
@@ -75,6 +132,7 @@ postRouter.get("/:id", async function (req: Request, res: Response) {
       },
       community: {
         select: {
+          id:true,
           name: true,
         },
       },
@@ -87,6 +145,7 @@ postRouter.get("/:id", async function (req: Request, res: Response) {
     res.sendStatus(404);
   }
 });
+
 
 postRouter.post("/comment", verifyAuth, async function (req: Request, res: Response) {
   const user = await prisma.user.findFirst({
@@ -168,6 +227,54 @@ postRouter.put("/like", verifyAuth, async function (req: Request, res: Response)
     }
   } else {
     res.status(404).json("Database record doesn't exist");
+  }
+});
+
+postRouter.put("/:id/save", verifyAuth, async function (req: Request, res: Response) {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: req.user,
+    },
+  });
+  const isSaved = await prisma.post.findFirst({
+    where:{
+      savedBy: {
+        some:{
+          id: user.id
+        }
+      },
+      id: req.params.id
+    },
+  })
+  if(isSaved){
+    await prisma.post.update({
+      where:{
+        id: isSaved.id
+      },
+      data:{
+        savedBy:{
+          disconnect:{
+            id:user.id
+          }
+        }
+      }
+    })
+    return res.sendStatus(200)
+  }
+  else{
+    await prisma.post.update({
+      where:{
+        id: req.params.id
+      },
+      data:{
+        savedBy:{
+          connect:{
+            id:user.id
+          }
+        }
+      }
+    })
+    return res.sendStatus(200)
   }
 });
 
@@ -356,6 +463,11 @@ postRouter.get("/", async function (req: Request, res: Response) {
         take,
         cursor,
         select: {
+          savedBy:{
+            select:{
+              id:true
+            }
+          },
           author: {
             select: {
               name: true,

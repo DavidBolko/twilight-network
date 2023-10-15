@@ -39,13 +39,17 @@ CommunityRouter.get("/", async function(req:Request, res:Response){
           select:{
             id:true
           }
-        }
+        },
+        Users:{
+          select:{
+            id:true,
+          }
+        },
       }
       
     })
-
-    const response = mutateArray(searchParam.followedBy.toString(), communities)
-    return res.status(200).json(response)
+    //const response = mutateArray(searchParam.followedBy.toString(), communities)
+    return res.status(200).json(communities)
   }
   return res.sendStatus(404)
 })
@@ -70,6 +74,11 @@ CommunityRouter.get("/:id", async function(req:Request, res:Response) {
       },
       Posts:{
         select:{
+          savedBy:{
+            select:{
+              id:true
+            }
+          },
           id:true,
           title:true,
           _count:{
@@ -82,6 +91,7 @@ CommunityRouter.get("/:id", async function(req:Request, res:Response) {
           type: true,
           author:{
             select:{
+              avatar:true,
               name: true,
             }
           },

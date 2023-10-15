@@ -1,17 +1,20 @@
 import { useParams } from "react-router-dom";;
-import { CDN, fetcher } from "../../utils";
+import { CDN } from "../../utils";
 import ErrorPage from "../ErrorPage";
 import { useQuery } from "react-query";
-import { CheckIcon } from "@heroicons/react/24/outline";
 import PostCard from "../../components/PostCard";
 import PostCardSkeleton from "../../components/Skeletons/PostCardSkeleton";
 import axios, { AxiosError } from "axios";
 import sadImage from "../../../public/sad.svg"
+import { useContext } from "react";
+import { UserContext } from "../../store";
+import { Check } from "lucide-react";
 
 const Community = () => {
   const params = useParams();
-
-  const { isLoading, isError, error, data, refetch } = useQuery<api_data, AxiosError>({
+  const user = useContext(UserContext);  
+  
+  const { error, data, refetch } = useQuery<api_data, AxiosError>({
     queryFn: async() => await axios.get(`/api/c/${params.id}`),
     refetchOnWindowFocus: false,
   });
@@ -35,9 +38,9 @@ const Community = () => {
       <section className="flex flex-col-reverse lg:grid grid-cols-4 pt-20 p-4 gap-4 ">
         <main className="flex col-span-2 col-start-2 justify-center">
           {data.data.community.Posts.length > 0 ?
-          <ul className="flex gap-6 w-full">
+          <ul className="flex flex-col gap-6 w-full">
             {data.data.community.Posts.map((ele) => (
-              <PostCard cardType="com" likedBy={ele.likedBy} liked={ele.likedBy.some((e)=>{return e.id == ele.id})} author={ele.author} comments={ele._count.comments > 0 ? ele._count.comments : 0} community={data.data.community} refetch={refetch} content={ele.content} id={ele.id} preview={true} likeCount={ele._count.likedBy} title={ele.title} type={ele.type}/>
+              <PostCard saved={ele.savedBy.some((e)=>{return e.id == user.id})} cardType="com" likedBy={ele.likedBy} liked={ele.likedBy.some((e)=>{return e.id == user.id})} author={ele.author} comments={ele._count.comments > 0 ? ele._count.comments : 0} community={data.data.community} refetch={refetch} content={ele.content} id={ele.id} preview={true} likeCount={ele._count.likedBy} title={ele.title} type={ele.type}/>
             ))}
           </ul>
           : <div className="flex flex-col items-center   text-center">
@@ -48,7 +51,7 @@ const Community = () => {
           </div>
           }
         </main>
-        <div className="flex flex-col gap-2 p-4 text-justify shadow-twilight bg-twilight-100 dark:bg-twilight-700 h-fit rounded-lg">
+        <div className="flex flex-col gap-2 p-4 text-justify shadow-twilight bg-twilight-100 dark:bg-twilight-500/20 h-fit rounded-lg">
           <div className="flex gap-2">
             <img src={CDN(data.data.community.Img!)} alt="" className="w-16 h-16 rounded-full" />
             <div>
@@ -58,22 +61,15 @@ const Community = () => {
           </div>
           <p>{data.data.community.desc}</p>
           <div className="flex gap-2">
-            <a className="button-normal" href={`/p/create?com=${data.data.community.id}`}>
+            <a className="button-normal" href={`/c/${data.data.community.id}/create`}>
               Make a post
             </a>
             {data.data.followed == true ? (
               <button className="button-colored-active flex items-center" onClick={handleFollow}>
-                {" "}
-                <span>
-                  <CheckIcon width={20} height={20} />
-                </span>{" "}
-                Followed{" "}
+                <span><Check width={20} height={20} /></span>Followed
               </button>
-            ) : (
-              <button className="button-colored" onClick={handleFollow}>
-                {" "}
-                Follow{" "}
-              </button>
+              ) : (
+              <button className="button-colored" onClick={handleFollow}>Follow</button>
             )}
           </div>
         </div>
@@ -95,7 +91,7 @@ const Community = () => {
           <PostCardSkeleton />
         </ul>
       </main>
-      <div className="flex flex-col gap-2 p-4 text-justify bg-slate-700 h-fit rounded-lg">
+      <div className="flex flex-col gap-2 p-4 text-justify h-fit rounded-lg">
         <div className="flex gap-2">
           <div>
             <h1 className="text-3xl">Jennie</h1>
@@ -136,10 +132,12 @@ interface api_data{
         type: string
         author: {
           name: string;
-          displayName: string
           avatar: string
         }
         likedBy: [
+          {id: string}
+        ];
+        savedBy: [
           {id: string}
         ];
         _count: {

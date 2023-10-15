@@ -36,7 +36,7 @@ const UserCard:FC<props> = (props) =>{
   if(props.logged && editing==false){
     return(
       <section className="grid grid-cols-userCard gap-2 pt-12">
-        <img src={CDN(props.user.avatar)} alt="" className="object-cover border-2 border-twilight-white-300/30 rounded-full sm:max-w-[200px] lg:max-h-[200px] "/>
+        <img src={CDN(props.user.avatar)} alt="" className="w-48 h-48 object-cover border-2 border-twilight-white-300/30 rounded-full sm:max-w-[200px] lg:max-h-[200px] "/>
         <div className="flex flex-col md:gap-2 justify-evenly text-justify">
           <div className="flex items-center justify-between">
             <h1 className="text-xl">{props.user.name}</h1>
@@ -54,7 +54,7 @@ const UserCard:FC<props> = (props) =>{
           <div className="w-48 h-48 border border-nord-frost-300/50 rounded-full">
             <label htmlFor="avatar" className="hidden">Avatar Image</label>
             <input type="file" name="avatar" className="absolute opacity-0 h-[200px] w-[200px] z-20 cursor-pointer"  onChange={(e)=>setFile(e.target.files![0])}/>
-            <img src={CDN(props.user.avatar)} alt="" className="bg-twilight-white-300/30 animate-pulse rounded-full w-48"/>
+            <img src={CDN(props.user.avatar)} alt="" className="w-48 h-48 object-cover grayscale bg-twilight-white-300/30 animate-pulse rounded-full"/>
           </div>
           <div className="flex flex-col  justify-evenly text-justify">
             <div className="flex items-center justify-between">

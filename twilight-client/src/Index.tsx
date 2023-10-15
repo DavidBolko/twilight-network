@@ -8,6 +8,7 @@ import { UserContext } from "./store";
 import { Check, Flame, ThumbsUp } from "lucide-react";
 import { CDN } from "./utils";
 import { Link } from "react-router-dom";
+import { Post } from "./types";
 
 export const Index = () => {
   const [type, setType] = useState("trending")
@@ -58,7 +59,7 @@ export const Index = () => {
               return(
                 <ul className="flex flex-col gap-2" key={i}>
                   {page.posts.map((ele)=>{
-                    return <li key={ele.id}><PostCard cardType="" likedBy={ele.likedBy} liked={ele.likedBy.some((e)=>{return e.id == user.id})} author={ele.author} comments={ele._count.comments > 0 ? ele._count.comments : 0} community={ele.community} refetch={refetch} content={ele.content} id={ele.id} preview={true} likeCount={ele._count.likedBy} title={ele.title} type={ele.type}/></li>
+                    return <li key={ele.id}><PostCard author={ele.author} cardType="" likedBy={ele.likedBy} liked={ele.likedBy.some((e) => { return e.id == user.id; })}  comments={ele._count.comments > 0 ? ele._count.comments : 0} community={ele.community} refetch={refetch} content={ele.content} id={ele.id} preview={true} likeCount={ele._count.likedBy} title={ele.title} type={ele.type} saved={ele.savedBy.some((e)=>{return e.id == user.id})}/></li>
                   })}
                 </ul>
               )
@@ -97,34 +98,8 @@ export const Index = () => {
   );
 };
 
-type data = [{
-  author: {
-    name:string;
-    displayName: string;
-    avatar: string;
-  };
-  community: {
-    name:string;
-    displayName: string;
-    id: string;
-    Img: string;
-  };
-  content: string;
-  id: string;
-  _count:{
-    comments:number;
-    likedBy:number;
-  }
-  likedBy: [
-    {id: string}
-  ];
-  title: string;
-  userId?: string;
-  type:string, 
-}];
 
-
-const fetchPosts = async ({pageParam = ''}: {pageParam: string}, {type = ''}: {type: string}): Promise<{ posts: data; nextId: string }> => {
+const fetchPosts = async ({pageParam = ''}: {pageParam: string}, {type = ''}: {type: string}): Promise<{ posts: Post[]; nextId: string }> => {
   const res = await axios.get(`/api/p?cursor=${pageParam}&?type=${type}`)
   return res.data
 }

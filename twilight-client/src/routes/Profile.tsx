@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate} from "react-router-dom";
 import UserCard from "../components/Profile/UserCard";
 import { UserContext } from "../store";
 import Tabs from "../components/Profile/Tabs";
@@ -11,7 +11,6 @@ import TabsSkeleton from "../components/Skeletons/TabsSkeleton";
 
 
 const Profile = () => {
-  const navigate = useNavigate()
   const location = useLocation()
   const id = location.pathname.split("/")[2]
   const existingSession = useContext(UserContext);

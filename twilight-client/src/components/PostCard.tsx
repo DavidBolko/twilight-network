@@ -2,7 +2,8 @@ import { FC } from "react";
 import { CDN, previewCDN } from "../utils";
 import { Link, useNavigate } from "react-router-dom";
 import { Users } from "@phosphor-icons/react";
-import { Download, Heart, MessageCircle } from "lucide-react";
+import { Bookmark, Download, Heart, MessageCircle } from "lucide-react";
+import axios from "axios";
 
 
 const PostCard: FC<props> = (props) => {
@@ -20,13 +21,18 @@ const PostCard: FC<props> = (props) => {
       props.refetch()
     }
   }
+
+  const handleSave = async()=>{
+    await axios.put("/api/p/"+props.id+"/save")
+    props.refetch()
+  }
   
   return (
     <div className="card">
       <div className="flex items-center gap-2">
         {props.cardType == "profile"
         ? ""
-        : <img src={CDN(props.author!.avatar)} loading="lazy" className="w-12 h-12 rounded-full object-cover" />
+        : <img src={CDN(props.author!.avatar)} loading="lazy" className="w-[48px] h-[48px] aspect-square rounded-full object-cover" />
         }
         <div className="flex flex-col w-full">
           <p className="font-bold text-base">{props.title}</p>
@@ -46,21 +52,25 @@ const PostCard: FC<props> = (props) => {
         : <img src={previewCDN(props.content)} alt="" loading="lazy" className="rounded-lg scale-[.98] hover:scale-100 transition-all" />
         }
       </a>
-      <div className="flex w-full mt-auto">
+      <div className="flex w-full mt-auto justify-between">
         <div className="flex items-center gap-1 text-xs">
-          {props.liked == true
-          ?<button onClick={()=>likePost(props.id)}><Heart fill="#4F9EE3" width={24} height={24} className="text-moonlight-200 dark:text-glow hover:text-twilight-white-300"/></button>
-          :<button onClick={()=>likePost(props.id)}><Heart width={24} height={24} className="hover:text-twilight-white-300"/></button>
-          }
+          <button onClick={()=>likePost(props.id)}><Heart strokeWidth={"1"} width={24} height={24} className={`hover:text-transparent hover:fill-moonlight-300 ${props.liked ? "fill-moonlight-200 text-transparent" : "fill-transparent"}`}/></button>
           <p>{props.likeCount}</p>
         </div>
-        <a href={`/api/cdn/${props.content}`} className="flex ml-auto mr-2 items-center hover:text-moonlight-200">
-          <Download width={20} height={20} />
-        </a>
-        <a href="#" onClick={() => navigate(`/p/${props.id}`)} className="flex items-center gap-1 hover:text-moonlight-200">
-          <MessageCircle width={20} height={20}/>
-          <p className="text-sm">{props.comments}</p>
-        </a>
+        <div className="flex gap-2">
+          <button onClick={handleSave} className="flex items-center gap-1 ">
+            <Bookmark width={20} height={20} strokeWidth={"1"} className={`hover:text-transparent hover:fill-moonlight-300 ${props.saved ? "fill-moonlight-200 text-transparent" : "fill-transparent"}`}/>
+          </button>
+          {props.type != "text" ?
+          <a href={`/api/cdn/${props.content}`} className="flex  items-center">
+            <Download width={20} height={20} strokeWidth={"1"} className="hover:text-transparent hover:fill-moonlight-300"/>
+          </a> : ""
+          }
+          <a href="#" onClick={() => navigate(`/p/${props.id}`)} className="flex items-center gap-1">
+            <MessageCircle width={20} height={20} strokeWidth={"1"} className="hover:text-transparent hover:fill-moonlight-300"/>
+            <p className="text-sm">{props.comments}</p>
+          </a>
+        </div>
       </div>
     </div>
   );
@@ -77,7 +87,6 @@ type props = {
   community: {
     name :string;
     id: string;
-    Img?: string;
   };
   likedBy:[
     {
@@ -93,4 +102,5 @@ type props = {
   type: string,
   preview?: boolean,
   liked: boolean
+  saved: boolean
 };

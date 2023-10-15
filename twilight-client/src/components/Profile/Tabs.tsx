@@ -2,6 +2,7 @@ import { Tab } from "@headlessui/react";
 import { FC } from "react";
 import PostTab from "./PostTab";
 import Communities from "./Communities";
+import SavedPosts from "./SavedPost";
 
 type props={
   userID:string
@@ -22,7 +23,9 @@ const Tabs: FC<props> = (props) => {
         <Tab.Panel className="mt-2">
           <Communities userID={props.userID}/>
         </Tab.Panel>
-        <Tab.Panel>Content 3</Tab.Panel>
+        <Tab.Panel>
+          <SavedPosts userID={props.userID}/>
+        </Tab.Panel>
       </Tab.Panels>
     </Tab.Group>
   );

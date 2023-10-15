@@ -18,13 +18,14 @@ model User {
   password     String
   ModeratorOf Community[] @relation(name: "ModeratorOf")
   Followed Community[]
-  Posts Post[]
-  comments Comment[]
+  Posts Post[] 
+  comments Comment[] 
   avatar String @default("default.svg")
   likes Post[] @relation(name: "likedBy")
   description String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  saved Post[] @relation(name: "saved")
 }
 
 model Community{
@@ -52,6 +53,7 @@ model Post{
   userId String
   comments Comment[]
   likedBy User[] @relation(name: "likedBy")
+  savedBy User[] @relation(name: "saved")
 }
 
 model Comment{
