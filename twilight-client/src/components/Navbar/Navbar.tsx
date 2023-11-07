@@ -1,11 +1,7 @@
 import OptionsCard from "../OptionsCard";
-import { FC, useContext, useEffect, useState } from "react";
-import { CDN,} from "../../utils";
-import SearchBarNav from "../SearchBarNav";
+import { FC, useContext, useState } from "react";
 import DarkModeToggler from "./DarkModeToggler";
 import { useNavigate } from "react-router-dom";
-import { ArrowDownIcon } from "@heroicons/react/24/solid";
-import { CaretDownIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { UserContext } from "../../store";
 import OptionsButton from "./OptionsButton";
 import SearchBar from "../SearchBar";

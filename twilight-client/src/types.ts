@@ -9,11 +9,24 @@ export interface Post {
   type: string;
   content: string;
   likedBy: [{ id: string }];
-  community: {
+  community?: {
     id: string;
     name: string;
   };
 }
+
+export interface Community{
+  id: string,
+  name: string,
+  desc: string,
+  Img: string,
+  createdAt: string,
+  updatedAt: string,
+  Users: User[],
+  Posts: ApiPost[],
+  followed: boolean
+}
+
 
 export interface ApiPost extends Post {
   savedBy: [{ id: string }];

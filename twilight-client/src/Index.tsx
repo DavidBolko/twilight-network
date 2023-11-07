@@ -31,8 +31,8 @@ export const Index = () => {
       <div className="flex flex-col lg:grid grid-cols-feed">
         <div className="relative w-full ">
           {user.id ?
-            <section className="lg:absolute flex justify-items-center right-0 lg:flex-col place-content-center h-fit w-full lg:w-fit gap-2 mt-16 p-4">
-              <Link to={"/profile/"+user.id} className="card flex-row gap-2 w-full items-center lg:w-fit hover:shadow-glow">
+            <section className="hidden lg:absolute lg:flex justify-items-center right-0 lg:flex-col place-content-center h-fit w-full lg:w-fit gap-2 mt-16 p-4">
+              <Link to={"/profile/"+user.id} className="flex flex-row gap-2 w-full items-center lg:w-fit">
                 <img src={CDN(user.avatar)} className="w-16 h-16 border-2 border-twilight-white-300/60 rounded-full object-cover" alt="" />
                 <div className="flex flex-col justify-center">
                   <p className="text-sm">Hi,</p>
@@ -54,7 +54,7 @@ export const Index = () => {
           }
         </div>
         <main className="flex p-4 w-full col-start-2 place-self-center">
-          <section className="flex flex-col gap-2 lg:pt-16 w-full">
+          <section className="flex flex-col gap-2 pt-14 w-full">
             {data.pages.flatMap((page, i)=>{
               return(
                 <ul className="flex flex-col gap-2" key={i}>

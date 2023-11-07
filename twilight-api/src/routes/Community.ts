@@ -62,7 +62,7 @@ CommunityRouter.get("/:id", async function(req:Request, res:Response) {
       id: req.user
     }
   })
-  const community = await prisma.community.findFirst({
+  var community = await prisma.community.findFirst({
     where:{
       id: req.params.id
     },
@@ -113,11 +113,11 @@ CommunityRouter.get("/:id", async function(req:Request, res:Response) {
       array.push(element.id)
     });
     if(array.includes(user.id)){
-      return res.json({community, followed:true})
+      Object.assign(community, {followed:true})
+      return res.json(community)
     }
-    else{
-      return res.json({community, followed:false})
-    } 
+    Object.assign(community, {followed:false})
+    return res.json(community)
   }
   else{
     return res.sendStatus(404)

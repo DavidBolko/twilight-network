@@ -26,7 +26,7 @@ const PostCard: FC<props> = (props) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({id:props.id})
+      body: JSON.stringify({id:id})
     })
     if(res.ok){
       props.refetch()

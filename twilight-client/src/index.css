@@ -34,50 +34,35 @@
 @layer components {
   .form-input {
     @apply outline-none !important;
-    @apply bg-twilight-100;
     @apply dark:bg-twilight-700/40;
-    @apply focus-within:bg-twilight-200 !important;
+    @apply focus-within:bg-twilight-200/60 !important;
     @apply dark:focus-within:bg-twilight-700/60 !important;
     @apply rounded-md;
-    @apply dark:shadow-glow; 
-    @apply shadow-md;
+    @apply border;
+    @apply w-full;
+    @apply p-2;
+    @apply border-twilight-400;
+    @apply dark:border-twilight-500;
     @apply text-base;
     @apply backdrop-blur-sm;
   }
-  .form-input-w-svg {
-    @apply form-input;
-    @apply p-2;
-    @apply w-full;
-  }
-  .form-input > svg{
-    @apply dark:bg-twilight-500;
-    @apply bg-twilight-200;
-    @apply rounded-l-md;
-    @apply p-1.5;
-    @apply min-w-[35px];
-  }
-  .form-input > input{
-    @apply p-2;
+  .form-input>input{
     @apply bg-transparent;
-    @apply w-full;
   }
   .button-normal {
-    @apply bg-twilight-100;
-    @apply dark:bg-twilight-800;
+    @apply bg-transparent;
     @apply flex;
     @apply gap-2;
-    @apply shadow-twilight;
-    @apply p-1.5;
+    @apply p-1;
     @apply rounded-md;
     @apply min-w-fit;
     @apply h-fit;
     @apply items-center;
     @apply text-center;
     @apply cursor-pointer;
-    @apply hover:bg-twilight-200;
-    @apply hover:dark:bg-twilight-900;
     @apply hover:transition-all;
-    @apply hover:scale-105;
+    @apply hover:dark:bg-twilight-white-300;
+    @apply hover:dark:bg-twilight-500;
   }
   .button-colored {
     @apply button-normal;
@@ -118,7 +103,9 @@
     @apply rounded-lg;
     @apply w-full;
     @apply hover:transition-all;
-    @apply shadow-twilight;
+    @apply border;
+    @apply border-twilight-300;
+    @apply dark:border-twilight-500;
   }
   .text-glow{
     text-shadow: 1px 1px 12px rgb(61 147 224 / 1)

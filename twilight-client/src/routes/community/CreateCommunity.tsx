@@ -40,11 +40,11 @@ const CreateCommunity = () => {
           <div className="flex gap-2 w-full items-center">
             <img src={photo} className="w-16 h-16 rounded-full object-cover" />
             <label className="hidden">Title</label>
-            <input placeholder="Title" name="title" className="form-input-w-svg w-full h-fit" onChange={(e)=>setTitle(e.target.value)}/>
+            <input placeholder="Title" name="title" className="form-input w-full h-fit" onChange={(e)=>setTitle(e.target.value)}/>
           </div>
 
           <label className="hidden">Description</label>
-          <textarea placeholder="Describe your community..." name="desc" className="form-input-w-svg resize-none" onChange={(e)=>setDesc(e.target.value)}/>
+          <textarea placeholder="Describe your community..." name="desc" className="form-input resize-none" onChange={(e)=>setDesc(e.target.value)}/>
 
           <label>Community Photo</label>
           <input type="file" name="avatar" onChange={(e)=>setImage(e.target.files![0])}/>

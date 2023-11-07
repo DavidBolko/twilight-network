@@ -35,12 +35,12 @@ const SearchBar:FC<props> = (props) => {
 
     return(
         <div className="relative w-full  z-20">
-            <div className="absolute form-input-w-svg p-0" onFocus={()=>setOpen(true)} onBlur={e => e.relatedTarget === null && setOpen(false)}>
-                <input required className="w-full" value={`${selected ? selected : searchInput}`}  type="text" onChange={(e)=>{handleSearch(e.target.value), setSelected(e.target.value)}}/>
+            <div className="absolute form-input p-0" onFocus={()=>setOpen(true)} onBlur={e => e.relatedTarget === null && setOpen(false)}>
+                <input required className="form-input w-full" value={`${selected ? selected : searchInput}`}  type="text" onChange={(e)=>{handleSearch(e.target.value), setSelected(e.target.value)}}/>
                 {data ?
-                <ul className={`${open && data && searchInput  ? "block":"hidden"} p-2 border-t-2 z-30 border-t-twilight-500 backdrop-blur-md`}>
+                <ul className={`${open && data && searchInput  ? "block":"hidden"} p-0.5  border-t-2 z-30 border-t-twilight-300 dark:border-t-twilight-500 backdrop-blur-md`}>
                     {data.map((ele) => (
-                        <li className="hover:bg-twilight-dark-500/30 p-1 rounded-md">
+                        <li className="hover:bg-twilight-dark-500/30 p-2 rounded-sm" >
                             <p onMouseDown={()=>handleClick(ele.name, ele.id)}>{ele.name}</p>
                         </li>
                     ))}

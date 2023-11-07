@@ -9,15 +9,13 @@ import sadImage from "../../../public/sad.svg"
 import { useContext } from "react";
 import { UserContext } from "../../store";
 import { Check } from "lucide-react";
+import { Community as ApiCommunity } from "../../types";
 
 const Community = () => {
   const params = useParams();
   const user = useContext(UserContext);  
   
-  const { error, data, refetch } = useQuery<api_data, AxiosError>({
-    queryFn: async() => await axios.get(`/api/c/${params.id}`),
-    refetchOnWindowFocus: false,
-  });
+  const {data, refetch,error} = useQuery<ApiCommunity, AxiosError>("community", async ()=> await axios.get(`/api/c/${params.id}`).then((res) => res.data), {refetchOnWindowFocus:false})
 
 
   const handleFollow = async () => {
@@ -30,17 +28,14 @@ const Community = () => {
     }
   };
   
-  console.log(data);
-  
-
   if(data){
     return (
       <section className="flex flex-col-reverse lg:grid grid-cols-4 pt-20 p-4 gap-4 ">
         <main className="flex col-span-2 col-start-2 justify-center">
-          {data.data.community.Posts.length > 0 ?
+          {data.Posts.length > 0 ?
           <ul className="flex flex-col gap-6 w-full">
-            {data.data.community.Posts.map((ele) => (
-              <PostCard saved={ele.savedBy.some((e)=>{return e.id == user.id})} cardType="com" likedBy={ele.likedBy} liked={ele.likedBy.some((e)=>{return e.id == user.id})} author={ele.author} comments={ele._count.comments > 0 ? ele._count.comments : 0} community={data.data.community} refetch={refetch} content={ele.content} id={ele.id} preview={true} likeCount={ele._count.likedBy} title={ele.title} type={ele.type}/>
+            {data.Posts.map((ele) => (
+              <PostCard saved={ele.savedBy.some((e)=>{return e.id == user.id})} cardType="com" likedBy={ele.likedBy} liked={ele.likedBy.some((e)=>{return e.id == user.id})} author={ele.author} comments={ele._count.comments > 0 ? ele._count.comments : 0}  refetch={refetch} content={ele.content} id={ele.id} preview={true} likeCount={ele._count.likedBy} title={ele.title} type={ele.type}/>
             ))}
           </ul>
           : <div className="flex flex-col items-center   text-center">
@@ -53,18 +48,18 @@ const Community = () => {
         </main>
         <div className="flex flex-col gap-2 p-4 text-justify shadow-twilight bg-twilight-100 dark:bg-twilight-500/20 h-fit rounded-lg">
           <div className="flex gap-2">
-            <img src={CDN(data.data.community.Img!)} alt="" className="w-16 h-16 rounded-full" />
+            <img src={CDN(data.Img!)} alt="" className="w-16 h-16 rounded-full" />
             <div>
               <h1 className="text-3xl">Jennie</h1>
-              <p>{data.data.community.Users.length} followers</p>
+              <p>{data.Users.length} followers</p>
             </div>
           </div>
-          <p>{data.data.community.desc}</p>
+          <p>{data.desc}</p>
           <div className="flex gap-2">
-            <a className="button-normal" href={`/c/${data.data.community.id}/create`}>
+            <a className="button-normal" href={`/c/${data.id}/create`}>
               Make a post
             </a>
-            {data.data.followed == true ? (
+            {data.followed == true ? (
               <button className="button-colored-active flex items-center" onClick={handleFollow}>
                 <span><Check width={20} height={20} /></span>Followed
               </button>
@@ -77,8 +72,6 @@ const Community = () => {
     );
   }
   if (error) {
-    console.log(error);
-    
     return <ErrorPage status={error.response!.status} statusText={error.response!.statusText}/>;
   } 
   return (
@@ -114,38 +107,3 @@ const Community = () => {
 };
 
 export default Community;
-
-interface api_data{
-  data:{
-    community: {
-      name: string
-      id:string
-      desc: string
-      Img: string
-      Users: Array<{
-        id: string
-      }>
-      Posts: Array<{
-        id: string
-        title: string
-        content: string
-        type: string
-        author: {
-          name: string;
-          avatar: string
-        }
-        likedBy: [
-          {id: string}
-        ];
-        savedBy: [
-          {id: string}
-        ];
-        _count: {
-          likedBy: number
-          comments: number
-        }
-      }>
-    }
-    followed: boolean
-  }
-}

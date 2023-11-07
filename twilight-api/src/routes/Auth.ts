@@ -5,6 +5,7 @@ import passport from "passport";
 import multer from "multer";
 import { randomBytes } from "crypto";
 import path from "path";
+import { error } from "console";
 const AuthRouter = Router();
 
 var storage = multer.diskStorage({
@@ -78,6 +79,13 @@ AuthRouter.post("/signupstepone", async function (req: Request, res: Response) {
 
 AuthRouter.post("/signin", passport.authenticate("local", {}), function (req: Request, res: Response) {
   res.sendStatus(200);
+});
+
+AuthRouter.post('/logout', function(req, res, next) {
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.sendStatus(200)
+  });
 });
 
 AuthRouter.get("/verify", function (req: Request, res: Response) {
