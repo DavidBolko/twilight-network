@@ -99,8 +99,8 @@ type data = {
     {
       content: string,
       author: {
-        displayName: string
-        img: string
+        name: string
+        avatar: string
       }
     }
   ];

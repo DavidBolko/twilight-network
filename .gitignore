@@ -26,14 +26,19 @@ dist-ssr
 *.sln
 *.sw?
 
-twilight-uploads/Avatars/*
-twilight-uploads/Communities/*
-twilight-uploads/Posts/*
+twilight-uploads/Avatars/*.jpg
+twilight-uploads/Avatars/*.svg
+twilight-uploads/Avatars/*.png
+twilight-uploads/Avatars/*.jpeg
+twilight-uploads/Communities/*.jpg
+twilight-uploads/Communities/*.svg
+twilight-uploads/Communities/*.png
+twilight-uploads/Communities/*.jpeg
+twilight-uploads/Posts/*.jpg
+twilight-uploads/Posts/*.svg
+twilight-uploads/Posts/*.png
+twilight-uploads/Posts/*.jpeg
 
 twilight-api/prisma/migrations/*
 dev.db
 
-*.jpg
-*.svg
-*.png
-*.jpeg

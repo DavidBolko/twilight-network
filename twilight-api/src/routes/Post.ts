@@ -125,7 +125,8 @@ postRouter.get("/:id", async function (req: Request, res: Response) {
         include: {
           author: {
             select: {
-              name:true
+              name:true,
+              avatar: true
             },
           },
         },
