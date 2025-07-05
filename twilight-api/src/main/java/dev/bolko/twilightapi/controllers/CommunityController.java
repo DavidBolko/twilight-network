@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/c")
@@ -22,7 +23,7 @@ public class CommunityController {
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("image") MultipartFile image) {
-        if(communityRepo.findByName(name).isEmpty()){
+        if(communityRepo.findByName(name).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name already exists");
         }
 
@@ -50,7 +51,7 @@ public class CommunityController {
                 throw new RuntimeException(e);
             }
 
-            Community response = new Community(original.getId(), original.getName(), original.getImage(), presignedUrl);
+            Community response = new Community(original.getId(), original.getName(), original.getImage(), presignedUrl, new ArrayList<>());
 
             return ResponseEntity.ok(response);
         }).orElse(ResponseEntity.notFound().build());

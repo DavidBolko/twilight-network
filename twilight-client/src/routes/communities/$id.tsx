@@ -1,6 +1,7 @@
 import {createFileRoute, useLoaderData} from '@tanstack/react-router'
 import axios from "axios";
 import type {Community} from "../../types.ts";
+import CreatePostModal from '../../components/CreatePostModal.tsx';
 
 
 export const Route = createFileRoute('/communities/$id')({
@@ -16,8 +17,10 @@ function CommunityComponent() {
 
     if(community) {
         return (
-            <div>
+            <div className="relative">
+                <CreatePostModal communityId={community.id}/>
                 <h1>{community.name}</h1>
+                <button className="btn primary">Post</button>
                 <img src={community.image} alt="haha"/>
             </div>
         );

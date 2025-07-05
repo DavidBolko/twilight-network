@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PostIdRouteImport } from './routes/post/$id'
 import { Route as CommunitiesCreateRouteImport } from './routes/communities/create'
 import { Route as CommunitiesIdRouteImport } from './routes/communities/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostIdRoute = PostIdRouteImport.update({
+  id: '/post/$id',
+  path: '/post/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesCreateRoute = CommunitiesCreateRouteImport.update({
@@ -33,30 +39,39 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/communities/create': typeof CommunitiesCreateRoute
+  '/post/$id': typeof PostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/communities/create': typeof CommunitiesCreateRoute
+  '/post/$id': typeof PostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/communities/create': typeof CommunitiesCreateRoute
+  '/post/$id': typeof PostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/communities/$id' | '/communities/create'
+  fullPaths: '/' | '/communities/$id' | '/communities/create' | '/post/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/communities/$id' | '/communities/create'
-  id: '__root__' | '/' | '/communities/$id' | '/communities/create'
+  to: '/' | '/communities/$id' | '/communities/create' | '/post/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/communities/$id'
+    | '/communities/create'
+    | '/post/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunitiesIdRoute: typeof CommunitiesIdRoute
   CommunitiesCreateRoute: typeof CommunitiesCreateRoute
+  PostIdRoute: typeof PostIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +81,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/post/$id': {
+      id: '/post/$id'
+      path: '/post/$id'
+      fullPath: '/post/$id'
+      preLoaderRoute: typeof PostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communities/create': {
@@ -89,6 +111,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunitiesIdRoute: CommunitiesIdRoute,
   CommunitiesCreateRoute: CommunitiesCreateRoute,
+  PostIdRoute: PostIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
