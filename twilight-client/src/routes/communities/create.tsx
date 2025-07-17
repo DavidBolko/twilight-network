@@ -55,7 +55,7 @@ function CreateCommunity() {
                     <label>Community Photo</label>
                     <input type="file" name="avatar" onChange={(e)=>setImage(e.target.files![0])}/>
 
-                    <input type="submit" className="button-colored w-full"/>
+                    <input type="submit" className="btn primary w-full"/>
                 </form>
             </div>
         </section>

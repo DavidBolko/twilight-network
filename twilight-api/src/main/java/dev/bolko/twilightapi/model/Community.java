@@ -1,5 +1,7 @@
 package dev.bolko.twilightapi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,7 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -24,5 +28,14 @@ public final class Community {
 
     @OneToMany(mappedBy = "community")
     @JsonManagedReference
+    @JsonIgnore
     private List<Post> posts = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    @JsonBackReference
+    private User creator;
+
+    @ManyToMany(mappedBy = "communities")
+    private Set<User> members = new HashSet<>();
 }

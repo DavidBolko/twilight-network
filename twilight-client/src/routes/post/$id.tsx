@@ -1,65 +1,73 @@
-import {createFileRoute, useLoaderData} from '@tanstack/react-router'
+import {createFileRoute, useParams} from '@tanstack/react-router'
+import Post from "../../components/Post.tsx";
+import {SendIcon} from "lucide-react";
 import axios from "axios";
-import {Smile} from 'lucide-react';
+import type {PostType} from "../../types.ts";
+import {type SyntheticEvent, useState} from "react";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
 
 export const Route = createFileRoute("/post/$id")({
-    loader: async ({params}) => {
-        const res = await axios.get(`http://localhost:8080/api/p/${params.id}`);
-        return res.data;
-    },
     component: RouteComponent,
 });
 
 function RouteComponent() {
-    const post: Post = useLoaderData({from: Route.id});
+    const { id } = useParams({ from: Route.id });
+    const queryClient = useQueryClient();
+    const [comment, setComment] = useState("");
 
-    if (post) {
-        return (
-            <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[750px] lg:col-start-2">
-                <section>
-                    <PostCard author={data.author} likedBy={data.likedBy} liked={data.likedBy.some((e) => {
-                        return e.id == user.id
-                    })} title={data.title} type={data.type} community={data.community} cardType=""
-                              comments={data.comments.length >= 0 ? data.comments.length : 0} content={data.content}
-                              likeCount={data.likedBy.length} id={data.id} refetch={refetch}/>
-                </section>
-                <section className="card">
-                    <div>
-                        <p>Comment</p>
-                        <form className="flex flex-col">
-              <textarea
-                  className="w-full p-2 rounded-md resize-none form-input outline-none shadow-twilight "
-                  onChange={(e) => setComment(e.target.value)}
-                  value={comment}
-                  placeholder="Leave a comment..."
-                  name=""
-                  id=""
-              />
-                            <div className="flex items-center mt-2">
-                                <Smile width={32}/>
-                                <input className="ml-auto button-colored" required={true} type="submit" name="" id=""
-                                       onClick={submitComment}/>
-                            </div>
-                        </form>
-                    </div>
-                    <p>Comments</p>
-                    <ul className="flex flex-col-reverse">
-                        {data.comments?.map((ele, i) => (
-                            <li key={i}>
-                                <Comment author={ele.author} content={ele.content}/>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            </main>
+    const { data } = useQuery<PostType>({
+        queryKey: ["post", id],
+        queryFn: () => axios.get(`http://localhost:8080/api/p/${id}`).then((res) => res.data),
+    });
+
+    const sendComment = async (e: SyntheticEvent) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append("comment", comment);
+
+        const result = await axios.post(
+            `http://localhost:8080/api/p/${id}/comment`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            }
         );
+
+        if (result.status === 200) {
+            await queryClient.invalidateQueries({ queryKey: ["post", id] });
+            setComment(""); // reset textarea
+        }
+    };
+
+    if(data && data.comments !== undefined){
+
+        return(
+            <div className="resp-grid p-2">
+                <div className="flex flex-col gap-1 col-start-2">
+                    <Post text={data.text} id={data.id} title={data.title} community={data.community} images={data.images} likes={data.likes} />
+                    <div>
+                        <p>Comments</p>
+                        <form onSubmit={(e)=>sendComment(e)} className="card flex flex-col p-2 gap-2">
+                            <textarea onChange={(e)=>setComment(e.target.value)} className="w-full resize-none h-[80px] outline-none border-b-2 border-stone-700/20"/>
+                            <button type="submit" className="btn primary flex items-center self-end">
+                                Submit
+                                <SendIcon className="w-4 h-4"/>
+                            </button>
+                        </form>
+                        <ul className="flex flex-col mt-2 gap-2">
+                            {data.comments.map(comment => (
+                                <li className="card p-2" key={comment.id}>{comment.content}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        )
     }
     return (
-        <main className="flex flex-col gap-2 p-4 pt-16 mr-auto ml-auto max-w-[750px] lg:col-start-2">
-            <section>
-            </section>
-            <section>
-            </section>
-        </main>
-    );
+        <div className="resp-grid p-2"></div>
+    )
 }

@@ -1,7 +1,10 @@
 package dev.bolko.twilightapi.controllers;
 
+import dev.bolko.twilightapi.dto.CommunityDto;
+import dev.bolko.twilightapi.model.User;
 import dev.bolko.twilightapi.repositories.CommunityRepository;
 import dev.bolko.twilightapi.model.Community;
+import dev.bolko.twilightapi.repositories.UserRepository;
 import dev.bolko.twilightapi.services.UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/c")
@@ -19,6 +24,7 @@ import java.util.ArrayList;
 public class CommunityController {
 
     private final CommunityRepository communityRepo;
+    private final UserRepository userRepo;
     private final UploadService uploadService;
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -34,26 +40,51 @@ public class CommunityController {
             System.out.println(e.getMessage());
         }
 
+        UUID creatorId = UUID.fromString("aec09d67-43bc-4e66-a311-05561f678102");
+        User creator = userRepo.findById(creatorId).orElseThrow(() -> new RuntimeException("User not found"));
+
         Community c = new Community();
         c.setName(name);
         c.setImage(imageFilename);
+        c.setCreator(creator);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(communityRepo.save(c));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Community> getCommunity(@PathVariable("id") Long id) {
+    public ResponseEntity<CommunityDto> getCommunity(@PathVariable("id") Long id) {
         return communityRepo.findById(id).map(original -> {
             String presignedUrl = null;
             try {
                 presignedUrl = uploadService.getFile(original.getImage());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to generate image URL", e);
             }
 
-            Community response = new Community(original.getId(), original.getName(), original.getImage(), presignedUrl, new ArrayList<>());
+            CommunityDto response = new CommunityDto(original.getId(), original.getName(), original.getDescription(), presignedUrl);
 
             return ResponseEntity.ok(response);
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CommunityDto>> searchByName(@RequestParam String query) {
+        List<Community> communities = communityRepo.findByNameContainingIgnoreCase(query);
+
+        if(communities.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        List<CommunityDto> result = communities.stream().map(community -> {
+            String presignedUrl = null;
+            try {
+                presignedUrl = uploadService.getFile(community.getImage());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to generate image URL", e);
+            }
+            return new CommunityDto(community.getId(), community.getName(), community.getDescription(), presignedUrl);
+        }).toList();
+
+        return ResponseEntity.ok(result);
     }
 }

@@ -1,1 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+    --color-tw-bg: #0F0F1C;
+    --color-tw-surface: #1A1A2E;
+    --color-tw-border: #2E2E46;
+    --color-tw-text: #E5E5F0;
+    --color-tw-muted: #A0A0B2;
+
+    --color-tw-primary: #A78BFA;
+    --color-tw-primary-dark: #7C5FD9;
+    --color-tw-glow: #C4B5FD;
+
+    --color-tw-light-bg: #FAFAFA;
+    --color-tw-light-surface: #FFFFFF;
+    --color-tw-light-border: #E5E7EB;
+    --color-tw-light-text: #222222;
+    --color-tw-light-muted: #555555;
+}
+
+@layer base {
+    *{
+        @apply transition-all;
+    }
+    .html, body {
+        @apply bg-tw-light-bg;
+        @apply text-tw-light-text;
+        @apply dark:bg-tw-bg;
+        @apply dark:text-tw-text;
+    }
+    input, textarea, .input{
+        @apply rounded-md;
+        @apply outline-none;
+        @apply focus:outline-none;
+        @apply border;
+        @apply border-tw-border;
+        @apply focus:border-b-tw-primary;
+        @apply resize-none;
+        @apply p-2;
+    }
+}
+
+@layer utilities {
+    .font-quicksand {
+        font-family: 'Quicksand', sans-serif;
+    }
+}
+
+@layer components{
+    .resp-grid {
+        @apply flex;
+    }
+
+    .card{
+        @apply flex;
+        @apply gap-2;
+        @apply p-2;
+        @apply rounded-md;
+        @apply dark:bg-tw-surface;
+        @apply border-tw-border;
+        @apply shadow-lg;
+    }
+
+    @media (min-width: 1024px) {
+        .resp-grid {
+            @apply grid;
+            grid-template-columns: 1fr 1.25fr 1fr;
+        }
+    }
+
+    .btn{
+        @apply flex;
+        @apply border;
+        @apply border-tw-border;
+        @apply hover:border-tw-primary;
+        @apply rounded-md;
+        @apply p-0.5;
+        @apply px-2;
+        @apply w-fit;
+        @apply cursor-pointer;
+        @apply items-center;
+    }
+
+    .primary{
+        @apply bg-indigo-500/60;
+        @apply hover:bg-indigo-500;
+        @apply hover:shadow-[0_0_15px_rgba(99,102,241,0.7)];
+    }
+}
+
+
+

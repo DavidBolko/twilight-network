@@ -2,6 +2,7 @@ import {createFileRoute, useLoaderData} from '@tanstack/react-router'
 import axios from "axios";
 import type {Community} from "../../types.ts";
 import CreatePostModal from '../../components/CreatePostModal.tsx';
+import {useState} from "react";
 
 
 export const Route = createFileRoute('/communities/$id')({
@@ -13,14 +14,15 @@ export const Route = createFileRoute('/communities/$id')({
 });
 
 function CommunityComponent() {
+    const [isOpen, setIsOpen] = useState(false);
     const community: Community = useLoaderData({ from: Route.id });
 
     if(community) {
         return (
             <div className="relative">
-                <CreatePostModal communityId={community.id}/>
+                <CreatePostModal isOpen={isOpen} setIsOpen={setIsOpen} communityId={community.id}/>
                 <h1>{community.name}</h1>
-                <button className="btn primary">Post</button>
+                <button onClick={()=>setIsOpen(true)} className="btn primary">Post</button>
                 <img src={community.image} alt="haha"/>
             </div>
         );

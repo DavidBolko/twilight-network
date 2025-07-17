@@ -50,7 +50,7 @@ public class UploadService {
             url = minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
-                            .bucket("twilight") // nastav svoj bucket
+                            .bucket("twilight")
                             .object(id)
                             .expiry(60 * 60, TimeUnit.SECONDS) // 1 hodina
                             .build()
