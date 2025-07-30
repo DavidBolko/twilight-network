@@ -10,13 +10,14 @@ export type User = {
 export type Comment = {
     id: number,
     content: string,
+    author: User,
 }
 export type PostType = {
     id:string,
     title: string,
     text: string,
     community: Community,
-    //user: User
+    author: User,
     images?: string[],
     likes: User[],
     comments?: Comment[],

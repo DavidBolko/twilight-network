@@ -13,15 +13,24 @@ import java.util.*;
 @ToString(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email")
+})
 public final class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
+    private String email;
+    @Column(nullable = true)
     private String description;
+    @Column(nullable = true)
     private String image;
+    @Column(nullable = false)
+    private String password;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -38,4 +47,14 @@ public final class User {
     @ManyToMany(mappedBy = "likes")
     @JsonIgnore
     private Set<Post> likedPosts = new HashSet<>();
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Comment> comments = new HashSet<>();
+
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 }

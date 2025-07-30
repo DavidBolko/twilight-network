@@ -9,7 +9,9 @@ export default function SearchComponent(){
     const [query, setQuery] = useState("");
 
     const getSearch = async (query: string) => {
-        const res = await axios.get(`http://localhost:8080/api/c?query=${query}`);
+        const res = await axios.get(`http://localhost:8080/api/c?query=${query}`, {
+            withCredentials: true
+        });
         return res.data;
     };
 
@@ -37,8 +39,7 @@ export default function SearchComponent(){
         return (
             <div className="flex flex-col relative ">
                 <div className="group">
-                    <div
-                        className={`input text-sm flex items-center pl-2 pr-2 p-0 backdrop-blur-md opacity-5 group-hover:opacity-100 group-focus-within:opacity-100 focus-within:bg-tw-surface transition-opacity duration-200 ${open ? "rounded-b-none" : ""}`}>
+                    <div className={`input text-sm flex items-center pl-2 pr-2 p-0 backdrop-blur-md opacity-5 group-hover:opacity-100 group-focus-within:opacity-100 focus-within:bg-tw-surface transition-opacity duration-200 ${open ? "rounded-b-none" : ""}`}>
                         <SearchIcon/>
                         <input onChange={(e) => handleSearch(e.target.value)} onFocus={() => setOpen(true)}   onBlur={() => setTimeout(() => setOpen(false), 100)} className="border-0 w-full focus:outline-none bg-transparent" type="text"/>
                     </div>
@@ -62,7 +63,7 @@ export default function SearchComponent(){
         <div className="flex flex-col relative ">
             <div className="group">
                 <div
-                    className={`input text-sm flex items-center pl-2 pr-2 p-0 backdrop-blur-md opacity-5 group-hover:opacity-100 group-focus-within:opacity-100 focus-within:bg-tw-surface transition-opacity duration-200`}>
+                    className={`input text-sm flex items-center pl-2 pr-2 p-0 backdrop-blur-md opacity-15 group-hover:opacity-100 group-focus-within:opacity-100 bg-tw-surface transition-opacity duration-200`}>
                     <SearchIcon/>
                     <input onChange={(e) => handleSearch(e.target.value)} onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} className="border-0 w-full focus:outline-none bg-transparent" type="text"/>
                 </div>

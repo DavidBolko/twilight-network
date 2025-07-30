@@ -20,8 +20,14 @@ public final class Comment {
     @JsonBackReference
     private Post post;
 
-    public Comment(String content, Post post) {
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "author_id", nullable = false)
+    @JsonBackReference
+    private User author;
+
+    public Comment(String content, Post post, User author) {
         this.content = content;
         this.post = post;
+        this.author = author;
     }
 }

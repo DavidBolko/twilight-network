@@ -10,10 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,9 +31,13 @@ public class CommunityController {
     private final UploadService uploadService;
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("image") MultipartFile image) {
+    public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("image") MultipartFile image, Authentication auth) {
         if(communityRepo.findByName(name).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name already exists");
+        }
+
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
         }
 
         String imageFilename = "";
@@ -40,8 +47,7 @@ public class CommunityController {
             System.out.println(e.getMessage());
         }
 
-        UUID creatorId = UUID.fromString("aec09d67-43bc-4e66-a311-05561f678102");
-        User creator = userRepo.findById(creatorId).orElseThrow(() -> new RuntimeException("User not found"));
+        User creator = userRepo.findById(((User) auth.getPrincipal()).getId()).orElseThrow(() -> new RuntimeException("User not found"));
 
         Community c = new Community();
         c.setName(name);

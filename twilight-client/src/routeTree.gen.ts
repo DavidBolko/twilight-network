@@ -13,6 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostIdRouteImport } from './routes/post/$id'
 import { Route as CommunitiesCreateRouteImport } from './routes/communities/create'
 import { Route as CommunitiesIdRouteImport } from './routes/communities/$id'
+import { Route as AuthRegisterRouteImport } from './routes/auth/register'
+import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,15 +37,36 @@ const CommunitiesIdRoute = CommunitiesIdRouteImport.update({
   path: '/communities/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLogoutRoute = AuthLogoutRouteImport.update({
+  id: '/auth/logout',
+  path: '/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/communities/create': typeof CommunitiesCreateRoute
   '/post/$id': typeof PostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/communities/create': typeof CommunitiesCreateRoute
   '/post/$id': typeof PostIdRoute
@@ -50,18 +74,38 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/communities/create': typeof CommunitiesCreateRoute
   '/post/$id': typeof PostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/communities/$id' | '/communities/create' | '/post/$id'
+  fullPaths:
+    | '/'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/register'
+    | '/communities/$id'
+    | '/communities/create'
+    | '/post/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/communities/$id' | '/communities/create' | '/post/$id'
+  to:
+    | '/'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/register'
+    | '/communities/$id'
+    | '/communities/create'
+    | '/post/$id'
   id:
     | '__root__'
     | '/'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/register'
     | '/communities/$id'
     | '/communities/create'
     | '/post/$id'
@@ -69,6 +113,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthLogoutRoute: typeof AuthLogoutRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
   CommunitiesIdRoute: typeof CommunitiesIdRoute
   CommunitiesCreateRoute: typeof CommunitiesCreateRoute
   PostIdRoute: typeof PostIdRoute
@@ -104,11 +151,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/auth/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/logout': {
+      id: '/auth/logout'
+      path: '/auth/logout'
+      fullPath: '/auth/logout'
+      preLoaderRoute: typeof AuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthLogoutRoute: AuthLogoutRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
   CommunitiesIdRoute: CommunitiesIdRoute,
   CommunitiesCreateRoute: CommunitiesCreateRoute,
   PostIdRoute: PostIdRoute,

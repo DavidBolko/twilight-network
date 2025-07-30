@@ -23,6 +23,7 @@ function CreateCommunity() {
         formData.append("image", image as Blob);
 
         const result = await axios.post("http://localhost:8080/api/c/create", formData, {
+            withCredentials: true,
             headers: {
                 "Content-Type": "multipart/form-data",
             },

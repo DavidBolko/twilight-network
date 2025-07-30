@@ -49,6 +49,7 @@ export default function CreatePostModal(props:props){
         console.log(formData.get("images"))
         try {
             const result = await axios.post(`http://localhost:8080/api/p/${props.communityId}`, formData, {
+                withCredentials: true,
                 headers: { "Content-Type": "multipart/form-data" },
             });
             if(result.status === 200){

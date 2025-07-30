@@ -10,14 +10,21 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/p")
@@ -32,10 +39,14 @@ public class PostController {
     private final CommentRepository commentRepo;
 
     @PostMapping(value = "/{communityId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createPost(@PathVariable("communityId") Long communityId, @RequestParam("title") String title, @RequestParam("type") String type, @RequestParam("text") String text, @RequestParam(value = "images", required = false) MultipartFile[] images) {
+    public ResponseEntity<?> createPost(@PathVariable("communityId") Long communityId, @RequestParam("title") String title, @RequestParam("type") String type, @RequestParam("text") String text, @RequestParam(value = "images", required = false) MultipartFile[] images, Authentication auth) {
         Optional<Community> com = communityRepo.findById(communityId);
         if (com.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Community not found");
+        }
+
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
         }
 
         Post post = new Post(title, text, com.get());
@@ -48,8 +59,7 @@ public class PostController {
             }
             post.setType(PostType.TEXT);
         }
-        UUID authorId = UUID.fromString("aec09d67-43bc-4e66-a311-05561f678102");
-        User author = userRepo.findById(authorId).orElseThrow(() -> new RuntimeException("User not found"));
+        User author = userRepo.findById(((User) auth.getPrincipal()).getId()).orElseThrow(() -> new RuntimeException("User not found"));
         post.setAuthor(author);
 
         postRepo.save(post);
@@ -92,17 +102,16 @@ public class PostController {
         List<Comment> comments = commentRepo.findByPostId(post.getId());
         return ResponseEntity.ok(new PostDto(post, imagesUrl, comments));
     }
-
     @PutMapping("/{id}/like")
-    public ResponseEntity<?> like(@PathVariable("id") Long id) {
-        Post post = postRepo.findById(id).orElse(null);
+    public ResponseEntity<?> like(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
 
+        Post post = postRepo.findById(id).orElse(null);
         if (post == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
         }
-
-        UUID authorId = UUID.fromString("aec09d67-43bc-4e66-a311-05561f678102");
-        User user = userRepo.findById(authorId).orElseThrow(() -> new RuntimeException("User not found"));
 
         Set<User> likesCopy = new HashSet<>(post.getLikes());
 
@@ -115,30 +124,52 @@ public class PostController {
         post.setLikes(likesCopy);
         postRepo.save(post);
 
-        return ResponseEntity.ok(post);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/comment")
-    public ResponseEntity<?> comment(@PathVariable("id") Long id, @RequestParam("comment") String comment) {
+    public ResponseEntity<?> comment(@PathVariable("id") Long id, @RequestParam("comment") String comment, Authentication auth ) {
         Post post = postRepo.findById(id).orElse(null);
 
         if (post == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
         }
-        Comment com = new Comment(comment, post);
+
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        User user =  userRepo.findById(((User) auth.getPrincipal()).getId()).orElseThrow(() -> new RuntimeException("User not found"));
+
+        Comment com = new Comment(comment, post, user);
         commentRepo.save(com);
 
         return ResponseEntity.ok(com);
     }
-    /*
-    export type PostType = {
-        id:string,
-                title: string,
-                text: string,
-                community: Community,
-                user: User
-        images?: string[]
+
+    @GetMapping
+    public ResponseEntity<List<PostDto>> getAllPosts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
+
+        Sort sortObj = Sort.by(Sort.Direction.fromString(sort[1]), sort[0]);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Page<Post> posts = postRepo.findAll(pageable);
+
+        List<PostDto> dtos = posts.stream().map(post -> {
+            List<String> imagesUrl = post.getImagePosts().stream().map(image -> {
+                try {
+                    return uploadService.getFile(image.getUrl());
+                } catch (IOException e) {
+                    throw new RuntimeException("Image load failed: " + e.getMessage(), e);
+                }
+            }).toList();
+
+            List<Comment> comments = commentRepo.findByPostId(post.getId());
+
+            return new PostDto(post, imagesUrl, comments);
+        }).toList();
+
+        return ResponseEntity.ok(dtos);
     }
-     */
 
 }

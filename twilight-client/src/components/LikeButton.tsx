@@ -11,22 +11,34 @@ type props = {
 export default function LikeButton(props: props) {
     const [filled, setFilled] = useState(props.filled);
     const [count, setCount] = useState(props.count);
-    const setLike = async() => {
-        const result = await axios.put(`http://localhost:8080/api/p/${props.id}/like`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer tvoj_token_tu"
-                }
-            }
-        );
 
-        if(result.status === 200){
-            setFilled(!filled);
-            if(filled){
-                setCount(count - 1);
-            } else setCount(count + 1);
+    const setLike = async () => {
+        try {
+            const response = await axios.put(
+                `http://localhost:8080/api/p/${props.id}/like`, {},
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                }
+            );
+
+            if (response.status === 200) {
+                setFilled(!filled);
+                setCount(prev => filled ? prev - 1 : prev + 1);
+            }
+
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 401) {
+                    window.location.href = "/auth/login";
+                }
+            } else {
+                console.error("Unexpected error", error);
+            }
         }
-    }
+    };
 
     return(
         <div className="flex gap-1 text-sm">

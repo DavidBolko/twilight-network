@@ -7,7 +7,9 @@ import {useState} from "react";
 
 export const Route = createFileRoute('/communities/$id')({
     loader: async ({ params }) => {
-        const res = await axios.get(`http://localhost:8080/api/c/${params.id}`);
+        const res = await axios.get(`http://localhost:8080/api/c/${params.id}`, {
+            withCredentials: true
+        });
         return res.data;
     },
     component: CommunityComponent,
@@ -23,7 +25,7 @@ function CommunityComponent() {
                 <CreatePostModal isOpen={isOpen} setIsOpen={setIsOpen} communityId={community.id}/>
                 <h1>{community.name}</h1>
                 <button onClick={()=>setIsOpen(true)} className="btn primary">Post</button>
-                <img src={community.image} alt="haha"/>
+                <img src={community.imageUrl} alt="haha"/>
             </div>
         );
     }
