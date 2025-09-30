@@ -5,9 +5,7 @@ import dev.bolko.twilightapi.repositories.UserRepository;
 import dev.bolko.twilightapi.Jwt;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -49,7 +49,7 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestParam String email, @RequestParam String password, HttpServletResponse response) {
         User user = userRepo.findUserByEmail(email);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
         if (!passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
@@ -77,11 +77,13 @@ public class AuthController {
         }
 
         User user = (User) auth.getPrincipal();
-        return ResponseEntity.ok(Map.of(
-                "id", user.getId(),
-                "email", user.getEmail(),
-                "name", user.getName()
-        ));
+        Map<String, Object> body = new HashMap<>();
+        body.put("id", user.getId());
+        body.put("email", user.getEmail());
+        body.put("name", user.getName());
+        body.put("image", user.getImage());
+
+        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/logout")

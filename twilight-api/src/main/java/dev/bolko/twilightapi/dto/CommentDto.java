@@ -1,22 +1,17 @@
 package dev.bolko.twilightapi.dto;
 
 import dev.bolko.twilightapi.model.Comment;
-import dev.bolko.twilightapi.model.Community;
-import dev.bolko.twilightapi.model.Post;
-import dev.bolko.twilightapi.model.User;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 public class CommentDto {
     public Long id;
-    public String content;
-    public UserDto author;
+    public String text;
+    public AuthDto author;
+    public Long postId;
+
     public CommentDto(Comment comment) {
         this.id = comment.getId();
-        this.content =  comment.getContent();
-        this.author = new UserDto(comment.getAuthor());
-
+        this.text = comment.getContent();
+        this.author = new AuthDto(comment.getAuthor());
+        this.postId = comment.getPost() != null ? comment.getPost().getId() : null;
     }
 }

@@ -1,25 +1,18 @@
 package dev.bolko.twilightapi.controllers;
 
 import dev.bolko.twilightapi.dto.CommunityDto;
-import dev.bolko.twilightapi.model.User;
+import dev.bolko.twilightapi.model.*;
+import dev.bolko.twilightapi.repositories.CommentRepository;
 import dev.bolko.twilightapi.repositories.CommunityRepository;
-import dev.bolko.twilightapi.model.Community;
 import dev.bolko.twilightapi.repositories.UserRepository;
-import dev.bolko.twilightapi.services.UploadService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.attribute.UserPrincipal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/c")
@@ -28,11 +21,11 @@ public class CommunityController {
 
     private final CommunityRepository communityRepo;
     private final UserRepository userRepo;
-    private final UploadService uploadService;
+    private final CommentRepository commentRepo;
 
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("image") MultipartFile image, Authentication auth) {
-        if(communityRepo.findByName(name).isPresent()){
+    @PostMapping("/create")
+    public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam("image") String imageKey, Authentication auth) {
+        if (communityRepo.findByName(name).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name already exists");
         }
 
@@ -40,57 +33,87 @@ public class CommunityController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
         }
 
-        String imageFilename = "";
-        try {
-            imageFilename = uploadService.uploadImage(image);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        User creator = userRepo.findById(((User) auth.getPrincipal()).getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User creator = userRepo.findById(((User) auth.getPrincipal()).getId()).orElseThrow(() -> new RuntimeException("User not found"));
+        Set<User> members = new HashSet<>();
+        members.add(creator);
 
         Community c = new Community();
         c.setName(name);
-        c.setImage(imageFilename);
+        c.setDescription(description);
+        c.setImage(imageKey);
         c.setCreator(creator);
+        c.setMembers(members);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(communityRepo.save(c));
+        Community saved = communityRepo.save(c);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CommunityDto(saved));
     }
 
+
+    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<CommunityDto> getCommunity(@PathVariable("id") Long id) {
-        return communityRepo.findById(id).map(original -> {
-            String presignedUrl = null;
-            try {
-                presignedUrl = uploadService.getFile(original.getImage());
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to generate image URL", e);
-            }
-
-            CommunityDto response = new CommunityDto(original.getId(), original.getName(), original.getDescription(), presignedUrl);
-
-            return ResponseEntity.ok(response);
-        }).orElse(ResponseEntity.notFound().build());
+        return communityRepo.findById(id)
+                .map(com -> {
+                    List<Comment> allComments = commentRepo.findAll();
+                    return ResponseEntity.ok(new CommunityDto(com, allComments));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
+
+    @Transactional
+    @PutMapping("/join/{id}")
+    public ResponseEntity<?> joinCommunity(@PathVariable("id") Long id, Authentication auth) {
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        User principal = (User) auth.getPrincipal();
+        User user = userRepo.findById(principal.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return communityRepo.findById(id)
+                .map(community -> {
+                    user.getCommunities().add(community);
+                    userRepo.save(user);
+                    return ResponseEntity.ok("User joined community " + community.getName());
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Transactional
+    @PutMapping("/leave/{id}")
+    public ResponseEntity<?> leaveCommunity(@PathVariable("id") Long id, Authentication auth) {
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        User principal = (User) auth.getPrincipal();
+        User user = userRepo.findById(principal.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return communityRepo.findById(id)
+                .map(community -> {
+                    user.getCommunities().remove(community);
+                    userRepo.save(user);
+                    return ResponseEntity.ok("User joined community " + community.getName());
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
     @GetMapping
     public ResponseEntity<List<CommunityDto>> searchByName(@RequestParam String query) {
         List<Community> communities = communityRepo.findByNameContainingIgnoreCase(query);
 
-        if(communities.isEmpty()){
+        if (communities.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        List<CommunityDto> result = communities.stream().map(community -> {
-            String presignedUrl = null;
-            try {
-                presignedUrl = uploadService.getFile(community.getImage());
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to generate image URL", e);
-            }
-            return new CommunityDto(community.getId(), community.getName(), community.getDescription(), presignedUrl);
-        }).toList();
+        List<CommunityDto> result = communities.stream().map(CommunityDto::new).toList();
 
         return ResponseEntity.ok(result);
     }
+
 }

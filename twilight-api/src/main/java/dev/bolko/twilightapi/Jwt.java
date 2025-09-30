@@ -14,7 +14,7 @@ import java.util.Date;
 public class Jwt {
 
     private final String SECRET = "supertajnehesloktoremaspravnedlzku123456";
-    private final long EXPIRATION = 1000 * 60 * 60 * 24; // 24 hodín
+    private final long EXPIRATION = 1000 * 60 * 60 * 24;
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());

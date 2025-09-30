@@ -1,32 +1,28 @@
-import {createContext, type ReactNode, useContext} from "react";
-import type {User} from "./types.ts";
+import { createContext, type ReactNode, useContext } from "react";
+import type { User } from "./types.ts";
 import axios from "axios";
-import {useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-const UserContext = createContext<User | null>(null)
+const UserContext = createContext<User | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-    const { data, isLoading} = useQuery<User>({
-        queryKey: ['currentUser'],
-        queryFn: async () => {
-            const res = await axios.get<User>('http://localhost:8080/api/auth/me', {
-                withCredentials: true,
-            });
-            return res.data;
-        },
-        retry: false,
-        staleTime: 1000 * 60 * 5,
-    });
+  const { data, isLoading } = useQuery<User>({
+    queryKey: ["currentUser"],
+    queryFn: async () => {
+      const res = await axios.get<User>(`${import.meta.env.VITE_API_URL}/auth/me`, {
+        withCredentials: true,
+      });
+      return res.data;
+    },
+    retry: false,
+    staleTime: 1000 * 60 * 5,
+  });
 
-    if (isLoading) return <div>Loading user...</div>;
+  if (isLoading) return <div>Loading user...</div>;
 
-    return <UserContext.Provider value={data ?? null}>
-        {children}
-    </UserContext.Provider>;
+  return <UserContext.Provider value={data ?? null}>{children}</UserContext.Provider>;
 }
-
 
 export function useUser() {
-    return useContext(UserContext);
+  return useContext(UserContext);
 }
-

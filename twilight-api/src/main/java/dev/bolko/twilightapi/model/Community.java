@@ -36,6 +36,6 @@ public final class Community {
     @JsonBackReference
     private User creator;
 
-    @ManyToMany(mappedBy = "communities")
+    @ManyToMany(mappedBy = "communities", fetch = FetchType.EAGER)
     private Set<User> members = new HashSet<>();
 }

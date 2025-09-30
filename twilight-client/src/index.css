@@ -1,4 +1,106 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply transition-all;
+  }
+  .html,
+  body {
+    @apply bg-tw-light-bg;
+    @apply text-tw-light-text;
+    @apply dark:bg-tw-bg;
+    @apply dark:text-tw-text;
+    @apply min-h-screen;
+  }
+  input,
+  textarea,
+  .input {
+    @apply rounded-md;
+    @apply outline-none;
+    @apply focus:outline-none;
+    @apply border;
+    @apply bg-transparent;
+    @apply border-tw-border;
+    @apply focus:border-b-tw-primary;
+    @apply resize-none;
+    @apply p-2;
+  }
+  a {
+    @apply hover:text-tw-primary;
+  }
+  input.error {
+    @apply border-red-500;
+    @apply border;
+  }
+}
+
+@layer utilities {
+  .font-quicksand {
+    font-family: "Quicksand", sans-serif;
+  }
+}
+
+@layer components {
+  .resp-grid {
+    @apply flex;
+    @apply lg:grid;
+    @apply grid-cols-tw;
+    @apply justify-center;
+  }
+  .container {
+    @apply flex;
+    @apply gap-2;
+    @apply p-2;
+    @apply rounded-md;
+  }
+  .card {
+    @apply flex;
+    @apply gap-2;
+    @apply p-2;
+    @apply rounded-md;
+    @apply border;
+    @apply dark:bg-tw-surface;
+    @apply border-tw-border/10;
+    @apply shadow-[0_6px_15px_rgba(0,0,0,0.08)];
+  }
+
+  .btn {
+    @apply flex;
+    @apply border;
+    @apply border-tw-border;
+    @apply hover:border-tw-primary;
+    @apply rounded-md;
+    @apply p-0.5;
+    @apply px-2;
+    @apply w-fit;
+    @apply cursor-pointer;
+    @apply items-center;
+    @apply justify-center;
+    @apply text-center;
+  }
+
+  .primary {
+    @apply bg-tw-primary/50;
+    @apply hover:bg-tw-primary/90;
+    @apply hover:shadow-[0_0_15px_rgba(167,139,250,0.7)];
+  }
+
+  .accent {
+    @apply bg-tw-accent;
+    @apply hover:bg-tw-accent-dark;
+    @apply hover:shadow-[0_0_15px_rgba(99,102,241,0.7)];
+  }
+
+  .text-glow {
+    @apply text-[color:var(--color-tw-glow)];
+    text-shadow: 0 0 8px rgba(196, 181, 253, 0.8);
+  }
+}
+
+/*
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -104,7 +206,4 @@
         @apply text-[color:var(--color-tw-glow)];
         text-shadow: 0 0 8px var(--color-tw-glow);
     }
-}
-
-
-
+}*/
