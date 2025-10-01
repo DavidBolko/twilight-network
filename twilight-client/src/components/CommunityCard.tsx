@@ -1,74 +1,60 @@
-import { FC } from "react"
-import { CDN } from "../utils"
-import { CheckIcon, ShieldCheckIcon } from "lucide-react"
+import type { SyntheticEvent } from "react";
+import { getFromCdn } from "../globals";
+import axios from "axios";
+import type { Community } from "../types";
 
-const CommunityCard:FC<props> = (props) =>{
+type CommunityCardProps = {
+  community: Community;
+  currentUserId: string;
+  isOwnProfile: boolean;
+  refetch: () => void;
+};
 
-    let moderator = false;
-    let followed = false;
-    for(const mod of props.community.Moderators){
-        if(!moderator){
-            moderator = mod.id == props.userID
-        }
-        console.log(mod);
-    }
-    for(const user of props.community.Users){
-        if(!followed){
-            followed = user.id == props.userID
-        }
-    }
+export default function CommunityCard({ community, currentUserId, isOwnProfile, refetch }: CommunityCardProps) {
+  const isMember = community.members.some((m) => m.id === currentUserId);
 
-    const handleFollow = async () => {
-        const res = await fetch(`/api/c/${props.community.id}/follow`, {
-          method: "PUT",
-          body: "",
-        });
-        if (res.ok) {
-            props.refetch(0);
-        }
-      };
+  const handleLeave = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    await axios.put(`${import.meta.env.VITE_API_URL}/c/leave/${community.id}`, {}, { withCredentials: true });
+    refetch();
+  };
 
-    return(
-        <div className="card flex-row justify-between items-center">
-            <div className="flex gap-6 flex-row">
-                <img src={CDN(props.community.Img)} className="h-32 w-32 border object-cover border-twilight-dark-500 rounded-full"/>
-                <div className="flex flex-col gap-2 text-justify">
-                    <div className="flex items-center gap-2">
-                        <p className="text-lg">{props.community.name}</p>
-                        {moderator
-                        ? <div className="flex items-center"><ShieldCheckIcon className="text-twilight-white-300/60" width={20} height={20}/><p className="text-twilight-white-300/60 text-xs">Moderator</p></div>
-                        : ""
-                        }
-                    </div>
-                    <p className="text-xs">{props.community.desc}</p>
-                </div>
-            </div>
-            {followed ? (
-              <button className="button-colored-active flex items-center" onClick={handleFollow}>
-                <span><CheckIcon width={20} height={20} /></span>Followed
-              </button>
-            ) : (
-              <button className="button-colored" onClick={handleFollow}>Follow</button>
-            )}
+  const handleJoin = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    await axios.put(`${import.meta.env.VITE_API_URL}/c/join/${community.id}`, {}, { withCredentials: true });
+    refetch();
+  };
+
+  return (
+    <div className="card justify-between items-center p-6">
+      <div className="flex gap-2">
+        <img src={getFromCdn(community.imageUrl!) || "/default-community.png"} alt={community.name} className="w-16 h-16 rounded-full object-cover" />
+        <div className="flex flex-col">
+          <span className="font-semibold text-lg">{community.name}</span>
+          {community.description && <span className="text-sm text-white/60 line-clamp-2">{community.description}</span>}
+          <span className="text-xs text-white/40">{community.members.length} members</span>
         </div>
-    )
-}
+      </div>
 
-export default CommunityCard
+      {isOwnProfile && (
+        <button className="btn primary h-fit" onClick={handleLeave}>
+          Leave
+        </button>
+      )}
 
-type props = {
-    refetch: Function,
-    userID: string,
-    community:{
-        id: string;
-        name: string;
-        desc: string;
-        Img: string;
-        Moderators:[
-            {id:string}
-        ]
-        Users:[{
-            id: string,
-        }]
-    }
+      {!isOwnProfile && (
+        <>
+          {isMember ? (
+            <button className="btn border h-fit" onClick={handleLeave}>
+              Leave
+            </button>
+          ) : (
+            <button className="btn primary h-fit" onClick={handleJoin}>
+              Join
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
 }

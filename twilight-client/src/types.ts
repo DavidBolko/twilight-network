@@ -1,44 +1,42 @@
-export interface Post {
-  author:{
-    id: string
-    name: string
-    avatar:string
-  }
+export type User = {
+  id: string;
+  name: string;
+  image?: string;
+};
+
+export type Comment = {
+  id: number;
+  text: string;
+  author: User;
+};
+
+export type PostType = {
   id: string;
   title: string;
-  type: string;
-  content: string;
-  likedBy: [{ id: string }];
-  community?: {
-    id: string;
-    name: string;
-  };
-}
+  text: string;
+  communityId: number;
+  communityName: string;
+  communityImage: string;
+  author: User;
+  images?: string[];
+  likes: User[];
+  comments?: Comment[];
+};
 
-export interface Community{
-  id: string,
-  name: string,
-  desc: string,
-  Img: string,
-  createdAt: string,
-  updatedAt: string,
-  Users: User[],
-  Posts: ApiPost[],
-  followed: boolean
-}
-
-
-export interface ApiPost extends Post {
-  savedBy: [{ id: string }];
-  _count: {
-    comments: number;
-    likedBy: number;
-  };
-}
-
-export interface User {
-  avatar: string
-  name: string
+export type Community = {
   id: string;
+  name: string;
+  description?: string;
+  imageUrl: string;
+  posts: PostType[];
+  members: User[];
+};
+
+export type FullUser = {
+  id: string;
+  name: string;
+  image?: string;
+  posts: PostType[];
   description: string;
-}
+  communities: Community[];
+};
