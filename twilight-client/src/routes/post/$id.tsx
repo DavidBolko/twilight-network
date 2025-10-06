@@ -1,80 +1,93 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
-import Post from "../../components/Post.tsx";
-import { SendIcon } from "lucide-react";
-import axios from "axios";
-import type { PostType } from "../../types.ts";
-import { type SyntheticEvent, useState } from "react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useState, type SyntheticEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { SendIcon } from "lucide-react";
+
+import Post from "../../components/Post.tsx";
+import type { PostType } from "../../types.ts";
+import { getFromCdn } from "../../utils.ts";
 
 export const Route = createFileRoute("/post/$id")({
-  component: RouteComponent,
+  component: PostPage,
 });
 
-function RouteComponent() {
+async function fetchPost(id: string): Promise<PostType> {
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}/p/${id}`, {
+    withCredentials: true,
+  });
+  return res.data;
+}
+
+function PostPage() {
   const { id } = useParams({ from: Route.id });
-  const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
 
-  const { data } = useQuery<PostType>({
+  const { data, isLoading, error, refetch } = useQuery<PostType>({
     queryKey: ["post", id],
-    queryFn: () =>
-      axios
-        .get(`${import.meta.env.VITE_API_URL}/p/${id}`, {
-          withCredentials: true,
-        })
-        .then((res) => res.data),
+    queryFn: () => fetchPost(id),
   });
 
   const sendComment = async (e: SyntheticEvent) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("comment", comment);
+    if (!comment.trim()) return;
 
-    const result = await axios.post(`${import.meta.env.VITE_API_URL}/p/${id}/comment`, formData, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    try {
+      const formData = new FormData();
+      formData.append("comment", comment);
 
-    if (result.status === 200) {
-      await queryClient.invalidateQueries({ queryKey: ["post", id] });
+      await axios.post(`${import.meta.env.VITE_API_URL}/p/${id}/comment`, formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      refetch();
       setComment("");
+    } catch (err) {
+      console.error("Failed to send comment:", err);
     }
   };
 
-  if (data && data.comments !== undefined) {
-    return (
-      <div className="resp-grid  p-2">
-        <div className="card flex flex-col gap-1 col-start-2">
-          <Post text={data.text} author={data.author} id={data.id} title={data.title} communityImage={data.communityImage} communityName={data.communityName} communityId={data.communityId} images={data.images} likes={data.likes} />
-          <div className="container flex-col">
-            <p>Comments</p>
-            <form onSubmit={(e) => sendComment(e)} className="flex flex-col gap-2">
-              <textarea required onChange={(e) => setComment(e.target.value)} className="w-full resize-none h-[80px] outline-none border-b-2 border-stone-700/20" />
-              <button type="submit" className="btn primary flex items-center self-end">
-                Submit
-                <SendIcon className="w-4 h-4" />
-              </button>
-            </form>
-            <ul className="flex flex-col mt-2 gap-4">
-              {data.comments.map((comment) => (
-                <li key={comment.id}>
-                  <div className="container flex-col">
-                    <div className="flex items-center">
-                      <img src="/anonymous.png" className="rounded-full w-8 h-8" />
-                      <p>{comment.author.name}</p>
-                    </div>
-                    <p className="text-md text-justify ml-2">{comment.text}</p>
+  // Erorry a loading
+  if (isLoading) return <p className="p-4 text-center">Loading...</p>;
+  if (error || !data) return <p className="p-4 text-center text-red-500">Error loading post</p>;
+
+  return (
+    <div className="resp-grid p-2">
+      <div className="card flex flex-col gap-1 col-start-2">
+        <Post id={data.id} title={data.title} text={data.text} author={data.author} communityId={data.communityId} communityName={data.communityName} communityImage={data.communityImage} images={data.images} likes={data.likes} saved={data.saved} />
+
+        <div className="container flex-col mt-4">
+          <p className="font-semibold mb-2">Comments</p>
+
+          {/* FORM NA KOMENTY */}
+          <form onSubmit={sendComment} className="flex flex-col gap-2">
+            <textarea required value={comment} onChange={(e) => setComment(e.target.value)} className="w-full resize-none h-[80px] outline-none border-b-2 border-stone-700/20 p-2 bg-transparent" placeholder="Write a comment..." />
+            <button type="submit" className="btn primary flex items-center self-end gap-1">
+              Submit
+              <SendIcon className="w-4 h-4" />
+            </button>
+          </form>
+
+          {/* KOMENTY */}
+          <ul className="flex flex-col mt-4 gap-4">
+            {(data.comments ?? []).map((c) => (
+              <li key={c.id}>
+                <div className="container flex-col">
+                  <div className="flex items-center gap-2">
+                    <img src={c.author.image ? getFromCdn(c.author.image) : "/anonymous.png"} className="rounded-full w-8 h-8" alt="user avatar" />
+                    <Link to={"/user/" + c.author.id} className="font-medium">
+                      {c.author.name}
+                    </Link>
                   </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+                  <p className="text-md text-justify ml-2">{c.text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-    );
-  }
-  return <div className="resp-grid p-2"></div>;
+    </div>
+  );
 }

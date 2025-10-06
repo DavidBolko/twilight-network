@@ -31,21 +31,13 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
 
     try {
       const formData = new FormData();
-      formData.append("file", image);
+      formData.append("name", title);
+      formData.append("description", desc);
+      formData.append("image", image);
 
-      const uploadResp = await axios.post(`${import.meta.env.VITE_CDN}/upload?bucket=twilight&folder=communities`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      const imageKey = uploadResp.data.key;
-
-      const form = new URLSearchParams();
-      form.append("name", title);
-      form.append("description", desc);
-      form.append("image", imageKey);
-
-      const result = await axios.post(`${import.meta.env.VITE_API_URL}/c/create`, form, {
+      const result = await axios.post(`${import.meta.env.VITE_API_URL}/c/create`, formData, {
         withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (result.status === 201) {

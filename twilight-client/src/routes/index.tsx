@@ -38,7 +38,7 @@ function Index() {
   });
 
   if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Error loading posts</p>;
+  if (error || !data) return <p>Error loading posts</p>;
 
   return (
     <div className="resp-grid flex-col p-2 gap-2">
@@ -54,11 +54,20 @@ function Index() {
         </button>
       </div>
       <ul className="card flex flex-col gap-1 col-start-2">
-        {data?.map((post) => (
-          <li key={post.id}>
-            <Post text={post.title} id={post.id} title={post.title} likes={post.likes} author={post.author} communityImage={post.communityImage} communityName={post.communityName} communityId={post.communityId} images={post.images} comments={post.comments} />
-          </li>
-        ))}
+        <ul className="flex flex-col gap-1 row-start-1 col-start-2 bg-tw-surface rounded-md min-h-screen">
+          {data?.length > 0 ? (
+            data?.map((post) => (
+              <li key={post.id}>
+                <Post {...post} />
+              </li>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full">
+              <img className="w-80 h-80" src="/sad.png" />
+              <p className="p-4 text-center text-gray-300">No posts were found.</p>
+            </div>
+          )}
+        </ul>
       </ul>
     </div>
   );

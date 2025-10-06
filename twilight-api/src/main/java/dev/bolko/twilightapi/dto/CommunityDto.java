@@ -2,6 +2,7 @@ package dev.bolko.twilightapi.dto;
 
 import dev.bolko.twilightapi.model.Community;
 import dev.bolko.twilightapi.model.Comment;
+import dev.bolko.twilightapi.model.User;
 
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +17,7 @@ public class CommunityDto {
     public Set<AuthDto> members = new HashSet<>();
     public List<PostDto> posts;
 
-    public CommunityDto(Community community, List<Comment> allComments) {
+    public CommunityDto(Community community, List<Comment> allComments, User user) {
         this.id = community.getId();
         this.name = community.getName();
         this.description = community.getDescription();
@@ -33,12 +34,12 @@ public class CommunityDto {
                     List<Comment> commentsForPost = allComments.stream()
                             .filter(c -> c.getPost().getId().equals(post.getId()))
                             .toList();
-                    return new PostDto(post, commentsForPost);
+                    return new PostDto(post, commentsForPost, user);
                 })
                 .toList();
     }
 
     public CommunityDto(Community community) {
-        this(community, List.of());
+        this(community, List.of(), null);
     }
 }

@@ -14,8 +14,9 @@ public class PostDto {
     public List<String> images;
     public List<AuthDto> likes;
     public List<CommentDto> comments;
+    public boolean saved;
 
-    public PostDto(Post post, List<Comment> comments) {
+    public PostDto(Post post, List<Comment> comments, User user) {
         this.id = post.getId();
         this.title = post.getTitle();
         this.text = post.getText();
@@ -23,6 +24,7 @@ public class PostDto {
         this.communityId = post.getCommunity() != null ? post.getCommunity().getId() : null;
         this.communityName = post.getCommunity() != null ? post.getCommunity().getName() : null;
         this.communityImage = post.getCommunity() != null ? post.getCommunity().getImage() : null;
+        this.saved = user != null && user.getSavedPosts().stream().anyMatch(p -> p.getId().equals(post.getId()));
 
         this.images = post.getImagePosts() == null
                 ? List.of()
@@ -44,6 +46,6 @@ public class PostDto {
     }
 
     public PostDto(Post post) {
-        this(post, List.of());
+        this(post, List.of(), null);
     }
 }

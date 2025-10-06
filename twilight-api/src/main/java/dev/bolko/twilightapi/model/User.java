@@ -19,6 +19,7 @@ import java.util.*;
 public final class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(nullable = false)
@@ -46,11 +47,18 @@ public final class User {
 
     @ManyToMany(mappedBy = "likes")
     @JsonIgnore
-    private Set<Post> likedPosts = new HashSet<>();
+    private List<Post> likedPosts = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_saved_posts",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "post_id")
+    )
+    private Set<Post> savedPosts = new HashSet<>();
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private Set<Comment> comments = new HashSet<>();
+    private List<Comment> comments = new ArrayList<>();
 
     public User(String name, String email, String password) {
         this.name = name;

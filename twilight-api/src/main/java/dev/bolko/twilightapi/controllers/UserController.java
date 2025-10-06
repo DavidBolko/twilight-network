@@ -1,5 +1,6 @@
 package dev.bolko.twilightapi.controllers;
 
+import dev.bolko.twilightapi.services.ImageService;
 import dev.bolko.twilightapi.dto.UserDto;
 import dev.bolko.twilightapi.model.Comment;
 import dev.bolko.twilightapi.model.User;
@@ -9,9 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final ImageService imageService;
     private final UserRepository userRepo;
     private final CommentRepository commentRepo;
 
@@ -30,11 +33,19 @@ public class UserController {
     }
 
     @PutMapping("/{id}/avatar")
-    public ResponseEntity<String> changeUserAvatar(@PathVariable UUID id, @RequestParam String key) {
-        User user = userRepo.findById(id).orElseThrow();
-        user.setImage(key);
-        userRepo.save(user);
-        return ResponseEntity.status(HttpStatus.OK).body(key);
+    public ResponseEntity<String> changeUserAvatar(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        try {
+            User user = userRepo.findById(id).orElseThrow();
+
+            String filename = imageService.saveImage(file);
+            user.setImage(filename);
+
+            userRepo.save(user);
+
+            return ResponseEntity.ok(filename);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload avatar: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}/description")

@@ -1,5 +1,6 @@
 package dev.bolko.twilightapi.controllers;
 
+import dev.bolko.twilightapi.model.Post;
 import dev.bolko.twilightapi.model.User;
 import dev.bolko.twilightapi.repositories.UserRepository;
 import dev.bolko.twilightapi.Jwt;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -62,21 +65,15 @@ public class AuthController {
         cookie.setSecure(false);
         response.addCookie(cookie);
 
-        return ResponseEntity.ok().body(Map.of(
-                "user", Map.of("email", user.getEmail(), "name", user.getName())
-        ));
-
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getProfile() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+    public ResponseEntity<?> getProfile(@AuthenticationPrincipal User user) {
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not logged in");
         }
 
-        User user = (User) auth.getPrincipal();
         Map<String, Object> body = new HashMap<>();
         body.put("id", user.getId());
         body.put("email", user.getEmail());

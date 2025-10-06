@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { type SyntheticEvent, useMemo, useState } from "react";
 import axios from "axios";
+import { type SyntheticEvent, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/auth/register")({
   component: Register,

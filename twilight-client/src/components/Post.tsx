@@ -1,17 +1,34 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate, useParams } from "@tanstack/react-router";
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 import LikeButton from "./LikeButton";
 import { useUser } from "../userContext";
 import type { PostType } from "../types";
-import { getFromCdn } from "../globals";
+import { getFromCdn } from "../utils";
+import { DeleteButton } from "./DeleteButton";
+import axios from "axios";
+import { SaveButton } from "./SaveButton";
 
 export default function Post(props: PostType) {
   const navigate = useNavigate();
+  const location = useLocation();
   const currentUser = useUser();
   const { id: communityIdParam } = useParams({ strict: false }) as { id?: string };
   const isInCommunityPage = communityIdParam === props.communityId.toString();
 
+  const match = location.pathname.startsWith("/post/");
+
+  const deletePost = async () => {
+    const form = new URLSearchParams();
+    form.append("id", props.id);
+    const result = await axios.delete(`${import.meta.env.VITE_API_URL}/p/${props.id}`, {
+      withCredentials: true,
+    });
+
+    if (result.status === 200 && match) {
+      navigate({ to: "/", search: { posts: "hot" } });
+    }
+  };
   return (
     <div className="container flex flex-col gap-2  w-full h-fit border-b border-white/15">
       <div className="flex gap-2 items-center">
@@ -51,8 +68,21 @@ export default function Post(props: PostType) {
         )}
       </div>
 
-      <div>
+      <div className="flex justify-between ">
         <LikeButton id={props.id} count={props.likes?.length ?? 0} filled={props.likes?.some((user) => user.id === currentUser?.id) ?? false} />
+        {match ? (
+          <div>
+            <DeleteButton
+              isAuthor={props.author.id == currentUser?.id}
+              onConfirm={() => {
+                deletePost();
+              }}
+            />
+            <SaveButton postId={props.id} saved={props.saved} />
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );

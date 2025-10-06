@@ -21,6 +21,7 @@ export type PostType = {
   images?: string[];
   likes: User[];
   comments?: Comment[];
+  saved: boolean;
 };
 
 export type Community = {
@@ -39,4 +40,5 @@ export type FullUser = {
   posts: PostType[];
   description: string;
   communities: Community[];
+  saved: PostType[];
 };

@@ -6,3 +6,6 @@
 *.jpg
 *.png
 /twilight-client/public/pic.jpg
+
+/uploads/**
+/twilight-api/uploads/**

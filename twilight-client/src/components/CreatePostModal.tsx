@@ -38,29 +38,19 @@ export default function CreatePostModal(props: props) {
     e.preventDefault();
 
     try {
-      let imageKeys: string[] = [];
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("type", mediaTypes[mediaType]);
+      formData.append("text", textContent);
 
-      if (images.length > 0) {
-        const uploads = await Promise.all(
-          images.map(async (file) => {
-            const formData = new FormData();
-            formData.append("file", file);
+      images.forEach((file) => {
+        formData.append("images", file);
+      });
 
-            const res = await axios.post(`${import.meta.env.VITE_CDN}/upload?bucket=twilight`, formData, { headers: { "Content-Type": "multipart/form-data" } });
-
-            return res.data.key as string;
-          }),
-        );
-        imageKeys = uploads;
-      }
-
-      const form = new URLSearchParams();
-      form.append("title", title);
-      form.append("type", mediaTypes[mediaType]);
-      form.append("text", textContent);
-      imageKeys.forEach((key) => form.append("images", key));
-
-      const result = await axios.post(`${import.meta.env.VITE_API_URL}/p/${props.communityId}`, form, { withCredentials: true });
+      const result = await axios.post(`${import.meta.env.VITE_API_URL}/p/${props.communityId}`, formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (result.status === 200) {
         await navigate({ to: `/post/${result.data.id}` });

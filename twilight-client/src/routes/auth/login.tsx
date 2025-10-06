@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type SyntheticEvent, useMemo, useState } from "react";
-import axios from "axios";
 import { queryClient } from "../../main.tsx";
+import axios from "axios";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,

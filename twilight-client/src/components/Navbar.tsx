@@ -4,7 +4,7 @@ import { useUser } from "../userContext.tsx";
 import { LogOutIcon, PlusIcon, SettingsIcon, SearchIcon, XIcon } from "lucide-react";
 import CreateCommunityModal from "./CreateCommunityModal.tsx";
 import { useState } from "react";
-import { getFromCdn } from "../globals.ts";
+import { getFromCdn } from "../utils.ts";
 
 export default function Navbar() {
   const location = useLocation();
@@ -82,7 +82,7 @@ function UserProfile({ user }: { user: { name: string; id: string; image?: strin
   return (
     <div className="relative group">
       <div className="flex flex-col gap-2 rounded-lg w-48 overflow-hidden hover:bg-tw-primary/10 rounded-b-none items-end bg-transparent hover:shadow-lg transition-all duration-200">
-        <Link to="/user/$id" params={{ id: user.id }} activeOptions={{ includeSearch: false }} className="hover:font-bold">
+        <Link to="/user/$id" params={{ id: user.id }} reloadDocument={true} activeOptions={{ includeSearch: false }} className="hover:font-bold">
           <div className="flex justify-items-end items-center gap-2 w-full p-1.5">
             <p>{user.name}</p>
             <img src={user.image ? getFromCdn(user.image) : "/anonymous.png"} className="w-10 h-10 rounded-full object-cover border border-tw-border/80" alt="profile_picture" />{" "}

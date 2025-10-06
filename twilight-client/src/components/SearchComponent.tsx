@@ -3,7 +3,7 @@ import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Community } from "../types.ts";
-import { getFromCdn } from "../globals.ts";
+import { getFromCdn } from "../utils.ts";
 
 export default function SearchComponent() {
   const [open, setOpen] = useState(true);
