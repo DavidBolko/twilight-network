@@ -4,6 +4,7 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import type { PostType } from "../types.ts";
 import Post from "../components/Post.tsx";
+import Loader from "../components/Loader.tsx";
 
 const fetchPosts = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_URL}/p`, {
@@ -37,12 +38,15 @@ function Index() {
     queryFn: fetchPosts,
   });
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error || !data) return <p>Error loading posts</p>;
+  if (isLoading) return <Loader />;
+  if (error || !data) {
+    navigate({ to: "/error", search: { message: "Nothing were found" } });
+    return;
+  }
 
   return (
-    <div className="resp-grid flex-col p-2 gap-2">
-      <div className="flex justify-evenly lg:flex-col lg:justify-start place-items-end row-start-1 text-right gap-2">
+    <div className="resp-grid p-2 gap-2">
+      <div className="flex justify-evenly lg:flex-col lg:justify-start place-items-end text-right gap-2">
         <button onClick={() => navigate({ to: "/", search: { posts: "new" } })} className={`btn border-none text-left p-2 w-24 ${active === "new" ? "bg-tw-primary/70" : "hover:bg-tw-primary/50"}`}>
           New
         </button>
@@ -53,8 +57,8 @@ function Index() {
           Best
         </button>
       </div>
-      <ul className="card flex flex-col gap-1 col-start-2">
-        <ul className="flex flex-col gap-1 row-start-1 col-start-2 bg-tw-surface rounded-md min-h-screen">
+      <section className="card">
+        <ul>
           {data?.length > 0 ? (
             data?.map((post) => (
               <li key={post.id}>
@@ -68,7 +72,7 @@ function Index() {
             </div>
           )}
         </ul>
-      </ul>
+      </section>
     </div>
   );
 }

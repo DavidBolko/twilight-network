@@ -3,9 +3,5 @@
 /twilight-api/src/main/resources/application.properties
 /twilight-api/src/main/resources/application.properties
 
-*.jpg
-*.png
-/twilight-client/public/pic.jpg
-
 /uploads/**
 /twilight-api/uploads/**

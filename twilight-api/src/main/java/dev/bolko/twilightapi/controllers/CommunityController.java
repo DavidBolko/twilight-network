@@ -33,18 +33,22 @@ public class CommunityController {
     private final CommentRepository commentRepo;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam("image") MultipartFile image, @AuthenticationPrincipal User principal) {
+    public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal User principal) {
         User user = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
 
         if (communityRepo.findByName(name).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name already exists");
         }
 
-        String filename;
-        try {
-            filename = imageService.saveImage(image);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save community image");
+        String filename = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                filename = imageService.saveImage(image);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save community image");
+            }
+        } else {
+            filename = "";
         }
 
         Set<User> members = new HashSet<>();

@@ -30,9 +30,9 @@ export default function Post(props: PostType) {
     }
   };
   return (
-    <div className="container flex flex-col gap-2  w-full h-fit border-b border-white/15">
+    <div className="container flex flex-col gap-2  w-full h-fit border-b hover:border-b-tw-accent border-white/15">
       <div className="flex gap-2 items-center">
-        {!isInCommunityPage && <img src={getFromCdn(props.communityImage)} className="w-12 h-12 rounded-full object-cover" alt="community_photo" />}
+        {!isInCommunityPage && <img src={props.communityImage ? getFromCdn(props.communityImage) : "/com" + (Math.floor(Math.random() * 3) + 1) + ".png"} className="w-12 h-12 rounded-full object-cover" alt="community_photo" />}
         <div>
           <p className="font-semibold">{props.title}</p>
           <p className="font-light text-sm text-gray-400">
@@ -51,7 +51,7 @@ export default function Post(props: PostType) {
 
       <div>
         {props.images && props.images.length > 0 ? (
-          <div className="ignore-link">
+          <div>
             <ImageGallery
               items={props.images.map((id) => ({
                 original: getFromCdn(id),
@@ -64,7 +64,7 @@ export default function Post(props: PostType) {
             />
           </div>
         ) : (
-          <textarea value={props.text} readOnly={true} className="border-none w-full text-md dark:text-white/70" />
+          <textarea onClick={() => navigate({ to: "/post/$id", params: { id: props.id } })} value={props.text} readOnly={true} className="border-none cursor-pointer w-full text-md dark:text-white/70" />
         )}
       </div>
 

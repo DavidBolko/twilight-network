@@ -24,16 +24,14 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
       return;
     }
 
-    if (!image) {
-      setError("Please select an image");
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append("name", title);
       formData.append("description", desc);
-      formData.append("image", image);
+
+      if (image) {
+        formData.append("image", image);
+      }
 
       const result = await axios.post(`${import.meta.env.VITE_API_URL}/c/create`, formData, {
         withCredentials: true,
@@ -58,7 +56,7 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
 
   return (
     <Modal onClose={() => setIsOpen(false)}>
-      <form onSubmit={createCom} className="flex flex-col gap-4 w-full max-w-lg p-6">
+      <form onSubmit={createCom} className="container">
         <h2 className="text-xl font-semibold">Create a Community</h2>
 
         <input type="text" placeholder="Community title" className={`input ${error.includes("Name") ? "outline outline-red-600" : ""}`} onChange={(e) => setTitle(e.target.value)} required />

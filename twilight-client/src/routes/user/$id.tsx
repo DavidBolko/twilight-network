@@ -42,12 +42,12 @@ function RouteComponent() {
 
   return (
     <div className="resp-grid">
-      <div className="col-start-2 mt-4">
+      <div className="lg:col-start-2 mt-4">
         {/* Profil s automatickým uploadom */}
         <UserProfile data={data} id={id} refetch={refetch} />
 
         {/* Prepínač kategórií */}
-        <section className="container items-center mt-4">
+        <section className="container mt-4">
           <div className="flex w-full">
             {categories.map((cat, i) => (
               <button
@@ -64,10 +64,10 @@ function RouteComponent() {
         </section>
 
         {/* Obsah */}
-        <section className="container items-center mt-4">
+        <section className="container mt-4">
           {category === "Posts" &&
             (data.posts.length > 0 ? (
-              <ul className="flex flex-col gap-4">
+              <ul className="container flex-col">
                 {data.posts.map((post) => (
                   <li key={post.id}>
                     <Post {...post} />
@@ -80,7 +80,7 @@ function RouteComponent() {
 
           {category === "Communities" &&
             (data.communities.length > 0 ? (
-              <ul className="flex flex-col gap-4 w-full">
+              <ul className="container flex-col">
                 {data.communities.map((com) => (
                   <li key={com.id}>
                     <CommunityCard community={com} currentUserId={user?.id!} isOwnProfile={user?.id === data.id} refetch={refetch} />
@@ -93,7 +93,7 @@ function RouteComponent() {
 
           {category === "Saved" &&
             (data.saved.length > 0 ? (
-              <ul className="flex flex-col gap-4 w-full">
+              <ul className="container flex-col">
                 {data.saved.map((post) => (
                   <li key={post.id}>
                     <Post {...post} />

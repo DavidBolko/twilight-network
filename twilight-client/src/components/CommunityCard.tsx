@@ -2,6 +2,7 @@ import { useState, type SyntheticEvent } from "react";
 import { getFromCdn } from "../utils";
 import axios from "axios";
 import type { Community } from "../types";
+import { Link } from "@tanstack/react-router";
 
 type CommunityCardProps = {
   community: Community;
@@ -26,22 +27,22 @@ export default function CommunityCard({ community, currentUserId, refetch }: Com
   };
 
   return (
-    <div className="card justify-between items-center p-6">
-      <div className="flex gap-2">
-        <img src={community.imageUrl ? getFromCdn(community.imageUrl) : "/default-community.png"} alt={community.name} className="w-16 h-16 rounded-full object-cover" />
-        <div className="flex flex-col">
+    <div className="card flex-row center p-6">
+      <Link className="container flex-row " to="/communities/$id" search={{ posts: "hot" }} params={{ id: community.id }}>
+        <img src={community.imageUrl ? getFromCdn(community.imageUrl) : "/com" + (Math.floor(Math.random() * 3) + 1) + ".png"} alt={community.name} className="w-20 h-20 rounded-full object-cover" />
+        <div>
           <span className="font-semibold text-lg">{community.name}</span>
-          {community.description && <span className="text-sm text-white/60 line-clamp-2">{community.description}</span>}
+          {community.description && <span className="text-sm text-white/60 line-clamp-2">{community.description.substring(0, 60)}</span>}
           <span className="text-xs text-white/40">{community.members.length} members</span>
         </div>
-      </div>
+      </Link>
 
       {isMember ? (
-        <button className="btn border hover:primary h-fit" onClick={handleJoin}>
+        <button className="btn danger" onClick={handleJoin}>
           Leave
         </button>
       ) : (
-        <button className="btn primary h-fit" onClick={handleJoin}>
+        <button className="btn primary" onClick={handleJoin}>
           Join
         </button>
       )}

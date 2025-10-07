@@ -57,7 +57,7 @@ export const UserProfile = ({ data, id, refetch }: UserProfileProps) => {
   };
 
   return (
-    <section className="container items-center">
+    <section className="container flex-row items-center">
       <div className="relative h-full">
         <label className="cursor-pointer block w-48 h-48">
           {isUploading ? (

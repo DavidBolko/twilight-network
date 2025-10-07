@@ -2,6 +2,7 @@ import { createContext, type ReactNode, useContext } from "react";
 import type { User } from "./types.ts";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import Loader from "./components/Loader.tsx";
 
 const UserContext = createContext<User | null>(null);
 
@@ -18,7 +19,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     staleTime: 1000 * 60 * 5,
   });
 
-  if (isLoading) return <div>Loading user...</div>;
+  if (isLoading) return <Loader />;
 
   return <UserContext.Provider value={data ?? null}>{children}</UserContext.Provider>;
 }

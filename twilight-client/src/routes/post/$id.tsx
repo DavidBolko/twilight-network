@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useState, type SyntheticEvent } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { SendIcon } from "lucide-react";
 
@@ -54,7 +54,7 @@ function PostPage() {
   if (error || !data) return <p className="p-4 text-center text-red-500">Error loading post</p>;
 
   return (
-    <div className="resp-grid p-2">
+    <div className="container lg:resp-grid">
       <div className="card flex flex-col gap-1 col-start-2">
         <Post id={data.id} title={data.title} text={data.text} author={data.author} communityId={data.communityId} communityName={data.communityName} communityImage={data.communityImage} images={data.images} likes={data.likes} saved={data.saved} />
 
@@ -71,7 +71,7 @@ function PostPage() {
           </form>
 
           {/* KOMENTY */}
-          <ul className="flex flex-col mt-4 gap-4">
+          <ul className="container">
             {(data.comments ?? []).map((c) => (
               <li key={c.id}>
                 <div className="container flex-col">

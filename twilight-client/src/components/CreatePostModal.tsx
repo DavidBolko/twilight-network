@@ -75,7 +75,7 @@ export default function CreatePostModal(props: props) {
           <form className="flex gap-2 flex-col" onSubmit={(e) => post(e)}>
             {commonHeader}
 
-            <div {...getRootProps()} className="card border-2 text-sm border-tw-border border-dashed min-h-[300px] items-center justify-center cursor-pointer hover:border-tw-primary">
+            <div {...getRootProps()} className="card border-2 text-sm border-tw-border border-dashed min-h-[300px] center cursor-pointer hover:border-tw-primary">
               <input {...getInputProps()} required={true} />
               {isDragActive ? <p>Drop the images here…</p> : <p>Drag and drop images here, or click to select files</p>}
               {images.length > 0 && (
@@ -107,37 +107,3 @@ export default function CreatePostModal(props: props) {
     }
   }
 }
-
-/*
-export default function CreatePostModal() {
-    const [modal, setModal] = React.useState(false)
-    const [mediaType, setMediaType] = React.useState(0);
-
-    if(mediaType === 0){
-        return(
-            <div className="flex flex-col gap-2 fixed top-50 z-50 p-2 bg-red-500">
-                <div>
-                    <input type="text" aria-label="Title" placeholder="Title"/>
-                    <button onClick={() => setMediaType((mediaType + 1) % mediaTypeIcons.length)} className="text-gray-600 hover:text-black" aria-label="Zmeniť typ média">
-                        {mediaTypeIcons[mediaType]}
-                    </button>
-                </div>
-                <input type="text" aria-label="Content"/>
-            </div>
-        )
-    } else {
-        return(
-            <div className="flex flex-col gap-2 fixed top-50 z-50 p-2 bg-red-500">
-                <div>
-                    <input type="text" aria-label="Title" placeholder="Title"/>
-                    <button onClick={() => setMediaType((mediaType + 1) % mediaTypeIcons.length)} className="text-gray-600 hover:text-black" aria-label="Zmeniť typ média">
-                        {mediaTypeIcons[mediaType]}
-                    </button>
-                </div>
-                <input type="text" aria-label="Content" placeholder="T"/>
-            </div>
-        )
-    }
-
-}
- */

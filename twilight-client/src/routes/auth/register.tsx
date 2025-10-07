@@ -57,11 +57,13 @@ function Register() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full px-4">
-      <h1 className="text-4xl mb-6 text-center">Create a new account</h1>
+    <div className="container center lg:mt-16">
+      <h1 className="text-4xl text-center  lg:m-0">Create a new account</h1>
 
-      <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-16 items-center justify-center w-full max-w-5xl card rounded-xl p-6">
-        <form onSubmit={submit} className="flex flex-col gap-2 w-full max-w-md lg:max-w-sm">
+      {/* hlavný box */}
+      <div className="card lg:flex-row center max-w-5xl p-6">
+        {/* formulár */}
+        <form onSubmit={submit} className="container lg:max-w-sm">
           <label htmlFor="name">Name</label>
           <input name="name" required onChange={(e) => setName(e.target.value)} className={errorMessage?.toLowerCase().includes("name") ? "error" : ""} />
 
@@ -79,6 +81,7 @@ function Register() {
           <button type="submit" className="btn primary w-full mt-2">
             Continue
           </button>
+
           <div className="flex gap-2 items-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">Already have an account?</p>
             <a href="/auth/login" className="text-tw-primary hover:text-tw-accent">
@@ -87,7 +90,8 @@ function Register() {
           </div>
         </form>
 
-        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center">
+        {/* obrázok a citát */}
+        <div className="container lg:w-1/2 center">
           <img src="/twilight.png" alt="register illustration" className="max-w-[300px] w-full h-auto object-contain hover:animate-pulse" />
           <h2 className="text-lg text-glow">{quote}</h2>
         </div>

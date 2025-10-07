@@ -41,32 +41,45 @@
   .font-quicksand {
     font-family: "Quicksand", sans-serif;
   }
+  .center {
+    @apply justify-center;
+    @apply items-center;
+  }
 }
 
 @layer components {
   .resp-grid {
-    @apply flex;
-    @apply lg:grid;
-    @apply grid-cols-tw;
+    @apply grid;
+    @apply grid-cols-1;
+    @apply gap-2;
+    @apply lg:grid-cols-tw;
     @apply justify-center;
+    @apply place-self-center;
+    @apply transition-all;
+    @apply w-full;
   }
+
   .container {
     @apply flex;
+    @apply flex-col;
     @apply gap-2;
+    @apply justify-self-center;
     @apply p-2;
     @apply rounded-md;
+    @apply w-full;
   }
   .card {
-    @apply flex;
-    @apply gap-2;
-    @apply p-2;
-    @apply rounded-md;
+    @apply container;
     @apply border;
     @apply dark:bg-tw-surface;
     @apply border-tw-border/10;
     @apply shadow-[0_6px_15px_rgba(0,0,0,0.08)];
   }
-
+  .navbar {
+    @apply flex p-2 justify-between items-center gap-2 w-full
+         bg-tw-light-surface dark:bg-tw-surface/70
+         backdrop-blur-md sticky top-0 z-50;
+  }
   .btn {
     @apply flex;
     @apply border;

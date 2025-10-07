@@ -10,6 +10,7 @@ import { useUser } from "../../userContext.tsx";
 
 import Post from "../../components/Post.tsx";
 import CreatePostModal from "../../components/CreatePostModal.tsx";
+import { PostFilterTabs } from "../../components/PostFilterTabs.tsx";
 
 const communityQueryKey = (id: string) => ["community", id];
 
@@ -69,40 +70,14 @@ function CommunityComponent() {
   const isMember = user && data.members.some((m: any) => m.id === user.id);
 
   return (
-    <div className="lg:resp-grid p-2 gap-2 min-h-full bg-tw-surface lg:bg-transparent">
+    <div className="resp-grid p-2">
       {/* Modalne okno na vytvorenie postu */}
       {user && <CreatePostModal isOpen={isOpen} setIsOpen={setIsOpen} communityId={data.id} />}
 
-      {/* Filtrovanie postov */}
-      <div className="flex justify-evenly lg:flex-col lg:justify-start place-items-end row-start-1 text-right gap-2">
-        {tabs.map((tab) => (
-          <button key={tab} onClick={() => changeTab(tab)} className={`btn border-none text-left p-2 w-24 ${activeTab === tab ? "bg-tw-primary/70" : "hover:bg-tw-primary/50"}`}>
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Informacie o komunite */}
-      <div className="flex flex-col col-start-3 gap-2 card h-fit p-4">
-        <div className="flex gap-2 items-center">
-          <img src={getFromCdn(data.imageUrl)} className="w-24 h-24 rounded-full object-cover" alt={data.name} />
-          <div>
-            <h1 className="text-xl font-semibold">{data.name}</h1>
-            <div className="flex gap-1 mt-1">
-              <button onClick={handlePost} className="btn">
-                Post
-              </button>
-              <button onClick={handleJoin} className={`btn ${isMember ? "danger" : "primary"}`}>
-                {isMember ? "Leave community" : "Join community"}
-              </button>
-            </div>
-          </div>
-        </div>
-        <p className="text-justify text-sm">{data.description}</p>
-      </div>
+      <PostFilterTabs to="/communities/$id" params={{ id }} />
 
       {/* Posty */}
-      <ul className="flex flex-col gap-1 row-start-1 col-start-2 bg-tw-surface rounded-md min-h-screen">
+      <ul className="card w-full">
         {data.posts.length ? (
           data.posts.map((post) => (
             <li key={post.id}>
@@ -110,12 +85,31 @@ function CommunityComponent() {
             </li>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center h-full p-4">
+          <div className="container center">
             <img className="w-72 h-72 opacity-80" src="/sad.png" alt="No posts" />
-            <p className="p-4 text-center text-gray-400">This community has no posts yet.</p>
+            <p className=" text-gray-400">This community has no posts yet.</p>
           </div>
         )}
       </ul>
+
+      {/* Informacie o komunite */}
+      <div className="card row-start-2 lg:col-start-3 lg:row-start-1 h-fit">
+        <div className="flex p-2">
+          <img src={data.imageUrl ? getFromCdn(data.imageUrl) : "/com" + (Math.floor(Math.random() * 3) + 1) + ".png"} className="w-24 h-24 rounded-full object-cover" alt={data.name} />
+          <div>
+            <h1 className="text-xl font-semibold">{data.name}</h1>
+            <div className="container flex-row gap-1 mt-1">
+              <button onClick={handlePost} className="btn">
+                Post
+              </button>
+              <button onClick={handleJoin} className={`btn ${isMember ? "danger" : "primary"}`}>
+                {isMember ? "Leave" : "Join"}
+              </button>
+            </div>
+          </div>
+        </div>
+        <p className="text-justify text-sm">{data.description}</p>
+      </div>
     </div>
   );
 }

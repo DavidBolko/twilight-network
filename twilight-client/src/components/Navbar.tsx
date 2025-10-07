@@ -24,7 +24,7 @@ export default function Navbar() {
 
   if (isAuthPage) {
     return (
-      <nav className="flex fixed z-50 top-0 items-center justify-center gap-2 w-full">
+      <nav className="navbar">
         <Link search={{ posts: "hot" }} to="/" className="[&.active]:font-bold text-4xl md:text-6xl font-bold">
           TWILIGHT
         </Link>
@@ -33,7 +33,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="p-2 flex sticky z-50 top-0 justify-between items-center gap-2 bg-tw-light-surface dark:bg-tw-surface shadow-md">
+    <nav className="navbar">
       <Link search={{ posts: "hot" }} to="/" className={`${indexActive ? "font-bold" : ""} text-2xl md:text-4xl`}>
         TWILIGHT
       </Link>

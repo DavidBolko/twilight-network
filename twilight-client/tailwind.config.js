@@ -23,7 +23,7 @@ export default {
         },
       },
       gridTemplateColumns: {
-        tw: "1fr 2fr 1fr",
+        tw: "minmax(0,16rem) minmax(0,40rem) minmax(0,16rem)",
       },
     },
   },
