@@ -8,6 +8,7 @@ import dev.bolko.twilightapi.utils.PostType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.*;
 @Entity
 @Data
 @NoArgsConstructor
+@SQLRestriction("deleted_at IS NULL")
 public final class Post {
 
     @Id
@@ -23,11 +25,11 @@ public final class Post {
     private String title;
     private String text;
 
+    @Enumerated(EnumType.STRING)
     private PostType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_id", nullable = false)
-    @JsonBackReference
     @JsonIgnore
     private Community community;
 
@@ -36,10 +38,17 @@ public final class Post {
     private List<ImagePost> imagePosts = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("user-comments")
     private List<Comment> comments = new ArrayList<>();
 
+
     private LocalDateTime createdAt;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -47,11 +56,7 @@ public final class Post {
     private User author;
 
     @ManyToMany
-    @JoinTable(
-            name = "post_likes",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "post_likes", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> likes = new HashSet<>();
 
     @PrePersist

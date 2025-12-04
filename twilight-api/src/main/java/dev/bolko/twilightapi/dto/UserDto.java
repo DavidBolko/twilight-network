@@ -18,6 +18,7 @@ public class UserDto {
     public List<PostDto> posts;
     public Set<CommunityDto> communities;
     public Set<PostDto> saved;
+    public boolean isElder;
 
     public UserDto(User user, List<Comment> allComments) {
         this.id = user.getId();
@@ -25,6 +26,7 @@ public class UserDto {
         this.image = user.getImage();
         this.description = user.getDescription();
         this.saved = user.getSavedPosts().stream().map(PostDto::new).collect(Collectors.toSet());
+        this.isElder = user.getIsElderOwl();
 
         this.posts = user.getPosts() == null
                 ? List.of()

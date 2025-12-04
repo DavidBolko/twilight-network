@@ -39,8 +39,6 @@ export const Route = createFileRoute("/communities/$id")({
 function CommunityComponent() {
   const navigate = useNavigate();
   const { id } = useParams({ strict: false }) as { id: string };
-  const search = useSearch({ from: "/communities/$id" });
-  const activeTab = search.posts;
 
   const user = useUser();
   const [isOpen, setIsOpen] = useState(false);
@@ -49,10 +47,9 @@ function CommunityComponent() {
     queryKey: communityQueryKey(id),
     queryFn: () => fetchCommunity(id),
     staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
   });
-
-  const tabs: ("new" | "hot" | "best")[] = ["new", "hot", "best"];
-  const changeTab = (tab: "new" | "hot" | "best") => navigate({ to: "/communities/$id", params: { id }, search: { posts: tab } });
 
   const handleJoin = async () => {
     if (!user) return navigate({ to: "/auth/login" });
@@ -77,38 +74,44 @@ function CommunityComponent() {
       <PostFilterTabs to="/communities/$id" params={{ id }} />
 
       {/* Posty */}
-      <ul className="card w-full">
-        {data.posts.length ? (
-          data.posts.map((post) => (
-            <li key={post.id}>
+      {data.posts.length ? (
+        <ul className="card min-h-screen">
+          {data.posts.map((post) => (
+            <li className="w-full" key={post.id}>
               <Post {...post} />
             </li>
-          ))
-        ) : (
-          <div className="container center">
-            <img className="w-72 h-72 opacity-80" src="/sad.png" alt="No posts" />
-            <p className=" text-gray-400">This community has no posts yet.</p>
-          </div>
-        )}
-      </ul>
+          ))}
+        </ul>
+      ) : (
+        <div className="card min-h-screen center">
+          <img className="w-72 h-72 opacity-80" src="/sad.png" alt="No posts" />
+          <p className="text-gray-400">This community has no posts yet.</p>
+        </div>
+      )}
 
       {/* Informacie o komunite */}
-      <div className="card row-start-2 lg:col-start-3 lg:row-start-1 h-fit">
-        <div className="flex p-2">
-          <img src={data.imageUrl ? getFromCdn(data.imageUrl) : "/com" + (Math.floor(Math.random() * 3) + 1) + ".png"} className="w-24 h-24 rounded-full object-cover" alt={data.name} />
-          <div>
-            <h1 className="text-xl font-semibold">{data.name}</h1>
-            <div className="container flex-row gap-1 mt-1">
-              <button onClick={handlePost} className="btn">
-                Post
-              </button>
-              <button onClick={handleJoin} className={`btn ${isMember ? "danger" : "primary"}`}>
-                {isMember ? "Leave" : "Join"}
-              </button>
+      <div className="card row-start-2 lg:col-start-3 lg:row-start-1 h-fit min-w-0">
+        <div className="flex p-2 gap-3">
+          <img src={data.imageUrl ? getFromCdn(data.imageUrl) : data.imageUrl} className="w-24 h-24 rounded-full object-cover" alt={data.name} />
+
+          <div className="flex flex-col justify-between flex-1 min-w-0">
+            <div>
+              <h1 className="text-xl font-semibold">{data.name}</h1>
+              <div className="flex gap-2 mt-1">
+                <button onClick={handlePost} className="btn">
+                  Post
+                </button>
+                <button onClick={handleJoin} className={`btn ${isMember ? "danger" : "primary"}`}>
+                  {isMember ? "Leave" : "Join"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <p className="text-justify text-sm">{data.description}</p>
+
+        <div className="px-3 pb-3 min-w-0">
+          <p className="text-sm text-justify break-words whitespace-pre-wrap">{data.description}</p>
+        </div>
       </div>
     </div>
   );

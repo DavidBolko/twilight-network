@@ -7,6 +7,8 @@ import dev.bolko.twilightapi.model.User;
 import dev.bolko.twilightapi.repositories.CommentRepository;
 import dev.bolko.twilightapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -55,5 +58,7 @@ public class UserController {
         userRepo.save(user);
         return ResponseEntity.status(HttpStatus.OK).body(description);
     }
+
+
 
 }

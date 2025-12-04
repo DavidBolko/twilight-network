@@ -17,6 +17,7 @@ export default function Post(props: PostType) {
   const isInCommunityPage = communityIdParam === props.communityId.toString();
 
   const match = location.pathname.startsWith("/post/");
+  const canDelete = !!currentUser && (props.author.id === currentUser.id || currentUser.isElder);
 
   const deletePost = async () => {
     const form = new URLSearchParams();
@@ -32,7 +33,7 @@ export default function Post(props: PostType) {
   return (
     <div className="container flex flex-col gap-2  w-full h-fit border-b hover:border-b-tw-accent border-white/15">
       <div className="flex gap-2 items-center">
-        {!isInCommunityPage && <img src={props.communityImage ? getFromCdn(props.communityImage) : "/com" + (Math.floor(Math.random() * 3) + 1) + ".png"} className="w-12 h-12 rounded-full object-cover" alt="community_photo" />}
+        {!isInCommunityPage && <img src={props.communityImage ? getFromCdn(props.communityImage) : props.communityImage} className="w-12 h-12 rounded-full object-cover" alt="community_photo" />}
         <div>
           <p className="font-semibold">{props.title}</p>
           <p className="font-light text-sm text-gray-400">
@@ -73,16 +74,14 @@ export default function Post(props: PostType) {
         {match ? (
           <div>
             <DeleteButton
-              isAuthor={props.author.id == currentUser?.id}
+              isAuthor={canDelete}
               onConfirm={() => {
                 deletePost();
               }}
             />
             <SaveButton postId={props.id} saved={props.saved} />
           </div>
-        ) : (
-          <></>
-        )}
+        ) : null}
       </div>
     </div>
   );

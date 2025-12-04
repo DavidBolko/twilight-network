@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { HeartIcon } from "lucide-react";
 import axios from "axios";
+import { queryClient } from "../main";
 
 type props = {
   filled: boolean;
@@ -26,6 +27,7 @@ export default function LikeButton(props: props) {
       );
 
       if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: ["community"] });
         setFilled(!filled);
         setCount((prev) => (filled ? prev - 1 : prev + 1));
       }

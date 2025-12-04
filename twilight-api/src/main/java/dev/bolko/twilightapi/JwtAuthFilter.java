@@ -7,12 +7,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -40,12 +42,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         System.out.println("token: " + token);
         if (token != null) {
             try {
+
+
+
                 String email = jwt.extractUsername(token);
+
                 User user = userRepository.findUserByEmail(email);
                 if (jwt.isTokenValid(token, user)) {
-                    var auth = new UsernamePasswordAuthenticationToken(user, null, List.of());
+                    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+                    if (Boolean.TRUE.equals(user.getIsElderOwl())) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                    }
+
+                    authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+                    var auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
+
             } catch (Exception ignored) {
             }
         }

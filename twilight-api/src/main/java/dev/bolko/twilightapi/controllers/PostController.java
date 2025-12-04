@@ -24,7 +24,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
+
+import static dev.bolko.twilightapi.utils.Validator.validatePostInput;
 
 @RestController
 @RequestMapping("/api/p")
@@ -45,8 +48,9 @@ public class PostController {
 
         Community community = communityRepo.findById(communityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Community not found"));
 
-        if ((images == null || images.isEmpty()) && text.isBlank()) {
-            return ResponseEntity.badRequest().body("Post cannot be empty.");
+        String validationError = validatePostInput(title, type, text, images);
+        if (validationError != null) {
+            return ResponseEntity.badRequest().body(validationError);
         }
 
         PostType postType = (images != null && !images.isEmpty()) ? PostType.IMAGE : PostType.TEXT;
@@ -86,28 +90,33 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<?> deletePost(@PathVariable("id") Long id, @AuthenticationPrincipal User principal) {
-        User user = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
+    public ResponseEntity<?> deletePost(@PathVariable("id") Long id,
+                                        @AuthenticationPrincipal User principal) {
+        User user = userService.getCurrentUser(principal)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
 
         Post post = postRepo.findById(id).orElse(null);
         if (post == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
         }
 
-        if (!post.getAuthor().getId().equals(user.getId())) {
+        if (!post.getAuthor().getId().equals(user.getId()) && !Boolean.TRUE.equals(user.getIsElderOwl())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot delete this post");
         }
 
         List<String> images = new ArrayList<>(
                 post.getImagePosts().stream().map(ImagePost::getUrl).toList()
         );
-
         imageService.deleteImages(images);
         imagePostRepo.deleteAll(post.getImagePosts());
-        postRepo.delete(post);
+
+        post.setDeletedAt(LocalDateTime.now());
+        postRepo.save(post);
 
         return ResponseEntity.ok().build();
     }
+
+
 
 
     @PutMapping("/{id}/like")

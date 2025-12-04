@@ -25,12 +25,13 @@ public final class Community {
     @EqualsAndHashCode.Include
     private long id;
 
+    @Column(nullable = false, unique = true)
     private String name;
+
     private String description;
     private String image;
 
     @OneToMany(mappedBy = "community")
-    @JsonManagedReference
     @JsonIgnore
     private List<Post> posts = new ArrayList<>();
 
@@ -39,9 +40,12 @@ public final class Community {
     @JsonBackReference
     private User creator;
 
-    @ManyToMany(mappedBy = "communities", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "communities")
     private Set<User> members = new HashSet<>();
-
+    public void addMember(User user) {
+        this.members.add(user);
+        user.getCommunities().add(this);
+    }
     public Community( String name, String description, String image, User creator, Set<User> members) {
         this.name = name;
         this.description = description;

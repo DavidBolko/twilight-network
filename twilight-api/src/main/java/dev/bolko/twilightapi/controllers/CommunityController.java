@@ -21,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.*;
 
+import static dev.bolko.twilightapi.utils.Validator.validateCommunityInput;
+
 @RestController
 @RequestMapping("/api/c")
 @RequiredArgsConstructor
@@ -36,6 +38,11 @@ public class CommunityController {
     public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal User principal) {
         User user = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
 
+        String validationError = validateCommunityInput(name, description, image);
+        if (validationError != null) {
+            return ResponseEntity.badRequest().body(validationError);
+        }
+
         if (communityRepo.findByName(name).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name already exists");
         }
@@ -48,14 +55,16 @@ public class CommunityController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save community image");
             }
         } else {
-            filename = "";
+            Random r = new Random();
+            filename = "community" + r.nextInt(1,4) + ".png";
         }
 
-        Set<User> members = new HashSet<>();
-        members.add(user);
-
-        Community c = new Community(name, description, filename, user, members);
+        Community c = new Community(name, description, filename, user, new HashSet<>());
+        c.addMember(user);
         Community saved = communityRepo.save(c);
+
+        user.getCommunities().add(saved);
+        userRepo.save(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new CommunityDto(saved));
     }

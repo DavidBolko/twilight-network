@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import axios from "axios";
 import { type SyntheticEvent, useMemo, useState } from "react";
+import api from "../../axios";
+import axios from "axios";
 
 export const Route = createFileRoute("/auth/register")({
   component: Register,
@@ -22,11 +23,6 @@ function Register() {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (password !== password2) {
-      setErrorMessage("Passwords do not match");
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append("name", name);
@@ -34,21 +30,27 @@ function Register() {
       formData.append("password", password);
       formData.append("password2", password2);
 
-      const result = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const result = await api.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData, { headers: { "Content-Type": "multipart/form-data" } });
 
       if (result.status === 200) {
         await navigate({ to: "/auth/login" });
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        const serverMsg = String(err.response?.data ?? "");
+        const message = String(err.response?.data ?? "").toLowerCase();
 
-        if (serverMsg.includes("exists")) {
+        if (message.includes("exists")) {
           setErrorMessage("An account with this email already exists.");
-        } else if (serverMsg.includes("password")) {
+        } else if (message.includes("match")) {
           setErrorMessage("Passwords do not match.");
+        } else if (message.includes("email")) {
+          setErrorMessage("Invalid email address.");
+        } else if (message.includes("name")) {
+          setErrorMessage("Invalid name.");
+        } else if (message.includes("password")) {
+          setErrorMessage("Invalid password format.");
         } else {
-          setErrorMessage(serverMsg || "Registration failed. Please try again.");
+          setErrorMessage("Registration failed. Please try again.");
         }
       } else {
         setErrorMessage("Unexpected error occurred.");

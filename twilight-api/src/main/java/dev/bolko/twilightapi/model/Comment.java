@@ -17,12 +17,12 @@ public final class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("post-comments")
     private Post post;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "author_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("user-comments")
     private User author;
 
     public Comment(String content, Post post, User author) {

@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static dev.bolko.twilightapi.utils.Validator.validateLoginInput;
+import static dev.bolko.twilightapi.utils.Validator.validateRegistrationInput;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -33,12 +36,14 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestParam String name, @RequestParam String password, @RequestParam String password2, @RequestParam String email) {
         User user = userRepo.findUserByEmail(email);
-        System.out.println(user);
+
+        String validationError = validateRegistrationInput(name, email, password, password2);
+        if (validationError != null) {
+            return ResponseEntity.badRequest().body(validationError);
+        }
+
         if (user != null) {
             return ResponseEntity.badRequest().body("User already exists");
-        }
-        if(!password.equals(password2)) {
-            return ResponseEntity.badRequest().body("Passwords do not match");
         }
 
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
@@ -50,6 +55,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestParam String email, @RequestParam String password, HttpServletResponse response) {
+
+        String validationError = validateLoginInput(email, password);
+        if (validationError != null) {
+            return ResponseEntity.badRequest().body(validationError);
+        }
+
         User user = userRepo.findUserByEmail(email);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -79,6 +90,7 @@ public class AuthController {
         body.put("email", user.getEmail());
         body.put("name", user.getName());
         body.put("image", user.getImage());
+        body.put("isElder", user.getIsElderOwl());
 
         return ResponseEntity.ok(body);
     }

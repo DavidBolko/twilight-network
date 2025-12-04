@@ -46,6 +46,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/c/create").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/c/join/**", "/api/users/**", "/api/p/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/users/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/admin/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/admin/users").permitAll()
                         .requestMatchers("/api/auth/logout").authenticated()
                         .anyRequest().authenticated()
                 )

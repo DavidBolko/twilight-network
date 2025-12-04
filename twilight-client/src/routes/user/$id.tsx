@@ -44,7 +44,7 @@ function RouteComponent() {
     <div className="resp-grid">
       <div className="lg:col-start-2 mt-4">
         {/* Profil s automatickým uploadom */}
-        <UserProfile data={data} id={id} refetch={refetch} />
+        <UserProfile data={data} id={id} refetch={refetch} currentUser={user ?? null} />
 
         {/* Prepínač kategórií */}
         <section className="container mt-4">

@@ -29,7 +29,7 @@ export default function CommunityCard({ community, currentUserId, refetch }: Com
   return (
     <div className="card flex-row center p-6">
       <Link className="container flex-row " to="/communities/$id" search={{ posts: "hot" }} params={{ id: community.id }}>
-        <img src={community.imageUrl ? getFromCdn(community.imageUrl) : "/com" + (Math.floor(Math.random() * 3) + 1) + ".png"} alt={community.name} className="w-20 h-20 rounded-full object-cover" />
+        <img src={community.imageUrl ? getFromCdn(community.imageUrl) : community.imageUrl} alt={community.name} className="w-20 h-20 rounded-full object-cover" />
         <div>
           <span className="font-semibold text-lg">{community.name}</span>
           {community.description && <span className="text-sm text-white/60 line-clamp-2">{community.description.substring(0, 60)}</span>}

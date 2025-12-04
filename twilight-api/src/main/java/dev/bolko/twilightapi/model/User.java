@@ -32,6 +32,8 @@ public final class User {
     private String image;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
+    private Boolean isElderOwl;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -47,22 +49,27 @@ public final class User {
 
     @ManyToMany(mappedBy = "likes")
     @JsonIgnore
-    private List<Post> likedPosts = new ArrayList<>();
+    private Set<Post> likedPosts = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-            name = "user_saved_posts",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "post_id")
-    )
+    @JoinTable(name = "user_saved_posts", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "post_id"))
     private Set<Post> savedPosts = new HashSet<>();
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    @JsonManagedReference("user-comments")
     private List<Comment> comments = new ArrayList<>();
 
     public User(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.isElderOwl = false;
+    }
+
+    public User(String name, String email, String password, boolean isElderOwl) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.isElderOwl = isElderOwl;
     }
 }

@@ -1,7 +1,9 @@
 export type User = {
   id: string;
   name: string;
+  email: string;
   image?: string;
+  isElder: boolean;
 };
 
 export type Comment = {
@@ -41,4 +43,5 @@ export type FullUser = {
   description: string;
   communities: Community[];
   saved: PostType[];
+  isElder: boolean;
 };

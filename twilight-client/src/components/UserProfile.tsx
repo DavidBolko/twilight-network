@@ -1,21 +1,27 @@
 import { useEffect, useState } from "react";
-import type { FullUser } from "../types";
+import type { FullUser, User } from "../types";
 import { getFromCdn } from "../utils";
 import axios from "axios";
-import { Loader2Icon, LoaderIcon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 
 interface UserProfileProps {
   data: FullUser;
-  id: string;
+  id: string; // ID profilu, ktorý si pozerám
   refetch: () => void;
+  currentUser: User | null; // prihlásený user, môže byť aj null
 }
 
-export const UserProfile = ({ data, id, refetch }: UserProfileProps) => {
+export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps) => {
   const [description, setDescription] = useState(data.description || "");
   const [debouncedDescription, setDebouncedDescription] = useState(description);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Debounce zmeny popisu (odošleme až ked sa prestane pisať)
+  // môže byť undefined, ak user nie je prihlásený
+  const isSelf = currentUser?.id === id;
+  const isAdmin = !!currentUser?.isElder; // alebo iný field, ktorý máš v FullUser
+  const showAdminActions = isAdmin && !isSelf && !data.isElder;
+
+  // Debounce zmeny popisu (odošleme až keď sa prestane písať)
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedDescription(description), 500);
     return () => clearTimeout(handler);
@@ -26,13 +32,14 @@ export const UserProfile = ({ data, id, refetch }: UserProfileProps) => {
     if (debouncedDescription !== data.description) {
       const formData = new FormData();
       formData.append("description", debouncedDescription);
+
       axios.put(`${import.meta.env.VITE_API_URL}/users/${id}/description`, formData, {
         withCredentials: true,
       });
     }
-  }, [debouncedDescription]);
+  }, [debouncedDescription, data.description, id]);
 
-  //nastavenie noveho avataru
+  // nastavenie noveho avataru
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
 
@@ -56,6 +63,24 @@ export const UserProfile = ({ data, id, refetch }: UserProfileProps) => {
     }
   };
 
+  const handleBan = async () => {
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/users/${id}/ban`, {}, { withCredentials: true });
+      await refetch();
+    } catch (err) {
+      console.error("Error banning user:", err);
+    }
+  };
+
+  const handlePromote = async () => {
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/admin/users/${id}/promote`, {}, { withCredentials: true });
+      await refetch();
+    } catch (err) {
+      console.error("Error promoting user:", err);
+    }
+  };
+
   return (
     <section className="container flex-row items-center">
       <div className="relative h-full">
@@ -73,7 +98,19 @@ export const UserProfile = ({ data, id, refetch }: UserProfileProps) => {
 
       <div className="flex flex-col gap-2 text-justify mt-4 w-full">
         <p className="font-semibold text-lg">{data.name}</p>
+
         <textarea className="text-md text-white/60 w-full border-0 focus:border bg-transparent outline-none resize-none" onChange={(e) => setDescription(e.target.value)} value={description} placeholder="Write something about yourself..." />
+
+        {showAdminActions && (
+          <div className="flex gap-2 mt-4">
+            <button className="btn danger" onClick={handleBan}>
+              Ban
+            </button>
+            <button className="btn primary" onClick={handlePromote}>
+              Promote
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

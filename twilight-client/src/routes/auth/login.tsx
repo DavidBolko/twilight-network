@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type SyntheticEvent, useMemo, useState } from "react";
 import { queryClient } from "../../main.tsx";
-import axios from "../../axios.ts";
+import api from "../../axios.ts";
+import axios from "axios";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/auth/login")({
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const quotes = ["Your next chapter begins at twilight.", "Where moments glow.", "Not a feed. A feeling.", "Quiet social for loud minds."];
   const quote = useMemo(() => {
@@ -25,7 +26,7 @@ function Login() {
     formData.append("password", password);
 
     try {
-      const result = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData, {
+      const result = await api.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData, {
         withCredentials: true,
         headers: {
           "Content-Type": "multipart/form-data",
@@ -36,9 +37,19 @@ function Login() {
         window.location.href = "/";
       }
       console.log("Success:", result.data);
-    } catch (err: any) {
-      if (err.response) {
-        setError(true);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const message = String(err.response?.data ?? "").toLowerCase();
+
+        if (message.includes("not found")) {
+          setErrorMessage("User not found.");
+        } else if (message.includes("unauthorized") || message.includes("invalid")) {
+          setErrorMessage("Invalid email or password.");
+        } else {
+          setErrorMessage("Login failed. Please try again.");
+        }
+      } else {
+        setErrorMessage("Unexpected error occurred.");
       }
     }
   };
@@ -52,12 +63,12 @@ function Login() {
         {/* formulár */}
         <form onSubmit={submit} className="container lg:max-w-sm">
           <label htmlFor="email">Email</label>
-          <input name="email" required type="email" onChange={(e) => setEmail(e.target.value)} className={`${error ? "error" : ""}`} />
+          <input name="email" onChange={(e) => setEmail(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
 
           <label htmlFor="password">Password</label>
-          <input name="password" required type="password" onChange={(e) => setPassword(e.target.value)} className={`${error ? "error" : ""}`} />
+          <input name="password" type="password" onChange={(e) => setPassword(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
 
-          {error && <p className="text-red-500/80 text-sm">Invalid email or password</p>}
+          {errorMessage && <p className="text-red-500/80 text-sm">{errorMessage}</p>}
 
           <button type="submit" className="btn primary w-full mt-2">
             Login
