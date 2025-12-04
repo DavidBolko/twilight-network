@@ -4,6 +4,7 @@ import { Loader2Icon } from "lucide-react";
 import Modal from "./Modal.tsx";
 import { api } from "../axios.ts";
 import axios from "axios";
+import { validateCommunityClient } from "../validator.ts";
 
 type Props = {
   isOpen: boolean;
@@ -21,10 +22,17 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  useEffect(() => {
     if (!isOpen) {
       setTitle("");
       setDesc("");
       setImage(undefined);
+      if (preview) URL.revokeObjectURL(preview);
       setPreview(null);
       setError("");
       setIsUploading(false);
@@ -32,9 +40,20 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
   }, [isOpen]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError("");
+
     if (!e.target.files?.length) return;
     const file = e.target.files[0];
+
+    const imgErr = validateCommunityClient(title, desc, file);
+    if (imgErr && imgErr.toLowerCase().includes("image")) {
+      setError(imgErr);
+      e.target.value = "";
+      return;
+    }
+
     setImage(file);
+    if (preview) URL.revokeObjectURL(preview);
     setPreview(URL.createObjectURL(file));
   };
 
@@ -42,10 +61,17 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
     e.preventDefault();
     setError("");
 
+    const clientErr = validateCommunityClient(title, desc, image);
+    if (clientErr) {
+      setError(clientErr);
+      return;
+    }
+
     try {
       setIsUploading(true);
+
       const formData = new FormData();
-      formData.append("name", title);
+      formData.append("name", title.trim());
       formData.append("description", desc);
       if (image) formData.append("image", image);
 
@@ -65,17 +91,12 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
         const message = String(err.response?.data ?? "").toLowerCase();
 
-        if (message.includes("exists")) {
+        if (status === 409 || message.includes("exists")) {
           setError("A community with this name already exists.");
-        } else if (message.includes("name")) {
-          setError("Too short or missing community name.");
-        } else if (message.includes("description")) {
-          setError("Too short or missing description.");
-        } else if (message.includes("image")) {
-          setError("Invalid image or upload failed.");
-        } else if (message.includes("unauthorized") || message.includes("not authenticated")) {
+        } else if (status === 401 || status === 403 || message.includes("unauthorized") || message.includes("not authenticated")) {
           setError("You must be logged in to create a community.");
         } else {
           setError("Failed to create community. Please try again.");
@@ -90,13 +111,18 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
 
   if (!isOpen) return null;
 
+  const errLower = error.toLowerCase();
+  const nameOutline = errLower.includes("name") || errLower.includes("title") || errLower.includes("community name");
+  const descOutline = errLower.includes("description");
+  const imgOutline = errLower.includes("image");
+
   return (
     <Modal onClose={() => setIsOpen(false)}>
-      <form onSubmit={createCom} className="container flex flex-col gap-4">
+      <form onSubmit={createCom} noValidate className="container flex flex-col gap-4">
         <h2 className="text-xl font-semibold">Create a Community</h2>
 
         <span className="container items-center flex-row">
-          <label className="cursor-pointer w-16 h-16 flex items-center justify-center border border-white/15 rounded-full bg-black/10 overflow-hidden self-center">
+          <label className={`cursor-pointer w-16 h-16 flex items-center justify-center border rounded-full bg-black/10 overflow-hidden self-center ${imgOutline ? "outline outline-red-600" : "border-white/15"}`}>
             {isUploading ? (
               <div className="flex items-center justify-center w-full h-full bg-black/20">
                 <Loader2Icon className="w-12 h-12 text-tw-primary text-white/60 animate-spin" />
@@ -109,10 +135,10 @@ export default function CreateCommunityModal({ isOpen, setIsOpen }: Props) {
             <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           </label>
 
-          <input type="text" placeholder="Community title" value={title} onChange={(e) => setTitle(e.target.value)} className={`h-fit input ${error.toLowerCase().includes("name") ? "outline outline-red-600" : ""}`} required />
+          <input type="text" placeholder="Community title" value={title} onChange={(e) => setTitle(e.target.value)} className={`h-fit input ${nameOutline ? "outline outline-red-600" : ""}`} required />
         </span>
 
-        <textarea placeholder="Describe your community..." value={desc} onChange={(e) => setDesc(e.target.value)} className={`input resize-none ${error.toLowerCase().includes("description") ? "outline outline-red-600" : ""}`} />
+        <textarea placeholder="Describe your community..." value={desc} onChange={(e) => setDesc(e.target.value)} className={`input resize-none ${descOutline ? "outline outline-red-600" : ""}`} />
 
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 

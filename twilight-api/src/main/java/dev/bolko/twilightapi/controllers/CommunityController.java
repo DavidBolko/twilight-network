@@ -6,13 +6,13 @@ import dev.bolko.twilightapi.repositories.CommentRepository;
 import dev.bolko.twilightapi.repositories.CommunityRepository;
 import dev.bolko.twilightapi.repositories.UserRepository;
 import dev.bolko.twilightapi.services.ImageService;
+import dev.bolko.twilightapi.services.InputValidatorService;
 import dev.bolko.twilightapi.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,13 +21,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.*;
 
-import static dev.bolko.twilightapi.utils.Validator.validateCommunityInput;
 
 @RestController
 @RequestMapping("/api/c")
 @RequiredArgsConstructor
 public class CommunityController {
-
+    private final InputValidatorService validator;
     private final ImageService imageService;
     private final UserService userService;
     private final CommunityRepository communityRepo;
@@ -38,7 +37,7 @@ public class CommunityController {
     public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal User principal) {
         User user = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
 
-        String validationError = validateCommunityInput(name, description, image);
+        String validationError = validator.validateCommunityInput(name, description, image);
         if (validationError != null) {
             return ResponseEntity.badRequest().body(validationError);
         }

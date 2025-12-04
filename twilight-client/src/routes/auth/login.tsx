@@ -3,6 +3,7 @@ import { type SyntheticEvent, useMemo, useState } from "react";
 import { queryClient } from "../../main.tsx";
 import api from "../../axios.ts";
 import axios from "axios";
+import { validateLoginInput } from "../../validator.ts";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,
@@ -14,15 +15,20 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const quotes = ["Your next chapter begins at twilight.", "Where moments glow.", "Not a feed. A feeling.", "Quiet social for loud minds."];
-  const quote = useMemo(() => {
-    return quotes[Math.floor(Math.random() * quotes.length)];
-  }, []);
+  const quote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
 
   const submit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+
+    const clientErr = validateLoginInput(email, password);
+    if (clientErr) {
+      setErrorMessage(clientErr);
+      return;
+    }
 
     const formData = new FormData();
-    formData.append("email", email);
+    formData.append("email", email.trim());
     formData.append("password", password);
 
     try {
@@ -32,18 +38,22 @@ function Login() {
           "Content-Type": "multipart/form-data",
         },
       });
+
       if (result.status === 200) {
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
         window.location.href = "/";
       }
-      console.log("Success:", result.data);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
         const message = String(err.response?.data ?? "").toLowerCase();
 
-        if (message.includes("not found")) {
+        const invalid = status === 401 || message.includes("unauthorized") || message.includes("invalid");
+        const notFound = status === 404 || message.includes("not found");
+
+        if (notFound) {
           setErrorMessage("User not found.");
-        } else if (message.includes("unauthorized") || message.includes("invalid")) {
+        } else if (invalid) {
           setErrorMessage("Invalid email or password.");
         } else {
           setErrorMessage("Login failed. Please try again.");
@@ -59,12 +69,12 @@ function Login() {
       <h1 className="text-4xl text-center  lg:m-0">Welcome back</h1>
 
       <div className="card lg:flex-row center max-w-5xl p-6">
-        <form onSubmit={submit} className="container lg:max-w-sm">
+        <form onSubmit={submit} noValidate className="container lg:max-w-sm">
           <label htmlFor="email">Email</label>
-          <input name="email" onChange={(e) => setEmail(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
+          <input name="email" type="email" required onChange={(e) => setEmail(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
 
           <label htmlFor="password">Password</label>
-          <input name="password" type="password" onChange={(e) => setPassword(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
+          <input name="password" type="password" required onChange={(e) => setPassword(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
 
           {errorMessage && <p className="text-red-500/80 text-sm">{errorMessage}</p>}
 

@@ -4,14 +4,12 @@ import dev.bolko.twilightapi.model.Post;
 import dev.bolko.twilightapi.model.User;
 import dev.bolko.twilightapi.repositories.UserRepository;
 import dev.bolko.twilightapi.Jwt;
+import dev.bolko.twilightapi.services.InputValidatorService;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -19,16 +17,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import static dev.bolko.twilightapi.utils.Validator.validateLoginInput;
-import static dev.bolko.twilightapi.utils.Validator.validateRegistrationInput;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
+    private final InputValidatorService validator;
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final Jwt jwt;
@@ -37,7 +32,7 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestParam String name, @RequestParam String password, @RequestParam String password2, @RequestParam String email) {
         User user = userRepo.findUserByEmail(email);
 
-        String validationError = validateRegistrationInput(name, email, password, password2);
+        String validationError = validator.validateRegistrationInput(name, email, password, password2);
         if (validationError != null) {
             return ResponseEntity.badRequest().body(validationError);
         }
@@ -56,7 +51,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestParam String email, @RequestParam String password, HttpServletResponse response) {
 
-        String validationError = validateLoginInput(email, password);
+        String validationError = validator.validateLoginInput(email, password);
         if (validationError != null) {
             return ResponseEntity.badRequest().body(validationError);
         }

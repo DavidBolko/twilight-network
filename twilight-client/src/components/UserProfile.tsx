@@ -3,12 +3,13 @@ import type { FullUser, User } from "../types";
 import { getFromCdn } from "../utils";
 import axios from "axios";
 import { Loader2Icon } from "lucide-react";
+import { validateAvatarFile, validateDescription } from "../validator";
 
 interface UserProfileProps {
   data: FullUser;
-  id: string; // ID profilu, ktorý si pozerám
+  id: string;
   refetch: () => void;
-  currentUser: User | null; // prihlásený user, môže byť aj null
+  currentUser: User | null;
 }
 
 export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps) => {
@@ -16,34 +17,52 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
   const [debouncedDescription, setDebouncedDescription] = useState(description);
   const [isUploading, setIsUploading] = useState(false);
 
-  // môže byť undefined, ak user nie je prihlásený
+  const [descError, setDescError] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+
   const isSelf = currentUser?.id === id;
-  const isAdmin = !!currentUser?.isElder; // alebo iný field, ktorý máš v FullUser
+  const isAdmin = !!currentUser?.isElder;
   const showAdminActions = isAdmin && !isSelf && !data.isElder;
 
-  // Debounce zmeny popisu (odošleme až keď sa prestane písať)
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedDescription(description), 500);
     return () => clearTimeout(handler);
   }, [description]);
 
-  // odoslanie popisu pri zmene popisu
   useEffect(() => {
-    if (debouncedDescription !== data.description) {
-      const formData = new FormData();
-      formData.append("description", debouncedDescription);
+    if (debouncedDescription === (data.description || "")) return;
 
-      axios.put(`${import.meta.env.VITE_API_URL}/users/${id}/description`, formData, {
+    const err = validateDescription(debouncedDescription);
+    setDescError(err);
+    if (err) return;
+
+    const formData = new FormData();
+    formData.append("description", debouncedDescription);
+
+    axios
+      .put(`${import.meta.env.VITE_API_URL}/users/${id}/description`, formData, {
         withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .catch(() => {
+        setDescError("Failed to update description. Please try again.");
       });
-    }
   }, [debouncedDescription, data.description, id]);
 
-  // nastavenie noveho avataru
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAvatarError(null);
+
     if (!e.target.files?.length) return;
 
     const file = e.target.files[0];
+
+    const fileErr = validateAvatarFile(file);
+    if (fileErr) {
+      setAvatarError(fileErr);
+      e.target.value = "";
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", file);
 
@@ -57,7 +76,7 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
 
       await refetch();
     } catch (err) {
-      console.error("Error uploading avatar:", err);
+      setAvatarError("Error uploading avatar. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -90,16 +109,28 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
               <Loader2Icon className="w-12 h-12 text-tw-primary text-white/60 animate-spin" />
             </div>
           ) : (
-            <img src={data.image ? getFromCdn(data.image) : "/anonymous.png"} className="w-48 h-48 border border-white/15 rounded-full object-cover transition-all duration-300 hover:opacity-50 hover:grayscale" alt="avatar" />
+            <img src={data.image ? getFromCdn(data.image) : "/anonymous.png"} className={`w-48 h-48 border rounded-full object-cover transition-all duration-300 hover:opacity-50 hover:grayscale ${avatarError ? "error" : "border-white/15"}`} alt="avatar" />
           )}
           <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
         </label>
+
+        {avatarError && <p className="text-red-500/80 text-sm mt-2 w-48">{avatarError}</p>}
       </div>
 
       <div className="flex flex-col gap-2 text-justify mt-4 w-full">
         <p className="font-semibold text-lg">{data.name}</p>
 
-        <textarea className="text-md text-white/60 w-full border-0 focus:border bg-transparent outline-none resize-none" onChange={(e) => setDescription(e.target.value)} value={description} placeholder="Write something about yourself..." />
+        <textarea
+          className={`text-md text-white/60 w-full border-0 focus:border bg-transparent outline-none resize-none ${descError ? "error" : ""}`}
+          onChange={(e) => {
+            setDescription(e.target.value);
+            if (descError) setDescError(null);
+          }}
+          value={description}
+          placeholder="Write something about yourself..."
+        />
+
+        {descError && <p className="text-red-500/80 text-sm">{descError}</p>}
 
         {showAdminActions && (
           <div className="flex gap-2 mt-4">

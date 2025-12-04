@@ -4,6 +4,7 @@ import dev.bolko.twilightapi.services.ImageService;
 import dev.bolko.twilightapi.dto.PostDto;
 import dev.bolko.twilightapi.model.*;
 import dev.bolko.twilightapi.repositories.*;
+import dev.bolko.twilightapi.services.InputValidatorService;
 import dev.bolko.twilightapi.services.UserService;
 import dev.bolko.twilightapi.utils.PostType;
 import jakarta.transaction.Transactional;
@@ -27,12 +28,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static dev.bolko.twilightapi.utils.Validator.validatePostInput;
 
 @RestController
 @RequestMapping("/api/p")
 @RequiredArgsConstructor
 public class PostController {
+    private final InputValidatorService validator;
     @Autowired
     private final UserService userService;
     private final CommunityRepository communityRepo;
@@ -48,7 +49,7 @@ public class PostController {
 
         Community community = communityRepo.findById(communityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Community not found"));
 
-        String validationError = validatePostInput(title, type, text, images);
+        String validationError = validator.validatePostInput(title, type, text, images);
         if (validationError != null) {
             return ResponseEntity.badRequest().body(validationError);
         }
