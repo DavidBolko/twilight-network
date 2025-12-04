@@ -49,7 +49,6 @@ function PostPage() {
     }
   };
 
-  // Erorry a loading
   if (isLoading) return <p className="p-4 text-center">Loading...</p>;
   if (error || !data) return <p className="p-4 text-center text-red-500">Error loading post</p>;
 
@@ -61,7 +60,6 @@ function PostPage() {
         <div className="container flex-col mt-4">
           <p className="font-semibold mb-2">Comments</p>
 
-          {/* FORM NA KOMENTY */}
           <form onSubmit={sendComment} className="flex flex-col gap-2">
             <textarea required value={comment} onChange={(e) => setComment(e.target.value)} className="w-full resize-none h-[80px] outline-none border-b-2 border-stone-700/20 p-2 bg-transparent" placeholder="Write a comment..." />
             <button type="submit" className="btn primary flex items-center self-end gap-1">
@@ -70,7 +68,6 @@ function PostPage() {
             </button>
           </form>
 
-          {/* KOMENTY */}
           <ul className="container">
             {(data.comments ?? []).map((c) => (
               <li key={c.id}>

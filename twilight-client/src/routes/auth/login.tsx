@@ -58,9 +58,7 @@ function Login() {
     <div className="container center lg:mt-16">
       <h1 className="text-4xl text-center  lg:m-0">Welcome back</h1>
 
-      {/* hlavný box */}
       <div className="card lg:flex-row center max-w-5xl p-6">
-        {/* formulár */}
         <form onSubmit={submit} className="container lg:max-w-sm">
           <label htmlFor="email">Email</label>
           <input name="email" onChange={(e) => setEmail(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
@@ -82,7 +80,6 @@ function Login() {
           </div>
         </form>
 
-        {/* obrázok a citát */}
         <div className="container lg:w-1/2 center">
           <img src="/twilight.png" alt="login illustration" className="max-w-[300px] w-full h-auto object-contain" />
           <h2 className="text-lg text-glow">{quote}</h2>

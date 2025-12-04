@@ -96,7 +96,6 @@ function OwlsPage() {
         ))}
       </ul>
 
-      {/* Pagination */}
       <div className="flex justify-center gap-4 mt-4">
         <button className="btn" disabled={page < 1} onClick={() => setPage((p) => p - 1)}>
           Prev

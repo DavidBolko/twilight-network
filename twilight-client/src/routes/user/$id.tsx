@@ -43,10 +43,8 @@ function RouteComponent() {
   return (
     <div className="resp-grid">
       <div className="lg:col-start-2 mt-4">
-        {/* Profil s automatickým uploadom */}
         <UserProfile data={data} id={id} refetch={refetch} currentUser={user ?? null} />
 
-        {/* Prepínač kategórií */}
         <section className="container mt-4">
           <div className="flex w-full">
             {categories.map((cat, i) => (
@@ -63,7 +61,6 @@ function RouteComponent() {
           </div>
         </section>
 
-        {/* Obsah */}
         <section className="container mt-4">
           {category === "Posts" &&
             (data.posts.length > 0 ? (

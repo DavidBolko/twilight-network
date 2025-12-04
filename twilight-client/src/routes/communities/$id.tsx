@@ -68,12 +68,10 @@ function CommunityComponent() {
 
   return (
     <div className="resp-grid p-2">
-      {/* Modalne okno na vytvorenie postu */}
       {user && <CreatePostModal isOpen={isOpen} setIsOpen={setIsOpen} communityId={data.id} />}
 
       <PostFilterTabs to="/communities/$id" params={{ id }} />
 
-      {/* Posty */}
       {data.posts.length ? (
         <ul className="card min-h-screen">
           {data.posts.map((post) => (
@@ -89,7 +87,6 @@ function CommunityComponent() {
         </div>
       )}
 
-      {/* Informacie o komunite */}
       <div className="card row-start-2 lg:col-start-3 lg:row-start-1 h-fit min-w-0">
         <div className="flex p-2 gap-3">
           <img src={data.imageUrl ? getFromCdn(data.imageUrl) : data.imageUrl} className="w-24 h-24 rounded-full object-cover" alt={data.name} />
