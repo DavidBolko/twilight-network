@@ -5,27 +5,28 @@ import { useQuery } from "@tanstack/react-query";
 import type { PostType } from "../types.ts";
 import Post from "../components/Post.tsx";
 import Loader from "../components/Loader.tsx";
+import { PostFilterTabs } from "../components/PostFilterTabs.tsx";
 
-const fetchPosts = async () => {
+type Sort = "new" | "hot" | "best";
+
+const fetchPosts = async (sort: Sort) => {
   const res = await axios.get(`${import.meta.env.VITE_API_URL}/p`, {
     withCredentials: true,
+    params: { posts: sort },
   });
   return res.data;
 };
 
 export const Route = createFileRoute("/")({
-  loader: async () => {
+  loader: async ({ location }) => {
+    const sort = ((location.search as any)?.posts as Sort) ?? "hot";
     await queryClient.ensureQueryData({
-      queryKey: ["posts"],
-      queryFn: fetchPosts,
+      queryKey: ["posts", sort],
+      queryFn: () => fetchPosts(sort),
     });
   },
   component: Index,
-  validateSearch: (search: { posts?: "new" | "hot" | "best" }) => {
-    return {
-      posts: search.posts ?? "hot",
-    };
-  },
+  validateSearch: (search: { posts?: Sort }) => ({ posts: search.posts ?? "hot" }),
 });
 
 function Index() {
@@ -34,45 +35,47 @@ function Index() {
   const active = search.posts;
 
   const { data, isLoading, error } = useQuery<PostType[]>({
-    queryKey: ["posts"],
-    queryFn: fetchPosts,
+    queryKey: ["posts", active],
+    queryFn: () => fetchPosts(active),
   });
 
   if (isLoading) return <Loader />;
   if (error || !data) {
     navigate({ to: "/error", search: { message: "Nothing were found" } });
-    return;
+    return null;
   }
 
   return (
     <div className="resp-grid p-2 gap-2">
-      <div className="flex justify-evenly lg:flex-col lg:justify-start place-items-end text-right gap-2">
-        <button onClick={() => navigate({ to: "/", search: { posts: "new" } })} className={`btn border-none text-left p-2 w-24 ${active === "new" ? "bg-tw-primary/70" : "hover:bg-tw-primary/50"}`}>
-          New
-        </button>
-        <button onClick={() => navigate({ to: "/", search: { posts: "hot" } })} className={`btn border-none text-left p-2 w-24 ${active === "hot" ? "bg-tw-primary/70" : "hover:bg-tw-primary/50"}`}>
-          Hot
-        </button>
-        <button onClick={() => navigate({ to: "/", search: { posts: "best" } })} className={`btn border-none text-left p-2 w-24 ${active === "best" ? "bg-tw-primary/70" : "hover:bg-tw-primary/50"}`}>
-          Best
-        </button>
-      </div>
-      <section className="card">
-        <ul>
-          {data?.length > 0 ? (
-            data?.map((post) => (
-              <li key={post.id}>
-                <Post {...post} />
-              </li>
-            ))
+      <aside className="lg:col-start-1 lg:row-start-1 lg:sticky lg:top-20 lg:self-start lg:justify-self-end h-fit">
+        <PostFilterTabs to="/" />
+      </aside>
+
+      <aside className="card lg:col-start-3 lg:row-start-1 lg:sticky lg:top-20 h-fit order-2">
+        <p className="text-sm font-semibold">Feed</p>
+        <p className="text-xs text-tw-light-muted dark:text-tw-muted">Sorting affects what you see first (New / Hot / Best).</p>
+      </aside>
+
+      <main className="container pt-0 lg:col-start-2 lg:row-start-1">
+        <section aria-label="Posts feed">
+          {data.length > 0 ? (
+            <ul className="container p-0">
+              {data.map((post) => (
+                <li className="card" key={post.id}>
+                  <Post {...post} />
+                </li>
+              ))}
+            </ul>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full">
-              <img className="w-80 h-80" src="/sad.png" />
-              <p className="p-4 text-center text-gray-300">No posts were found.</p>
+            <div className="card min-h-screen center">
+              <img className="w-72 h-72 opacity-80" src="/sad.png" alt="No posts" />
+              <p className="text-tw-light-muted dark:text-tw-muted text-center">No posts were found.</p>
             </div>
           )}
-        </ul>
-      </section>
+        </section>
+      </main>
     </div>
   );
 }
+
+export default Index;

@@ -14,7 +14,6 @@ export type Comment = {
 
 export type PostType = {
   id: string;
-  title: string;
   text: string;
   communityId: number;
   communityName: string;

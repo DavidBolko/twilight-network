@@ -36,14 +36,13 @@ public class InputValidatorService {
         return null;
     }
 
-    public String validatePostInput(String title, String type, String text, List<MultipartFile> images) {
+    public String validatePostInput(String text, List<MultipartFile> images) {
         String err;
-        if ((err = validateTitle(title)) != null) return err;
 
-        if (type == null || (!type.equalsIgnoreCase("TEXT") && !type.equalsIgnoreCase("IMAGE")))
-            return "Invalid post type. Must be TEXT or IMAGE.";
+        boolean hasText = !isBlank(text);
+        boolean hasImages = images != null && !images.isEmpty();
 
-        if ((images == null || images.isEmpty()) && isBlank(text))
+        if (!hasText && !hasImages)
             return "Post cannot be empty.";
 
         if (text != null && text.length() > 2000)
@@ -51,13 +50,14 @@ public class InputValidatorService {
         if (containsHtml(text))
             return "Post text cannot contain HTML tags.";
 
-        if (images != null && !images.isEmpty()) {
+        if (hasImages) {
             if (images.size() > 10)
                 return "You can upload a maximum of 10 images.";
             for (MultipartFile file : images) {
                 if ((err = validateImage(file, 5)) != null) return err;
             }
         }
+
         return null;
     }
 

@@ -41,7 +41,7 @@ public class ImageService {
         List<ImagePost> imagePosts = new ArrayList<>();
 
         for (MultipartFile image : images) {
-            String uniqueName = System.currentTimeMillis() + "" + (int)(Math.random() * 10000) + ".jpeg";
+            String uniqueName = java.util.UUID.randomUUID().toString().replace("-", "") + ".jpeg";
             String filePath = UPLOAD_DIR + uniqueName;
             File destinationFile = new File(filePath);
 

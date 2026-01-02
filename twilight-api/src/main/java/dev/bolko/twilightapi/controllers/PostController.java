@@ -34,7 +34,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PostController {
     private final InputValidatorService validator;
-    @Autowired
     private final UserService userService;
     private final CommunityRepository communityRepo;
     private final PostRepository postRepo;
@@ -44,38 +43,42 @@ public class PostController {
     private final ImageService imageService;
 
     @PostMapping("/{communityId}")
-    public ResponseEntity<?> createPost(@PathVariable("communityId") Long communityId, @RequestParam("title") String title, @RequestParam("type") String type, @RequestParam("text") String text, @RequestParam(value = "images", required = false) List<MultipartFile> images, @AuthenticationPrincipal User principal) {
-        User user = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
+    public ResponseEntity<?> createPost(@PathVariable("communityId") Long communityId, @RequestParam(value = "text", required = false) String text, @RequestParam(value = "images", required = false) List<MultipartFile> images, @AuthenticationPrincipal User principal) {
+        var userOpt = userService.getCurrentUser(principal);
+        if (userOpt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        User user = userOpt.get();
 
-        Community community = communityRepo.findById(communityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Community not found"));
+        Community community = communityRepo.findById(communityId).orElse(null);
+        if (community == null) return ResponseEntity.badRequest().body("Community not found");
 
-        String validationError = validator.validatePostInput(title, type, text, images);
-        if (validationError != null) {
-            return ResponseEntity.badRequest().body(validationError);
-        }
+        String err = validator.validatePostInput(text, images);
+        if (err != null) return ResponseEntity.badRequest().body(err);
 
-        PostType postType = (images != null && !images.isEmpty()) ? PostType.IMAGE : PostType.TEXT;
+        boolean hasText = text != null && !text.trim().isEmpty();
+        boolean hasImages = images != null && !images.isEmpty();
 
-        Post post = new Post(title, text, community);
-        post.setType(postType);
+        Post post = new Post();
+        post.setCommunity(community);
         post.setAuthor(user);
+        post.setText(hasText ? text.trim() : null);
 
-        postRepo.save(post);
+        post.setType(hasText && hasImages ? PostType.MIXED : hasImages ? PostType.IMAGE : PostType.TEXT);
 
-        if (postType == PostType.IMAGE) {
+        if (hasImages) {
             try {
-                imagePostRepo.saveAll(imageService.saveImages(images, post));
+                post.getImagePosts().addAll(imageService.saveImages(images, post));
             } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Image upload failed: " + e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Image upload failed.");
             }
         }
 
-        return ResponseEntity.ok(post);
+        postRepo.save(post);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new PostDto(post, List.of(), user));
     }
 
 
     @GetMapping("/{id}")
-    @Transactional
     public ResponseEntity<?> getPost(@PathVariable("id") Long id, @AuthenticationPrincipal User principal) {
         var user = userService.getCurrentUser(principal);
 
@@ -90,9 +93,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<?> deletePost(@PathVariable("id") Long id,
-                                        @AuthenticationPrincipal User principal) {
+    public ResponseEntity<?> deletePost(@PathVariable("id") Long id, @AuthenticationPrincipal User principal) {
         User user = userService.getCurrentUser(principal)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
 
@@ -116,8 +117,6 @@ public class PostController {
 
         return ResponseEntity.ok().build();
     }
-
-
 
 
     @PutMapping("/{id}/like")
@@ -182,7 +181,7 @@ public class PostController {
         Comment com = new Comment(comment, post, user);
         commentRepo.save(com);
 
-        return ResponseEntity.ok(com);
+        return ResponseEntity.ok(com.getContent());
     }
 
 

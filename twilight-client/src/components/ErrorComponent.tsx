@@ -14,7 +14,7 @@ export default function Error({ error }: { error?: unknown }) {
 
       <span className="flex items-center justify-center gap-2">
         <AlertTriangle className="w-8 h-8 text-red-500" />
-        <h2 className="text-2xl font-bold">Oops! An error occurred</h2>
+        <h2 className="text-2xl font-bold">Oops! Something went wrong.</h2>
       </span>
 
       <p className="text-gray-400 mb-6">{message}</p>

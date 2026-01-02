@@ -69,7 +69,6 @@ public class CommunityController {
     }
 
 
-    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<CommunityDto> getCommunity(@PathVariable("id") Long id, @AuthenticationPrincipal User principal) {
         var user = userService.getCurrentUser(principal);
@@ -80,7 +79,6 @@ public class CommunityController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @Transactional
     @PutMapping("/join/{id}")
     public ResponseEntity<?> toggleCommunityMembership(@PathVariable("id") Long id, @AuthenticationPrincipal User principal) {
         User user = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));

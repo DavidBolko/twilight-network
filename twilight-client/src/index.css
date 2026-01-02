@@ -4,36 +4,41 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply transition-all;
+  html {
+    @apply font-quicksand antialiased;
   }
-  .html,
+
   body {
-    @apply bg-tw-light-bg;
-    @apply text-tw-light-text;
-    @apply dark:bg-tw-bg;
-    @apply dark:text-tw-text;
-    @apply min-h-screen;
+    @apply min-h-screen bg-tw-light-bg text-tw-light-text;
+    @apply dark:bg-tw-bg dark:text-tw-text;
   }
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  .btn {
+    @apply transition-all duration-150;
+  }
+
   input,
   textarea,
   .input {
-    @apply rounded-md;
-    @apply outline-none;
-    @apply focus:outline-none;
-    @apply border;
-    @apply bg-transparent;
-    @apply border-tw-border;
-    @apply focus:border-b-tw-primary;
-    @apply resize-none;
-    @apply p-2;
+    @apply rounded-md border bg-transparent p-2 resize-none;
+    @apply border-tw-light-border dark:border-tw-border;
+    @apply focus-visible:border-tw-accent-dark dark:focus-visible:border-tw-primary;
   }
-  a {
-    @apply hover:text-tw-primary;
-  }
+
   input.error {
     @apply border-red-500;
-    @apply border;
+    @apply focus-visible:ring-red-500;
+  }
+
+  a {
+    @apply underline-offset-4;
+    @apply hover:underline focus-visible:underline;
+    @apply hover:text-tw-primary-dark dark:hover:text-tw-primary; /* light vs dark */
   }
 }
 
@@ -55,8 +60,11 @@
     @apply lg:grid-cols-tw;
     @apply justify-center;
     @apply place-self-center;
-    @apply transition-all;
     @apply w-full;
+  }
+
+  .divider-top {
+    @apply border-t border-tw-light-border dark:border-tw-border;
   }
 
   .container {
@@ -68,51 +76,46 @@
     @apply rounded-md;
     @apply w-full;
   }
+
+  .box {
+    @apply container border border-tw-border p-4;
+  }
+
+  .navbar {
+    @apply flex p-2 justify-between items-center gap-2;
+    @apply w-full bg-tw-light-surface dark:bg-tw-surface/70 backdrop-blur-md sticky top-0 z-50;
+  }
   .card {
-    @apply container;
-    @apply border;
-    @apply dark:bg-tw-surface;
-    @apply border-tw-border/10;
+    @apply container border rounded-md;
+    @apply bg-tw-light-surface dark:bg-tw-surface;
+    @apply border-tw-light-border dark:border-tw-border;
     @apply shadow-[0_6px_15px_rgba(0,0,0,0.08)];
   }
-  .navbar {
-    @apply flex p-2 justify-between items-center gap-2 w-full
-         bg-tw-light-surface dark:bg-tw-surface/70
-         backdrop-blur-md sticky top-0 z-50;
-  }
+
   .btn {
-    @apply flex;
-    @apply border;
-    @apply border-tw-border;
-    @apply hover:text-tw-text;
+    @apply flex items-center justify-center text-center cursor-pointer w-fit;
+    @apply rounded-md p-0.5 px-2;
+    @apply border border-tw-light-border dark:border-tw-border;
     @apply hover:border-tw-primary;
-    @apply rounded-md;
-    @apply p-0.5;
-    @apply px-2;
-    @apply w-fit;
-    @apply cursor-pointer;
-    @apply items-center;
-    @apply justify-center;
-    @apply text-center;
+    @apply hover:text-tw-light-text dark:hover:text-tw-text;
   }
 
   .primary {
-    @apply bg-tw-primary/50;
-    @apply hover:bg-tw-primary/90;
+    @apply bg-tw-primary-dark text-white;
+    @apply hover:bg-tw-primary;
     @apply hover:shadow-[0_0_15px_rgba(167,139,250,0.7)];
+  }
+
+  .danger {
+    @apply border-red-500 text-red-400;
+    @apply hover:bg-red-500 hover:text-white hover:border-red-500;
+    @apply hover:shadow-[0_0_15px_rgba(239,68,68,0.7)];
   }
 
   .accent {
     @apply bg-tw-accent;
     @apply hover:bg-tw-accent-dark;
     @apply hover:shadow-[0_0_15px_rgba(99,102,241,0.7)];
-  }
-
-  .danger {
-    @apply border-red-500;
-    @apply hover:bg-red-500;
-    @apply hover:border-red-500;
-    @apply hover:shadow-[0_0_15px_rgba(239,68,68,0.7)];
   }
 
   .text-glow {

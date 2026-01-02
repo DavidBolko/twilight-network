@@ -83,7 +83,7 @@ function Login() {
           </button>
 
           <div className="flex gap-2 items-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Don't have an account?</p>
+            <p className="text-sm text-tw-muted">Don't have an account?</p>
             <a href="/auth/register" className="text-tw-primary hover:text-tw-accent">
               Create an account
             </a>

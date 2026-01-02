@@ -45,7 +45,7 @@ function RouteComponent() {
       <div className="lg:col-start-2 mt-4">
         <UserProfile data={data} id={id} refetch={refetch} currentUser={user ?? null} />
 
-        <section className="container mt-4">
+        <section className="container">
           <div className="flex w-full">
             {categories.map((cat, i) => (
               <button
@@ -61,12 +61,12 @@ function RouteComponent() {
           </div>
         </section>
 
-        <section className="container mt-4">
+        <section className="container">
           {category === "Posts" &&
             (data.posts.length > 0 ? (
-              <ul className="container flex-col">
+              <ul className="flex gap-2 flex-col">
                 {data.posts.map((post) => (
-                  <li key={post.id}>
+                  <li className="card" key={post.id}>
                     <Post {...post} />
                   </li>
                 ))}
@@ -77,7 +77,7 @@ function RouteComponent() {
 
           {category === "Communities" &&
             (data.communities.length > 0 ? (
-              <ul className="container flex-col">
+              <ul className="flex gap-2 flex-col">
                 {data.communities.map((com) => (
                   <li key={com.id}>
                     <CommunityCard community={com} currentUserId={user?.id!} isOwnProfile={user?.id === data.id} refetch={refetch} />
@@ -90,9 +90,9 @@ function RouteComponent() {
 
           {category === "Saved" &&
             (data.saved.length > 0 ? (
-              <ul className="container flex-col">
+              <ul className="flex gap-2 flex-col">
                 {data.saved.map((post) => (
-                  <li key={post.id}>
+                  <li className="card" key={post.id}>
                     <Post {...post} />
                   </li>
                 ))}

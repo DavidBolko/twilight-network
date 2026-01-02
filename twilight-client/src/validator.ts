@@ -52,29 +52,22 @@ export function validateAvatarFile(file: File): string | null {
   return validateImageFile(file, 5, false);
 }
 
-export function validatePostClient(title: string, type: "IMAGE" | "TEXT", text: string, images: File[]): string | null {
-  let err: string | null;
-
-  if ((err = validateTitle(title)) != null) return err;
-
-  if (type !== "TEXT" && type !== "IMAGE") return "Invalid post type. Must be TEXT or IMAGE.";
-
+export function validatePostClient(text: string, images: File[]) {
+  const hasText = text?.trim().length > 0;
   const hasImages = images && images.length > 0;
-  const hasText = !isBlank(text);
 
-  if (!hasImages && !hasText) return "Post cannot be empty.";
-
+  if (!hasText && !hasImages) return "Post cannot be empty.";
   if (text && text.length > 2000) return "Post text is too long. Max 2000 characters.";
-  if (containsHtml(text)) return "Post text cannot contain HTML tags.";
+  if (/<[a-z][\s\S]*>/i.test(text ?? "")) return "Post text cannot contain HTML tags.";
 
   if (hasImages) {
     if (images.length > 10) return "You can upload a maximum of 10 images.";
-
-    for (const file of images) {
-      if ((err = validateImageFile(file, 5, false)) != null) return err;
+    for (const f of images) {
+      if (!f.type.startsWith("image/")) return "Only image files are allowed.";
+      // voliteľne: limit 5MB (ak máš na backende)
+      if (f.size > 5 * 1024 * 1024) return "Each image must be <= 5MB.";
     }
   }
-
   return null;
 }
 

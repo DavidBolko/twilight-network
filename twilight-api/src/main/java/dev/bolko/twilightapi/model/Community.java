@@ -33,6 +33,7 @@ public final class Community {
 
     @OneToMany(mappedBy = "community")
     @JsonIgnore
+    @OrderBy("createdAt DESC")
     private List<Post> posts = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,11 +43,13 @@ public final class Community {
 
     @ManyToMany(mappedBy = "communities")
     private Set<User> members = new HashSet<>();
+
     public void addMember(User user) {
         this.members.add(user);
         user.getCommunities().add(this);
     }
-    public Community( String name, String description, String image, User creator, Set<User> members) {
+
+    public Community(String name, String description, String image, User creator, Set<User> members) {
         this.name = name;
         this.description = description;
         this.image = image;
