@@ -2,20 +2,28 @@ package dev.bolko.twilightapi.controllers;
 
 import dev.bolko.twilightapi.dto.CommunitySearchDto;
 import dev.bolko.twilightapi.dto.SearchResponseDto;
+import dev.bolko.twilightapi.dto.SidebarDto;
 import dev.bolko.twilightapi.dto.UserSearchDto;
 import dev.bolko.twilightapi.model.Community;
 import dev.bolko.twilightapi.model.User;
 import dev.bolko.twilightapi.repositories.CommunityRepository;
 import dev.bolko.twilightapi.repositories.UserRepository;
+import dev.bolko.twilightapi.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,6 +33,7 @@ public class GlobalController {
 
     private final CommunityRepository communityRepo;
     private final UserRepository userRepo;
+    private final UserService userService;
 
     @GetMapping("/search")
     public ResponseEntity<SearchResponseDto> search(@RequestParam String query) {
@@ -40,4 +49,8 @@ public class GlobalController {
 
         return ResponseEntity.ok(new SearchResponseDto(communities, users));
     }
+
+
+
+
 }

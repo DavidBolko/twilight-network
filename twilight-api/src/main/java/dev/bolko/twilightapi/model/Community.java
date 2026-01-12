@@ -31,7 +31,7 @@ public final class Community {
     private String description;
     private String image;
 
-    @OneToMany(mappedBy = "community")
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @OrderBy("createdAt DESC")
     private List<Post> posts = new ArrayList<>();

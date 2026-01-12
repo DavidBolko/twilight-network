@@ -1,23 +1,57 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { ImageIcon, Loader2, Send, XIcon } from "lucide-react";
-import axios from "axios";
+
 import { validatePostClient } from "../validator.ts";
+import { getFromCdn } from "../utils.ts";
+import type { PostType } from "../types.ts";
+import api from "../axios.ts";
+import axios from "axios";
 
 type Props = {
   communityId: string | number;
+
+  // CREATE
   onPosted?: () => void;
+
+  // EDIT
+  postId?: string | number;
+  initialText?: string;
+  initialImageIds?: string[];
+  onSaved?: (p: PostType) => void;
+  onCancel?: () => void;
+
+  // UI
+  variant?: "card" | "inline";
+  className?: string;
+  refetch?: Function;
 };
 
 const TEXT_MAX = 2000;
 const IMAGES_MAX = 10;
 
-export default function CreatePostContainer({ communityId, onPosted }: Props) {
-  const [text, setText] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+export default function CreatePostContainer({ communityId, onPosted, postId, initialText, initialImageIds, onSaved, onCancel, variant = "card", className }: Props) {
+  const isEdit = postId != null;
+  const wrapper = variant === "inline" ? "" : "card";
+
+  const [text, setText] = useState(initialText ?? "");
+  const [images, setImages] = useState<File[]>([]); // nové súbory
+  const [existing, setExisting] = useState<string[]>(initialImageIds ?? []); // existujúce IDs/URL
+  const [removedExisting, setRemovedExisting] = useState<string[]>([]); // čo zmazať
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // keď prepneš na iný post v edit móde
+  useEffect(() => {
+    setText(initialText ?? "");
+    setExisting(initialImageIds ?? []);
+    setRemovedExisting([]);
+    setImages([]);
+    setErrorMessage(null);
+    setIsLoading(false);
+  }, [postId, initialText, initialImageIds]);
 
   const textLen = text.length;
   const textOver = textLen > TEXT_MAX;
@@ -25,18 +59,23 @@ export default function CreatePostContainer({ communityId, onPosted }: Props) {
   const errorId = "create-post-error";
   const countId = "create-post-count";
 
-  const hasAny = text.trim().length > 0 || images.length > 0;
+  const currentImageCount = existing.length + images.length;
+  const hasAny = text.trim().length > 0 || currentImageCount > 0;
   const canSubmit = hasAny && !textOver && !isLoading;
 
-  const addImages = useCallback((files: File[]) => {
-    const onlyImages = files.filter((f) => f.type.startsWith("image/"));
-    if (!onlyImages.length) return;
+  const addImages = useCallback(
+    (files: File[]) => {
+      const onlyImages = files.filter((f) => f.type.startsWith("image/"));
+      if (!onlyImages.length) return;
 
-    setImages((prev) => {
-      const merged = [...prev, ...onlyImages];
-      return merged.slice(0, IMAGES_MAX);
-    });
-  }, []);
+      setImages((prev) => {
+        const limit = Math.max(0, IMAGES_MAX - existing.length);
+        const merged = [...prev, ...onlyImages];
+        return merged.slice(0, limit);
+      });
+    },
+    [existing.length],
+  );
 
   const onFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     addImages(Array.from(e.target.files ?? []));
@@ -67,21 +106,38 @@ export default function CreatePostContainer({ communityId, onPosted }: Props) {
     return () => previews.forEach((u) => URL.revokeObjectURL(u));
   }, [previews]);
 
-  const removeImage = (idx: number) => setImages((prev) => prev.filter((_, i) => i !== idx));
+  const removeNewImage = (idx: number) => setImages((prev) => prev.filter((_, i) => i !== idx));
 
-  const reset = () => {
+  const removeExisting = (imgId: string) => {
+    setExisting((prev) => prev.filter((x) => x !== imgId));
+    setRemovedExisting((prev) => (prev.includes(imgId) ? prev : [...prev, imgId]));
+  };
+
+  const resetCreate = () => {
     setText("");
     setImages([]);
+    setExisting([]);
+    setRemovedExisting([]);
     setErrorMessage(null);
     setIsLoading(false);
   };
 
-  const post = async (e: SyntheticEvent) => {
+  const submit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setErrorMessage(null);
 
-    const clientErr = validatePostClient(text, images);
-    if (clientErr) return setErrorMessage(clientErr);
+    // CREATE: tvoja existujúca validácia (text+new images)
+    if (!isEdit) {
+      const clientErr = validatePostClient(text, images);
+      if (clientErr) return setErrorMessage(clientErr);
+    } else {
+      // EDIT: berieme do úvahy aj existing obrázky
+      const trimmed = text.trim();
+      if (!trimmed && existing.length === 0 && images.length === 0) return setErrorMessage("Post cannot be empty.");
+      if (trimmed.length > TEXT_MAX) return setErrorMessage(`Post text is too long. Max ${TEXT_MAX} characters.`);
+      if (existing.length + images.length > IMAGES_MAX) return setErrorMessage(`You can upload a maximum of ${IMAGES_MAX} images.`);
+    }
 
     try {
       setIsLoading(true);
@@ -89,17 +145,32 @@ export default function CreatePostContainer({ communityId, onPosted }: Props) {
       const fd = new FormData();
       fd.append("text", text ?? "");
       images.forEach((img) => fd.append("images", img));
+      removedExisting.forEach((id) => fd.append("removeImageIds", id));
 
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/p/${communityId}`, fd, { withCredentials: true });
+      const url = isEdit ? `${import.meta.env.VITE_API_URL}/p/${postId}` : `${import.meta.env.VITE_API_URL}/p/${communityId}`;
 
-      if (res.status === 201 || res.status === 200) {
-        reset();
-        onPosted?.();
+      const res = isEdit ? await api.put(url, fd, { withCredentials: true }) : await api.post(url, fd, { withCredentials: true });
+
+      if (res.status === 200 || res.status === 201) {
+        if (isEdit) {
+          const updated = res.data as PostType;
+
+          // refresh UI v tomto komponente
+          setText(updated.text ?? "");
+          setExisting(updated.images ?? []);
+          setImages([]);
+          setRemovedExisting([]);
+
+          onSaved?.(updated);
+        } else {
+          resetCreate();
+          onPosted?.();
+        }
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
-        if (status === 401 || status === 403) setErrorMessage("You must be logged in to post.");
+        if (status === 401 || status === 403) setErrorMessage("You must be logged in.");
         else setErrorMessage(String(err.response?.data ?? err.message));
       } else {
         setErrorMessage("Unexpected error occurred.");
@@ -110,19 +181,35 @@ export default function CreatePostContainer({ communityId, onPosted }: Props) {
   };
 
   return (
-    <form className="card" onSubmit={post} onDragOver={onDragOver} onDrop={onDrop} noValidate>
-      <label htmlFor="createPost" className="sr-only">
+    <form className={`${wrapper} ${className ?? ""}`.trim()} onSubmit={submit} onDragOver={onDragOver} onDrop={onDrop} onClick={(e) => e.stopPropagation()} noValidate>
+      <label htmlFor={isEdit ? "editPost" : "createPost"} className="sr-only">
         Post content
       </label>
-      <textarea id="createPost" value={text} onChange={(e) => setText(e.target.value)} onPaste={onPaste} placeholder="What’s happening?" className={`w-full bg-transparent border-none ${textOver ? "outline outline-red-600" : ""}`} style={{ minHeight: 74 }} />
 
+      <textarea id={isEdit ? "editPost" : "createPost"} value={text} onChange={(e) => setText(e.target.value)} onPaste={onPaste} placeholder={isEdit ? "Edit your post..." : "What’s happening?"} className={`w-full bg-transparent border-none ${textOver ? "outline outline-red-600" : ""}`} style={{ minHeight: 74 }} />
+
+      {/* EXISTING IMAGES (edit) */}
+      {existing.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          {existing.map((id, idx) => (
+            <div key={id} className="relative">
+              <img src={getFromCdn(id)} alt={`Existing image ${idx + 1}`} className="object-cover h-20 w-full rounded" />
+              <button type="button" onClick={() => removeExisting(id)} className="btn absolute top-1 right-1 p-1" aria-label="Remove image" title="Remove" disabled={isLoading}>
+                <XIcon aria-hidden="true" focusable="false" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* NEW IMAGES */}
       {images.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
           {previews.map((url, idx) => (
             <div key={url} className="relative">
               <img src={url} alt={`Selected image ${idx + 1}`} className="object-cover h-20 w-full rounded" />
-              <button type="button" onClick={() => removeImage(idx)} className="btn absolute top-1 right-1 p-1" aria-label="Remove image" title="Remove">
-                <XIcon aria-hidden="true" focusable="false" />{" "}
+              <button type="button" onClick={() => removeNewImage(idx)} className="btn absolute top-1 right-1 p-1" aria-label="Remove image" title="Remove" disabled={isLoading}>
+                <XIcon aria-hidden="true" focusable="false" />
               </button>
             </div>
           ))}
@@ -137,10 +224,10 @@ export default function CreatePostContainer({ communityId, onPosted }: Props) {
 
       <div className="container rounded-none flex-row justify-between divider-top">
         <div className="flex items-center gap-2">
-          <input id="create-post-images" ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onFilesSelected} />
+          <input id={isEdit ? "edit-post-images" : "create-post-images"} ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onFilesSelected} />
 
           <label
-            htmlFor="create-post-images"
+            htmlFor={isEdit ? "edit-post-images" : "create-post-images"}
             aria-label="Add images"
             title="Add images"
             className={`p-1 rounded cursor-pointer transition-colors ${isLoading ? "text-white/40 cursor-not-allowed" : "text-white/60 hover:text-tw-primary"}`}
@@ -150,11 +237,9 @@ export default function CreatePostContainer({ communityId, onPosted }: Props) {
             <ImageIcon size={18} aria-hidden="true" focusable="false" />
           </label>
 
-          {images.length > 0 && (
-            <span className="text-xs text-white/50">
-              {images.length}/{IMAGES_MAX}
-            </span>
-          )}
+          <span className="text-xs text-white/50">
+            {currentImageCount}/{IMAGES_MAX}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -162,7 +247,7 @@ export default function CreatePostContainer({ communityId, onPosted }: Props) {
             {textLen}/{TEXT_MAX}
           </span>
 
-          <button type="submit" disabled={!canSubmit} aria-label={isLoading ? "Posting" : "Post"} title={isLoading ? "Posting..." : canSubmit ? "Post" : "Write text or add an image"} className={`p-1 rounded transition-colors ${!canSubmit ? "text-white/30 cursor-not-allowed" : "text-white/60 hover:text-tw-primary"}`}>
+          <button type="submit" disabled={!canSubmit} aria-label={isLoading ? (isEdit ? "Saving" : "Posting") : isEdit ? "Save" : "Post"} title={isLoading ? (isEdit ? "Saving..." : "Posting...") : canSubmit ? (isEdit ? "Save" : "Post") : "Write text or add an image"} className={`p-1 rounded transition-colors ${!canSubmit ? "text-white/30 cursor-not-allowed" : "text-white/60 hover:text-tw-primary"}`}>
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
           </button>
         </div>

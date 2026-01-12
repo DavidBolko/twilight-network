@@ -8,13 +8,14 @@ import Post from "../../components/Post";
 import type { PostType } from "../../types";
 import { getFromCdn } from "../../utils";
 import { validateComment } from "../../validator";
+import api from "../../axios";
 
 export const Route = createFileRoute("/post/$id")({
   component: PostPage,
 });
 
 async function fetchPost(id: string): Promise<PostType> {
-  const res = await axios.get(`${import.meta.env.VITE_API_URL}/p/${id}`, {
+  const res = await api.get(`${import.meta.env.VITE_API_URL}/p/${id}`, {
     withCredentials: true,
   });
   return res.data;
@@ -47,7 +48,7 @@ function PostPage() {
       const formData = new FormData();
       formData.append("comment", comment.trim());
 
-      await axios.post(`${import.meta.env.VITE_API_URL}/p/${id}/comment`, formData, {
+      await api.post(`${import.meta.env.VITE_API_URL}/p/${id}/comment`, formData, {
         withCredentials: true,
       });
 
@@ -79,7 +80,7 @@ function PostPage() {
       <div className="container lg:col-start-2">
         {/* Post */}
         <div className="card">
-          <Post id={data.id} text={data.text} author={data.author} communityId={data.communityId} communityName={data.communityName} communityImage={data.communityImage} images={data.images} likes={data.likes} saved={data.saved} comments={data.comments} />
+          <Post refetch={refetch} id={data.id} text={data.text} author={data.author} communityId={data.communityId} communityName={data.communityName} communityImage={data.communityImage} images={data.images} likes={data.likes} saved={data.saved} comments={data.comments} />
         </div>
 
         {/* Komentovacia sekcia */}

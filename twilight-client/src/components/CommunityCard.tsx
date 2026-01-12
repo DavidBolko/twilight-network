@@ -1,8 +1,8 @@
 import { useState, type SyntheticEvent } from "react";
 import { getFromCdn } from "../utils";
-import axios from "axios";
 import type { Community } from "../types";
 import { Link } from "@tanstack/react-router";
+import api from "../axios";
 
 type CommunityCardProps = {
   community: Community;
@@ -17,7 +17,7 @@ export default function CommunityCard({ community, currentUserId, refetch }: Com
   const handleJoin = async (e: SyntheticEvent) => {
     e.preventDefault();
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/c/join/${community.id}`, {}, { withCredentials: true });
+      await api.put(`${import.meta.env.VITE_API_URL}/c/join/${community.id}`, {}, { withCredentials: true });
 
       setIsMember((prev) => !prev);
       refetch();

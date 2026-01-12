@@ -61,6 +61,17 @@ public class InputValidatorService {
         return null;
     }
 
+    public String validatePostInput(String text, boolean hasImages) {
+        if (isBlank(text) && !hasImages) return "Post cannot be empty.";
+
+        if (text != null && text.length() > 2000)
+            return "Post text is too long. Max 2000 characters.";
+        if (containsHtml(text))
+            return "Post text cannot contain HTML tags.";
+
+        return null;
+    }
+
     private String validateName(String name) {
         if (isBlank(name)) return "Name cannot be empty.";
         if (name.length() < 3 || name.length() > 30)

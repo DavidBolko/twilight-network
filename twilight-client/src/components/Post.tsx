@@ -7,8 +7,13 @@ import { useUser } from "../userContext";
 import type { PostType } from "../types";
 import { getFromCdn } from "../utils";
 import { DeleteButton } from "./DeleteButton";
-import axios from "axios";
+
 import { SaveButton } from "./SaveButton";
+import { useEffect, useState } from "react";
+import { Pencil, X } from "lucide-react";
+
+import CreatePostContainer from "./CreatePostContainer";
+import api from "../axios";
 
 function formatWhen(createdAt?: string) {
   if (!createdAt) return "";
@@ -42,11 +47,29 @@ export default function Post(props: PostType) {
   const isInCommunityPage = communityIdParam === props.communityId.toString();
   const isPostPage = location.pathname.startsWith("/post/");
   const canDelete = !!currentUser && (props.author.id === currentUser.id || currentUser.isElder);
+  const canEdit = !!currentUser && (props.author.id === currentUser.id || currentUser.isElder);
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  // lokálny display state, aby sa UI okamžite zmenilo po uložení edit-u
+  const [displayText, setDisplayText] = useState(props.text ?? "");
+  const [displayImages, setDisplayImages] = useState<string[]>(props.images ?? []);
+
+  // keď príde nový props (refetch), sync len ak práve needituješ
+  useEffect(() => {
+    if (isEditing) return;
+    setDisplayText(props.text ?? "");
+    setDisplayImages(props.images ?? []);
+  }, [props.text, props.images, props.id, isEditing]);
+
+  const hasImages = displayImages.length > 0;
+  const hasText = !!displayText?.trim();
+  const when = formatWhen((props as any).createdAt);
 
   const goToPost = () => navigate({ to: "/post/$id", params: { id: props.id } });
 
   const deletePost = async () => {
-    const result = await axios.delete(`${import.meta.env.VITE_API_URL}/p/${props.id}`, {
+    const result = await api.delete(`${import.meta.env.VITE_API_URL}/p/${props.id}`, {
       withCredentials: true,
     });
 
@@ -55,13 +78,10 @@ export default function Post(props: PostType) {
     }
   };
 
-  const hasImages = !!props.images?.length;
-  const hasText = !!props.text?.trim();
-  const when = formatWhen((props as any).createdAt);
-
   return (
-    <article className="container m-1 h-fit py-2 relative">
-      <Link to="/post/$id" params={{ id: props.id }} aria-label={`Open post in ${props.communityName}`} className="absolute inset-0 rounded-md" />
+    <article className="container h-fit py-2 relative">
+      {/* overlay link nech zostane – ale počas editu ho vypneme */}
+      {!isEditing && <Link to="/post/$id" params={{ id: props.id }} aria-label={`Open post in ${props.communityName}`} className="absolute inset-0 rounded-md" />}
 
       <div className="container p-0 items-center flex-row relative z-10">
         {!isInCommunityPage && <img src={props.communityImage ? getFromCdn(props.communityImage) : props.communityImage} className="w-10 h-10 rounded-full object-cover" alt={`${props.communityName} avatar`} />}
@@ -105,10 +125,11 @@ export default function Post(props: PostType) {
       </div>
 
       <div className="flex flex-col gap-2 relative z-10">
-        {hasImages && (
+        {/* galéria zostáva rovnaká – ale počas editovania ju skryjeme (aby sa to nebilo s editorom) */}
+        {!isEditing && hasImages && (
           <div className="rounded-lg overflow-hidden">
             <ImageGallery
-              items={props.images!.map((id, i) => ({
+              items={displayImages.map((id, i) => ({
                 original: getFromCdn(id),
                 originalAlt: `Post image ${i + 1}`,
               }))}
@@ -124,13 +145,34 @@ export default function Post(props: PostType) {
           </div>
         )}
 
-        {hasText && (
-          <div>
-            <p className="text-md  whitespace-pre-wrap break-words leading-relaxed">{props.text}</p>
+        {(hasText || (isPostPage && isEditing)) && (
+          <div onClick={(e) => e.stopPropagation()}>
+            {isPostPage && isEditing ? (
+              <CreatePostContainer
+                communityId={props.communityId}
+                postId={props.id}
+                initialText={displayText}
+                initialImageIds={displayImages}
+                variant="inline"
+                refetch={props.refetch}
+                className="p-0 bg-transparent shadow-none border-none"
+                onSaved={(updated) => {
+                  setDisplayText(updated.text ?? "");
+                  setDisplayImages(updated.images ?? []);
+                  setIsEditing(false);
+                  props.refetch?.();
+                }}
+                onCancel={() => {
+                  setIsEditing(false);
+                }}
+              />
+            ) : (
+              <p className="text-md whitespace-pre-wrap break-words leading-relaxed">{displayText}</p>
+            )}
           </div>
         )}
 
-        {!hasImages && !hasText && <p className="text-sm text-white/50">Empty post</p>}
+        {!hasImages && !hasText && !isEditing && <p className="text-sm text-white/50">Empty post</p>}
       </div>
 
       <div className="flex justify-between items-center relative z-10" onClick={(e) => e.stopPropagation()}>
@@ -138,6 +180,25 @@ export default function Post(props: PostType) {
 
         {isPostPage ? (
           <div className="flex items-center gap-2 relative z-10">
+            {canEdit && !isEditing && (
+              <button
+                type="button"
+                className="hover:text-tw-primary"
+                onClick={() => {
+                  setIsEditing(true);
+                }}
+                aria-label="Edit post"
+                title="Edit">
+                <Pencil size={16} aria-hidden="true" />
+              </button>
+            )}
+
+            {canEdit && isEditing ? (
+              <button type="button" className="hover:text-tw-primary" onClick={() => setIsEditing(false)} aria-label="Cancel edit" title="Cancel">
+                <X size={16} aria-hidden="true" />
+              </button>
+            ) : null}
+
             <DeleteButton isAuthor={canDelete} onConfirm={deletePost} />
             <SaveButton postId={props.id} saved={props.saved} />
           </div>

@@ -1,49 +1,71 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { queryClient } from "../main.tsx";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import type { PostType } from "../types.ts";
+
+import { useEffect } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+import Sidebar from "../components/Sidebar.tsx";
+import type { PostType, Sort, TimeRange } from "../types.ts";
 import Post from "../components/Post.tsx";
-import Loader from "../components/Loader.tsx";
 import { PostFilterTabs } from "../components/PostFilterTabs.tsx";
-
-type Sort = "new" | "hot" | "best";
-
-const fetchPosts = async (sort: Sort) => {
-  const res = await axios.get(`${import.meta.env.VITE_API_URL}/p`, {
-    withCredentials: true,
-    params: { posts: sort },
-  });
-  return res.data;
-};
+import Loader from "../components/Loader.tsx";
+import api from "../axios.ts";
 
 export const Route = createFileRoute("/")({
-  loader: async ({ location }) => {
-    const sort = ((location.search as any)?.posts as Sort) ?? "hot";
-    await queryClient.ensureQueryData({
-      queryKey: ["posts", sort],
-      queryFn: () => fetchPosts(sort),
-    });
-  },
   component: Index,
-  validateSearch: (search: { posts?: Sort }) => ({ posts: search.posts ?? "hot" }),
+  validateSearch: (search: { posts?: Sort; time?: TimeRange }) => ({
+    posts: search.posts ?? "hot",
+    time: search.time ?? "all",
+  }),
 });
+
+const PAGE_SIZE = 10;
+
+const fetchPostsPage = async (sort: Sort, time: TimeRange, page: number) => {
+  const res = await api.get(`${import.meta.env.VITE_API_URL}/p`, {
+    withCredentials: true,
+    params: { sort, time, page, size: PAGE_SIZE },
+  });
+  return res.data as PostType[];
+};
 
 function Index() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/" });
-  const active = search.posts;
+  const activeSort = search.posts;
+  const activeTime = search.time;
 
-  const { data, isLoading, error } = useQuery<PostType[]>({
-    queryKey: ["posts", active],
-    queryFn: () => fetchPosts(active),
+  const postsQ = useInfiniteQuery({
+    queryKey: ["posts", activeSort, activeTime],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => fetchPostsPage(activeSort, activeTime, pageParam),
+    getNextPageParam: (lastPage, allPages) => (lastPage && lastPage.length === PAGE_SIZE ? allPages.length : undefined),
   });
 
-  if (isLoading) return <Loader />;
-  if (error || !data) {
+  useEffect(() => {
+    const onScroll = () => {
+      // keď si 600px od dna
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 600;
+
+      if (nearBottom && postsQ.hasNextPage && !postsQ.isFetchingNextPage) {
+        postsQ.fetchNextPage();
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [postsQ.hasNextPage, postsQ.isFetchingNextPage, postsQ.fetchNextPage]);
+
+  if (postsQ.isLoading) return <Loader />;
+
+  if (postsQ.error) {
     navigate({ to: "/error", search: { message: "Nothing were found" } });
     return null;
   }
+
+  const posts: PostType[] = [];
+  const pages = postsQ.data?.pages ?? [];
+  for (const p of pages) posts.push(...p);
 
   return (
     <div className="resp-grid p-2 gap-2">
@@ -51,28 +73,25 @@ function Index() {
         <PostFilterTabs to="/" />
       </aside>
 
-      <aside className="card lg:col-start-3 lg:row-start-1 lg:sticky lg:top-20 h-fit order-2">
-        <p className="text-sm font-semibold">Feed</p>
-        <p className="text-xs text-tw-light-muted dark:text-tw-muted">Sorting affects what you see first (New / Hot / Best).</p>
-      </aside>
+      <Sidebar />
 
-      <main className="container pt-0 lg:col-start-2 lg:row-start-1">
-        <section aria-label="Posts feed">
-          {data.length > 0 ? (
-            <ul className="container p-0">
-              {data.map((post) => (
-                <li className="card" key={post.id}>
-                  <Post {...post} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="card min-h-screen center">
-              <img className="w-72 h-72 opacity-80" src="/sad.png" alt="No posts" />
-              <p className="text-tw-light-muted dark:text-tw-muted text-center">No posts were found.</p>
-            </div>
-          )}
-        </section>
+      <main className="container pt-1 lg:col-start-2 lg:row-start-1">
+        {posts.length ? (
+          <ul className="container p-0">
+            {posts.map((post) => (
+              <li className="card" key={post.id}>
+                <Post {...post} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="card min-h-screen center">
+            <img className="w-72 h-72 opacity-80" src="/sad.png" alt="No posts" />
+            <p className="text-tw-light-muted dark:text-tw-muted text-center">No posts were found.</p>
+          </div>
+        )}
+
+        {postsQ.isFetchingNextPage ? <p className="text-center text-sm opacity-70 py-4">Loading more...</p> : null}
       </main>
     </div>
   );

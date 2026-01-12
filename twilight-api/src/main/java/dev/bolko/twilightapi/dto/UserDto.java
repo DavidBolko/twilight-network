@@ -42,7 +42,7 @@ public class UserDto {
         this.communities = user.getCommunities() == null
                 ? Set.of()
                 : user.getCommunities().stream()
-                .map(c -> new CommunityDto(c, allComments, user))
+                .map(CommunityDto::new)
                 .collect(Collectors.toSet());
     }
 

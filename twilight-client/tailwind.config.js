@@ -20,10 +20,17 @@ export default {
           "light-border": "#9082B1",
           "light-text": "#2C1F47",
           "light-muted": "#7262A3",
+          mood: {
+            mysterious: "#8B7CF6", // muted violet
+            moody: "#6D8CFF", // soft blue
+            enchanted: "#F0B86A", // warm muted gold
+            haunted: "#5FBF98", // muted teal/green
+            serene: "#77D7EA", // soft cyan
+          },
         },
       },
       gridTemplateColumns: {
-        tw: "minmax(0,16rem) minmax(0,40rem) minmax(0,16rem)",
+        tw: "minmax(0,16rem) minmax(0,36rem) minmax(0,16rem)",
       },
     },
   },

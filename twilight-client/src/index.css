@@ -13,6 +13,10 @@
     @apply dark:bg-tw-bg dark:text-tw-text;
   }
 
+  option {
+    @apply bg-tw-surface;
+  }
+
   a,
   button,
   input,
@@ -24,6 +28,7 @@
 
   input,
   textarea,
+  select,
   .input {
     @apply rounded-md border bg-transparent p-2 resize-none;
     @apply border-tw-light-border dark:border-tw-border;
@@ -65,6 +70,9 @@
 
   .divider-top {
     @apply border-t border-tw-light-border dark:border-tw-border;
+  }
+  .divider-right {
+    @apply border-r border-tw-light-border dark:border-tw-border;
   }
 
   .container {

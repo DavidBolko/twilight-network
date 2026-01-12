@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import axios from "axios";
+
 import { queryClient } from "../../main";
 import type { User } from "../../types";
 import { getFromCdn } from "../../utils";
@@ -18,16 +18,16 @@ type AdminUsersResponse = {
 const usersQueryKey = (page: number) => ["admin-users", page];
 
 const fetchUsers = async (page: number) => {
-  const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/users?page=${page}&size=20`, { withCredentials: true });
+  const res = await api.get(`${import.meta.env.VITE_API_URL}/admin/users?page=${page}&size=20`, { withCredentials: true });
   return res.data;
 };
 
 const banUser = async (id: string) => {
-  await axios.put(`${import.meta.env.VITE_API_URL}/users/${id}/ban`, {}, { withCredentials: true });
+  await api.put(`${import.meta.env.VITE_API_URL}/users/${id}/ban`, {}, { withCredentials: true });
 };
 
 const promoteUser = async (id: string) => {
-  await axios.put(`${import.meta.env.VITE_API_URL}/users/${id}/promote`, {}, { withCredentials: true });
+  await api.put(`${import.meta.env.VITE_API_URL}/users/${id}/promote`, {}, { withCredentials: true });
 };
 
 export const Route = createFileRoute("/admin/owls")({

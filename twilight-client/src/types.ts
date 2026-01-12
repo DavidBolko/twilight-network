@@ -1,9 +1,14 @@
+export type Mood = "mysterious" | "moody" | "enchanted" | "haunted" | "serene";
+export type Sort = "new" | "hot" | "best";
+export type TimeRange = "day" | "week" | "month" | "year" | "all";
+
 export type User = {
   id: string;
   name: string;
   email: string;
   image?: string;
   isElder: boolean;
+  online: boolean;
 };
 
 export type Comment = {
@@ -23,6 +28,9 @@ export type PostType = {
   likes: User[];
   comments?: Comment[];
   saved: boolean;
+  moodCounts?: Partial<Record<Mood, number>>;
+  myMood?: Mood | null;
+  refetch: Function;
 };
 
 export type Community = {
@@ -30,8 +38,8 @@ export type Community = {
   name: string;
   description?: string;
   imageUrl: string;
-  posts: PostType[];
   members: User[];
+  postCount: number;
 };
 
 export type FullUser = {
@@ -44,3 +52,22 @@ export type FullUser = {
   saved: PostType[];
   isElder: boolean;
 };
+export type SidebarType = {
+  ownedCommunities: {
+    id: number;
+    name: string;
+    image?: string | null;
+    membersCount: number;
+    postsCount: number;
+  }[];
+  memberCommunities: {
+    id: number;
+    name: string;
+    image?: string | null;
+    membersCount: number;
+    postsCount: number;
+  }[];
+  friends: User[]; // ✅ reuse
+  chatComingSoon: boolean;
+};
+type FriendRequest = { id: string; requesterId: string; requesterName: string; requesterImage?: string };

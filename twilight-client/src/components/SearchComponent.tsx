@@ -1,9 +1,9 @@
-import axios from "axios";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Community, User } from "../types";
 import { getFromCdn } from "../utils";
+import api from "../axios";
 
 type SearchResult = {
   communities: Community[];
@@ -15,7 +15,7 @@ export default function SearchComponent() {
   const [query, setQuery] = useState("");
 
   const getSearch = async (q: string): Promise<SearchResult> => {
-    const res = await axios.get<SearchResult>(`${import.meta.env.VITE_API_URL}/search?query=${encodeURIComponent(q)}`, { withCredentials: true });
+    const res = await api.get<SearchResult>(`${import.meta.env.VITE_API_URL}/search?query=${encodeURIComponent(q)}`, { withCredentials: true });
     return res.data;
   };
 

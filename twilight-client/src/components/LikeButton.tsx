@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { HeartIcon } from "lucide-react";
-import axios from "axios";
+
 import { queryClient } from "../main";
+import api from "../axios";
+import axios from "axios";
 
 type props = {
   filled: boolean;
@@ -15,7 +17,7 @@ export default function LikeButton(props: props) {
 
   const setLike = async () => {
     try {
-      const response = await axios.put(
+      const response = await api.put(
         `${import.meta.env.VITE_API_URL}/p/${props.id}/like`,
         {},
         {
@@ -44,7 +46,7 @@ export default function LikeButton(props: props) {
 
   return (
     <div className="flex gap-1 text-sm ml-2 items-center">
-      <button onClick={() => setLike()} className="flex items-center hover:cursor-pointer">
+      <button onClick={() => setLike()} className="flex items-center hover:cursor-pointer hover:">
         {filled ? <HeartIcon fill="white" className="w-4 h-4 hover:" /> : <HeartIcon className="w-4 h-4" />}
       </button>
       <p>{count} likes</p>

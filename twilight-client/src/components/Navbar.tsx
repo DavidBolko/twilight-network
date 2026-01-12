@@ -17,9 +17,14 @@ export default function Navbar() {
   const isAuthPage = location.pathname.includes("auth");
   const isEmptyPage = location.pathname.includes("logout");
   const isLoggedIn = !!user;
+  const isErrorPage = location.pathname.includes("error");
 
   if (isEmptyPage) {
     return null;
+  }
+
+  if (isErrorPage) {
+    return <></>;
   }
 
   if (isAuthPage) {

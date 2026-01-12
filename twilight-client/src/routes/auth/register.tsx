@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { type SyntheticEvent, useMemo, useState } from "react";
 import api from "../../axios";
-import axios from "axios";
+
 import { validateRegistrationInput } from "../../validator";
+import axios from "axios";
 
 export const Route = createFileRoute("/auth/register")({
   component: Register,
@@ -17,13 +18,11 @@ function Register() {
   const [name, setName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const emailOk = email.trim() === "" ? true : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const passwordsMatch = password2 === "" ? true : password2 === password;
+
   const quotes = ["Your next chapter begins at twilight.", "Where moments glow.", "Not a feed. A feeling.", "Quiet social for loud minds."];
   const quote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
-
-  const msg = (errorMessage ?? "").toLowerCase();
-  const nameErr = msg.includes("name");
-  const emailErr = msg.includes("email") || msg.includes("email format");
-  const passErr = msg.includes("password");
 
   const submit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -66,6 +65,8 @@ function Register() {
     }
   };
 
+  const canSubmit = name.trim().length >= 2 && email.trim().length > 0 && emailOk && password.length >= 6 && password2.length > 0 && passwordsMatch;
+
   return (
     <div className="container center lg:mt-16">
       <h1 className="text-4xl text-center lg:m-0">Create a new account</h1>
@@ -73,20 +74,22 @@ function Register() {
       <div className="card lg:flex-row center max-w-5xl p-6">
         <form onSubmit={submit} noValidate className="container lg:max-w-sm">
           <label htmlFor="name">Name</label>
-          <input name="name" required onChange={(e) => setName(e.target.value)} className={nameErr ? "error" : ""} />
+          <input name="name" required value={name} onChange={(e) => setName(e.target.value)} className={name.trim() !== "" && name.trim().length < 2 ? "error" : ""} />
 
           <label htmlFor="email">Email</label>
-          <input name="email" type="email" required onChange={(e) => setEmail(e.target.value)} className={emailErr ? "error" : ""} />
+          <input name="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={!emailOk ? "error" : ""} />
+          {!emailOk && <p className="text-red-500/80 text-sm">Enter a valid email.</p>}
 
           <label htmlFor="password">Password</label>
-          <input name="password" required type="password" onChange={(e) => setPassword(e.target.value)} className={passErr ? "error" : ""} />
+          <input name="password" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={password !== "" && password.length < 6 ? "error" : ""} />
 
           <label htmlFor="password2">Retype password</label>
-          <input name="password2" required type="password" onChange={(e) => setPassword2(e.target.value)} className={passErr ? "error" : ""} />
+          <input name="password2" required type="password" value={password2} onChange={(e) => setPassword2(e.target.value)} className={!passwordsMatch ? "error" : ""} />
+          {!passwordsMatch && <p className="text-red-500/80 text-sm">Passwords do not match.</p>}
 
           {errorMessage && <p className="text-red-500/80 text-sm mt-2">{errorMessage}</p>}
 
-          <button type="submit" className="btn primary w-full mt-2">
+          <button type="submit" className="btn primary w-full mt-2" disabled={!canSubmit}>
             Continue
           </button>
 

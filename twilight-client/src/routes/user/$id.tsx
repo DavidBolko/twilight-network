@@ -7,12 +7,13 @@ import Post from "../../components/Post";
 import CommunityCard from "../../components/CommunityCard";
 import { useUser } from "../../userContext";
 import { UserProfile } from "../../components/UserProfile";
-import axios from "axios";
+
+import api from "../../axios";
 
 const categories = ["Posts", "Communities", "Saved"] as const;
 
 const fetchUser = async (id: string) => {
-  const res = await axios.get<FullUser>(`${import.meta.env.VITE_API_URL}/users/${id}`, {
+  const res = await api.get<FullUser>(`${import.meta.env.VITE_API_URL}/users/${id}`, {
     withCredentials: true,
   });
   return res.data;

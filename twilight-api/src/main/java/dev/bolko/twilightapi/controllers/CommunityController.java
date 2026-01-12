@@ -1,14 +1,15 @@
 package dev.bolko.twilightapi.controllers;
 
 import dev.bolko.twilightapi.dto.CommunityDto;
+import dev.bolko.twilightapi.dto.PostDto;
 import dev.bolko.twilightapi.model.*;
 import dev.bolko.twilightapi.repositories.CommentRepository;
 import dev.bolko.twilightapi.repositories.CommunityRepository;
+import dev.bolko.twilightapi.repositories.PostRepository;
 import dev.bolko.twilightapi.repositories.UserRepository;
 import dev.bolko.twilightapi.services.ImageService;
 import dev.bolko.twilightapi.services.InputValidatorService;
 import dev.bolko.twilightapi.services.UserService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class CommunityController {
     private final UserService userService;
     private final CommunityRepository communityRepo;
     private final UserRepository userRepo;
-    private final CommentRepository commentRepo;
+    private final PostRepository postRepo;
 
     @PostMapping("/create")
     public ResponseEntity<?> createCommunity(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal User principal) {
@@ -68,14 +69,11 @@ public class CommunityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new CommunityDto(saved));
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<CommunityDto> getCommunity(@PathVariable("id") Long id, @AuthenticationPrincipal User principal) {
-        var user = userService.getCurrentUser(principal);
-        return communityRepo.findById(id).map(com -> {
-            List<Comment> allComments = commentRepo.findAll();
-            Hibernate.initialize(com.getMembers());
-            return ResponseEntity.ok(new CommunityDto(com, allComments, user.orElse(null)));
+    public ResponseEntity<CommunityDto> getCommunity(@PathVariable Long id) {
+        return communityRepo.findWithMembersById(id).map(com -> {
+            long postCount = postRepo.countByCommunityId(com.getId());
+            return ResponseEntity.ok(new CommunityDto(com, postCount));
         }).orElse(ResponseEntity.notFound().build());
     }
 

@@ -13,8 +13,8 @@ export const DeleteButton = ({ onConfirm, isAuthor }: DeleteButtonProps) => {
   if (isAuthor) {
     return (
       <>
-        <button className="p-2 hover:stroke-red-500" onClick={() => setOpen(true)}>
-          <TrashIcon className="w-4 h-4" />
+        <button className="p-2 hover:stroke-red-500 hover:text-tw-primary" onClick={() => setOpen(true)}>
+          <TrashIcon className="w-4 h-4 " />
         </button>
 
         {open && (
@@ -23,11 +23,11 @@ export const DeleteButton = ({ onConfirm, isAuthor }: DeleteButtonProps) => {
               <h2 className="text-lg font-semibold">Naozaj chceš odstrániť?</h2>
               <p className="text-sm text-gray-500">Túto akciu už nebude možné vrátiť späť.</p>
               <div className="flex gap-2 justify-end">
-                <button className="btn px-3" onClick={() => setOpen(false)}>
+                <button className="btn px-3 hover:text-tw-primary" onClick={() => setOpen(false)}>
                   Zrušiť
                 </button>
                 <button
-                  className="btn danger px-3"
+                  className="btn danger px-3 hover:text-tw-primary"
                   onClick={() => {
                     onConfirm();
                     setOpen(false);

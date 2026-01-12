@@ -5,6 +5,7 @@ import dev.bolko.twilightapi.utils.PostType;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class PostDto {
     public Long id;
@@ -23,6 +24,9 @@ public class PostDto {
 
     public LocalDateTime createdAt;
 
+    public Map<String, Integer> moodCounts;
+    public String myMood;
+
     public PostDto(Post post, List<Comment> comments, User user) {
         this.id = post.getId();
         this.text = post.getText();
@@ -36,17 +40,11 @@ public class PostDto {
 
         this.saved = user != null && user.getSavedPosts().stream().anyMatch(p -> p.getId().equals(post.getId()));
 
-        this.images = post.getImagePosts() == null
-                ? List.of()
-                : post.getImagePosts().stream().map(ImagePost::getUrl).toList();
-
-        this.likes = post.getLikes() == null
-                ? List.of()
-                : post.getLikes().stream().map(AuthDto::new).toList();
-
-        this.comments = comments == null
-                ? List.of()
-                : comments.stream().map(CommentDto::new).toList();
+        this.images = post.getImagePosts() == null ? List.of() : post.getImagePosts().stream().map(ImagePost::getUrl).toList();
+        this.likes = post.getLikes() == null ? List.of() : post.getLikes().stream().map(AuthDto::new).toList();
+        this.comments = comments == null ? List.of() : comments.stream().map(CommentDto::new).toList();
+        this.moodCounts = null;
+        this.myMood = null;
     }
 
     public PostDto(Post post) {

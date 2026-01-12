@@ -21,7 +21,7 @@ export default function Error({ error }: { error?: unknown }) {
 
       <div className="flex gap-4">
         <button onClick={() => router.history.back()} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition">
-          Go Back
+          Retry
         </button>
       </div>
     </div>

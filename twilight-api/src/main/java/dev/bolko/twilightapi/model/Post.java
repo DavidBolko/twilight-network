@@ -22,7 +22,6 @@ public final class Post {
     @Id
     private Long id;
 
-    // caption/obsah - môže byť null/prázdny, ak sú obrázky
     @Column(columnDefinition = "TEXT")
     private String text;
 
@@ -42,6 +41,7 @@ public final class Post {
     @JsonManagedReference("user-comments")
     private List<Comment> comments = new ArrayList<>();
 
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "deleted_at")
@@ -59,10 +59,6 @@ public final class Post {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> likes = new HashSet<>();
-
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
 
     @PrePersist
     public void prePersist() {

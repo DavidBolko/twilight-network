@@ -1,6 +1,7 @@
 import { BookmarkIcon } from "lucide-react";
 import { useState } from "react";
-import axios from "axios";
+
+import api from "../axios";
 
 interface SaveButtonProps {
   postId: string;
@@ -12,7 +13,7 @@ export const SaveButton = ({ postId, saved }: SaveButtonProps) => {
 
   const toggleSave = async () => {
     try {
-      await axios.put(
+      await api.put(
         `${import.meta.env.VITE_API_URL}/p/${postId}/save`,
         {},
         {
@@ -27,7 +28,7 @@ export const SaveButton = ({ postId, saved }: SaveButtonProps) => {
 
   return (
     <button className="p-2 transition-colors" onClick={toggleSave}>
-      <BookmarkIcon className=" w-4 h-4  text-white" fill={isSaved ? "currentColor" : "none"} />
+      <BookmarkIcon className=" w-4 h-4 hover:text-tw-primary text-white" fill={isSaved ? "currentColor" : "none"} />
     </button>
   );
 };

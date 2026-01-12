@@ -1,13 +1,9 @@
 package dev.bolko.twilightapi.dto;
 
 import dev.bolko.twilightapi.model.Community;
-import dev.bolko.twilightapi.model.Comment;
-import dev.bolko.twilightapi.model.User;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CommunityDto {
     public Long id;
@@ -15,31 +11,23 @@ public class CommunityDto {
     public String description;
     public String imageUrl;
     public Set<AuthDto> members = new HashSet<>();
-    public List<PostDto> posts;
+    public long postCount;
 
-    public CommunityDto(Community community, List<Comment> allComments, User user) {
+    public CommunityDto(Community community, long postCount) {
         this.id = community.getId();
         this.name = community.getName();
         this.description = community.getDescription();
         this.imageUrl = community.getImage();
+        this.postCount = postCount;
 
         if (community.getMembers() != null) {
-            this.members = community.getMembers().stream()
-                    .map(AuthDto::new)
-                    .collect(Collectors.toSet());
+            for (var m : community.getMembers()) {
+                this.members.add(new AuthDto(m));
+            }
         }
-
-        this.posts = community.getPosts().stream()
-                .map(post -> {
-                    List<Comment> commentsForPost = allComments.stream()
-                            .filter(c -> c.getPost().getId().equals(post.getId()))
-                            .toList();
-                    return new PostDto(post, commentsForPost, user);
-                })
-                .toList();
     }
 
     public CommunityDto(Community community) {
-        this(community, List.of(), null);
+        this(community, 0);
     }
 }
