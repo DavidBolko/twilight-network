@@ -120,6 +120,10 @@ public class Seeder implements CommandLineRunner {
                 "Aenean aliquam ipsum et purus euismod, vel mollis leo aliquam. Cras ultricies elit faucibus, faucibus tortor sed, blandit nibh. Nulla sollicitudin ipsum vel tincidunt consectetur. Fusce vulputate eros erat. Fusce nec fringilla nisi. Donec auctor nisi at tortor iaculis, quis blandit tellus ullamcorper. Quisque vitae massa rhoncus, consectetur sem et, feugiat metus. Phasellus at faucibus eros. Vestibulum fermentum eros lacus, in viverra nibh pulvinar at. Maecenas id scelerisque dui, sit amet auctor lorem. In orci ipsum, lobortis et tempor sit amet, molestie quis massa. Nunc tincidunt pretium est, et tristique mi tempus ac. Integer laoreet quam eu mi euismod mattis. In mollis rutrum luctus.\n" +
                 "\n" +
                 "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Aliquam ac est tincidunt, pulvinar libero sed, faucibus libero. Nulla massa mi, vulputate at viverra sed, tristique ac arcu. Cras quis libero sit amet nisi vestibulum cursus. Proin non lobortis metus. Nunc lacinia nisi sit amet ornare cursus. Proin eu dui ut metus condimentum pretium non sed magna. Integer sed turpis sed tortor placerat condimentum sit amet a nisi. Integer accumsan mollis velit eget facilisis. Phasellus nec convallis magna, sed rhoncus nulla. Fusce laoreet lectus faucibus odio gravida pharetra nec at nisl. Suspendisse fermentum mollis sapien vitae laoreet. In laoreet nec lorem at efficitur. Curabitur eu justo eu quam bibendum ultrices. Nunc dignissim mattis sollicitudin. Donec est est, consequat id sodales quis, pellentesque et lacus.";
-        return lorem.substring(0, rnd.nextInt()%lorem.length());
+        int minLen = 40;
+        int maxLen = lorem.length();
+
+        int len = rnd.nextInt(maxLen - minLen + 1) + minLen;
+        return lorem.substring(0, len);
     }
 }
