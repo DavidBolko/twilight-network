@@ -2,33 +2,30 @@ package dev.bolko.twilightapi.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-
 public final class Community {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    private long id;
+    private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 60)
     private String name;
 
+    @Column(length = 500)
     private String description;
+
     private String image;
 
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -36,24 +33,33 @@ public final class Community {
     @OrderBy("createdAt DESC")
     private List<Post> posts = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "creator_id", nullable = false)
     @JsonBackReference
     private User creator;
 
     @ManyToMany(mappedBy = "communities")
+    @JsonIgnore
     private Set<User> members = new HashSet<>();
 
-    public void addMember(User user) {
-        this.members.add(user);
-        user.getCommunities().add(this);
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    public Community(String name, String description, String image, User creator, Set<User> members) {
+    public Community(String name, String description, String image, User creator) {
         this.name = name;
         this.description = description;
         this.image = image;
         this.creator = creator;
-        this.members = members;
+    }
+    // --- helpers (používaj v service) ---
+    public void addMember(User user) {
+        members.add(user);
+        user.getCommunities().add(this);
+    }
+
+    public void removeMember(User user) {
+        members.remove(user);
+        user.getCommunities().remove(this);
     }
 }

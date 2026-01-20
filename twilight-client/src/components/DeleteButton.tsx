@@ -1,6 +1,6 @@
 import { TrashIcon } from "lucide-react";
 import Modal from "./Modal";
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 
 interface DeleteButtonProps {
   onConfirm: () => void;
@@ -18,7 +18,7 @@ export const DeleteButton = ({ onConfirm, isAuthor }: DeleteButtonProps) => {
         </button>
 
         {open && (
-          <Modal onClose={() => setOpen(false)}>
+          <Modal onClose={() => setOpen(false)} background={true} lightbox={false}>
             <div className="p-4 flex flex-col gap-4">
               <h2 className="text-lg font-semibold">Naozaj chceš odstrániť?</h2>
               <p className="text-sm text-gray-500">Túto akciu už nebude možné vrátiť späť.</p>
@@ -28,7 +28,8 @@ export const DeleteButton = ({ onConfirm, isAuthor }: DeleteButtonProps) => {
                 </button>
                 <button
                   className="btn danger px-3 hover:text-tw-primary"
-                  onClick={() => {
+                  onClick={(e:SyntheticEvent) => {
+                    e.stopPropagation()
                     onConfirm();
                     setOpen(false);
                   }}>

@@ -24,12 +24,8 @@ public class ImageController {
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
             Resource file = imageService.loadImage(filename);
-
             MediaType mediaType = MediaTypeFactory.getMediaType(file).orElse(MediaType.APPLICATION_OCTET_STREAM);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-                    .contentType(mediaType)
-                    .body(file);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"").contentType(mediaType).body(file);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }

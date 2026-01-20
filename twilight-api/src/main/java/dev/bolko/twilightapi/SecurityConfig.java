@@ -41,15 +41,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/i/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/", "/communities/**", "/api/c/**", "/api/users/**", "/api/p/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/c/create").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/c/join/**", "/api/users/**", "/api/p/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/users/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/f/**").authenticated()
-                        .requestMatchers(HttpMethod.GET,"/api/admin/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/admin/users").permitAll()
-                        .requestMatchers("/api/auth/logout").authenticated()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/p/**",        // posts endpoints (napr. /api/p, /api/p/{id}, /api/p/comments...)
+                                "/api/c/**",        // communities endpoints
+                                "/api/search/**",   // search endpoint (alebo /api/search)
+                                "/api/u/**",        // ak máš public user profile view (napr. /api/u/{id})
+                                "/api/i/**"         // ak máš public user profile view (napr. /api/u/{id})
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -67,6 +65,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.addAllowedOriginPattern("https://twilight.bolkodev.ipv64.de");
         config.addAllowedOriginPattern("http://localhost:5173");
+        config.addAllowedOriginPattern("http://192.168.1.18:5173");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 

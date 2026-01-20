@@ -7,8 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>{
     List<Comment> findByPostId(Long postId);
+
+    List<Comment> findByAuthorId(UUID id);
 }

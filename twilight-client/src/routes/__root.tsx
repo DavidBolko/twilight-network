@@ -1,9 +1,10 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Navbar from "../components/Navbar.tsx";
-import { UserProvider } from "../userContext.tsx";
 import ErrorPage from "../components/ErrorComponent.tsx";
-import Chat from "../components/Chat.tsx";
+import { useState } from "react";
+import Sidebar from "../components/Sidebar.tsx";
+import { useThemeToggler } from "../hooks.tsx";
 
 export const Route = createRootRoute({
   component: Root,
@@ -11,14 +12,17 @@ export const Route = createRootRoute({
 });
 
 function Root() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { dark, toggle } = useThemeToggler()
+
+  const isSidebarAllowed = !location.pathname.includes("/auth") && !location.pathname.includes("/error")
+
   return (
     <>
-      <UserProvider>
-        <Navbar />
-        <Outlet />
-        <Chat />
-        <TanStackRouterDevtools />
-      </UserProvider>
+      <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} toggleTheme={toggle} isDark={dark} />
+      {isSidebarAllowed ? <Sidebar sidebarOpen={sidebarOpen}/>  : null}
+      <Outlet />
+      <TanStackRouterDevtools />
     </>
   );
 }

@@ -21,9 +21,11 @@ public interface CommunityRepository extends JpaRepository<Community,  Long >{
     @EntityGraph(attributePaths = {"members"})
     Optional<Community> findWithMembersById(Long id);
 
-    @Query("select c from Community c where c.creator.id = :userId")
-    List<Community> findOwnedByUser(@Param("userId") UUID userId);
+    List<Community> findByCreatorId(UUID id);
 
-    @Query("select distinct c from Community c join c.members m where m.id = :userId")
-    List<Community> findMemberByUser(@Param("userId") UUID  userId);
+    List<Community> findByMembers_Id(UUID id);
+
+    List<Community> findByCategoryId(Long categoryId);
+
+    List<Community> findByCategoryIdAndNameContainingIgnoreCase(Long categoryId, String query);
 }

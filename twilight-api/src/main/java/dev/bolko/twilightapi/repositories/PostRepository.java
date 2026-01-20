@@ -19,61 +19,43 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     @NonNull
-    @EntityGraph(attributePaths = {"author", "likes", "imagePosts", "community"})
+    @EntityGraph(attributePaths = {"author", "community", "likes", "imagePosts"})
     Optional<Post> findById(Long id);
 
-    @EntityGraph(attributePaths = {"author", "likes", "imagePosts", "community"})
-    Page<Post> findAll(Pageable pageable);
-
-    @EntityGraph(attributePaths = {"author", "likes", "imagePosts", "community"})
-    Page<Post> findByCommunityId(Long communityId, Pageable pageable);
-
-    long countByCommunityId(Long communityId);
-
-
-    // NEW (bez community)
-    @EntityGraph(attributePaths = {"author", "likes", "imagePosts", "community"})
+    @EntityGraph(attributePaths = {"author", "community"})
     @Query("""
         select p from Post p
-        where p.deletedAt is null
-          and p.createdAt >= :from
+        where p.createdAt >= :from
         order by p.createdAt desc
     """)
     Page<Post> findNewSince(@Param("from") LocalDateTime from, Pageable pageable);
 
-    // NEW (v komunite)
-    @EntityGraph(attributePaths = {"author", "likes", "imagePosts", "community"})
+    @EntityGraph(attributePaths = {"author", "community"})
     @Query("""
         select p from Post p
-        where p.deletedAt is null
-          and p.community.id = :communityId
+        where p.community.id = :communityId
           and p.createdAt >= :from
         order by p.createdAt desc
     """)
-    Page<Post> findNewByCommunitySince(@Param("communityId") Long communityId,
-                                       @Param("from") LocalDateTime from,
-                                       Pageable pageable);
+    Page<Post> findNewByCommunitySince(@Param("communityId") Long communityId, @Param("from") LocalDateTime from, Pageable pageable);
 
-    // BEST (bez community) - žiadny GROUP BY, len size()
-    @EntityGraph(attributePaths = {"author", "likes", "imagePosts", "community"})
+    @EntityGraph(attributePaths = {"author", "community"})
     @Query("""
         select p from Post p
-        where p.deletedAt is null
-          and p.createdAt >= :from
+        where p.createdAt >= :from
         order by size(p.likes) desc, p.createdAt desc
     """)
     Page<Post> findBestSince(@Param("from") LocalDateTime from, Pageable pageable);
 
-    // BEST (v komunite)
-    @EntityGraph(attributePaths = {"author", "likes", "imagePosts", "community"})
+    @EntityGraph(attributePaths = {"author", "community"})
     @Query("""
         select p from Post p
-        where p.deletedAt is null
-          and p.community.id = :communityId
+        where p.community.id = :communityId
           and p.createdAt >= :from
         order by size(p.likes) desc, p.createdAt desc
     """)
-    Page<Post> findBestByCommunitySince(@Param("communityId") Long communityId,
-                                        @Param("from") LocalDateTime from,
-                                        Pageable pageable);
+    Page<Post> findBestByCommunitySince(@Param("communityId") Long communityId, @Param("from") LocalDateTime from, Pageable pageable);
+
+
+    long countByCommunityId(long id);
 }

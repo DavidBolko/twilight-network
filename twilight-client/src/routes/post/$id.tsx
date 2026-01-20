@@ -1,17 +1,19 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useState, type SyntheticEvent } from "react";
+import {  useState, type SyntheticEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { Loader2, Send } from "lucide-react";
+import { Loader, Loader2, Send } from "lucide-react";
 
 import Post from "../../components/Post";
 import type { PostType } from "../../types";
 import { getFromCdn } from "../../utils";
 import { validateComment } from "../../validator";
 import api from "../../axios";
+import { useUser } from "../../userContext";
+import ErrorComponent from "../../components/ErrorComponent";
 
 export const Route = createFileRoute("/post/$id")({
   component: PostPage,
+  errorComponent: ErrorComponent
 });
 
 async function fetchPost(id: string): Promise<PostType> {
@@ -22,14 +24,16 @@ async function fetchPost(id: string): Promise<PostType> {
 }
 
 function PostPage() {
+  const user = useUser();
   const { id } = useParams({ from: Route.id });
   const [comment, setComment] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
-  const { data, isLoading, error, refetch } = useQuery<PostType>({
+  const { data, isLoading,  refetch } = useQuery<PostType>({
     queryKey: ["post", id],
     queryFn: () => fetchPost(id),
+    retry:false
   });
 
   const canSend = comment.trim().length > 0 && !isSending;
@@ -42,62 +46,48 @@ function PostPage() {
     const err = validateComment(comment);
     if (err) return setErrorMessage(err);
 
+    setIsSending(true);
     try {
-      setIsSending(true);
-
       const formData = new FormData();
       formData.append("comment", comment.trim());
 
-      await api.post(`${import.meta.env.VITE_API_URL}/p/${id}/comment`, formData, {
-        withCredentials: true,
-      });
+      await api.post(`${import.meta.env.VITE_API_URL}/p/${id}/comments`, formData, { withCredentials: true });
 
       setComment("");
       await refetch();
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status;
-        const msg = String(err.response?.data ?? "").toLowerCase();
-
-        if (status === 401 || status === 403 || msg.includes("unauthorized")) {
-          setErrorMessage("You must be logged in to comment.");
-        } else {
-          setErrorMessage("Failed to send comment. Please try again.");
-        }
-      } else {
-        setErrorMessage("Unexpected error occurred.");
-      }
+    } catch {
+      setErrorMessage("Failed to send comment.");
     } finally {
       setIsSending(false);
     }
   };
 
-  if (isLoading) return <p className="p-4 text-center">Loading...</p>;
-  if (error || !data) return <p className="p-4 text-center text-red-500">Error loading post</p>;
+  if (isLoading) return <div className="pt-64"><Loader/></div>;
+  if (!data) throw new Error("Post not found");
+
 
   return (
-    <div className="resp-grid p-2">
-      <div className="container lg:col-start-2">
-        {/* Post */}
+    <div className="center-col p-2">
+      <div className="panel lg:col-start-2">
         <div className="card">
-          <Post refetch={refetch} id={data.id} text={data.text} author={data.author} communityId={data.communityId} communityName={data.communityName} communityImage={data.communityImage} images={data.images} likes={data.likes} saved={data.saved} comments={data.comments} />
+          <Post {...data} refetch={refetch} />
         </div>
 
-        {/* Komentovacia sekcia */}
         <section className="box">
-          <div className="container p-0 flex-row justify-between items-center mb-2">
+          <div className="panel p-0 flex-row items-center ">
             <p className="font-semibold">Comments</p>
             <span className="text-xs text-tw-muted">{(data.comments ?? []).length}</span>
           </div>
-
-          <form onSubmit={sendComment} noValidate>
+          {!user ? <p className="text-xs">You must be <Link to="/auth/login" className="text-tw-primary animate-pulse">logged in</Link> to comment.</p> : ""}
+          <form onSubmit={sendComment} className={`${!user ? "blur-sm" : ""}`}>
             <textarea
+              disabled={!user}
               value={comment}
               onChange={(e) => {
                 setComment(e.target.value);
                 if (errorMessage) setErrorMessage(null);
               }}
-              className={`container border-none dark:text-white/80 placeholder:text-white/40 ${commentErr ? "outline outline-red-600 rounded-lg p-2" : ""}`}
+              className={`panel border-none dark:text-white/80 placeholder:text-white/40 ${commentErr ? "outline outline-red-600 rounded-lg p-2" : ""}`}
               placeholder="Write a comment..."
               style={{ minHeight: 56 }}
             />
@@ -105,16 +95,16 @@ function PostPage() {
             {errorMessage && <p className="text-red-500/80 text-sm mt-2">{errorMessage}</p>}
 
             <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-white/50">{comment.length}/2000</span>
+              <span className={`text-xs ${comment.length > 500 ? "text-red-500" : "text-white/50 "}`}>{comment.length}/500</span>
 
-              <button type="submit" disabled={!canSend} className={`p-1 rounded transition-colors ${!canSend ? "text-white/30 cursor-not-allowed" : "text-white/60 hover:text-tw-primary"}`} title={isSending ? "Sending..." : "Send"} aria-label="Send comment">
+              <button type="submit" disabled={!canSend} className={`p-1 rounded ${!canSend ? "text-white/30 cursor-not-allowed" : "text-white/60 hover:text-tw-primary"}`} title={isSending ? "Sending..." : "Send"} aria-label="Send comment">
                 {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>
             </div>
           </form>
 
           <ul>
-            {(data.comments ?? []).map((c) => (
+            {data.comments!.map((c) => (
               <li key={c.id} className="divider-top border-t-tw-border/50 pt-3">
                 <div className="flex items-center gap-2">
                   <img src={c.author.image ? getFromCdn(c.author.image) : "/anonymous.png"} className="rounded-full w-8 h-8 object-cover" alt="user avatar" />

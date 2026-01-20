@@ -20,11 +20,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     staleTime: 1000 * 60 * 5,
   });
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <div className="mt-64">
+    <Loader/>
+  </div>
 
   return <UserContext.Provider value={data ?? null}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {
-  return useContext(UserContext);
+  return useContext(UserContext); // User | null
 }

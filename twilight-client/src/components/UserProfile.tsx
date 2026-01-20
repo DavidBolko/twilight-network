@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { FullUser, User } from "../types";
 import { getFromCdn } from "../utils";
 
-import { Check, Pencil, X, Loader2Icon, UserPlus } from "lucide-react";
+import { Check, Pencil, X, Loader2Icon } from "lucide-react";
 import { validateAvatarFile, validateDescription } from "../validator";
 import api from "../axios";
 
@@ -24,9 +24,6 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
 
   const [descError, setDescError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  const [friendInfo, setFriendInfo] = useState<string | null>(null);
-  const [isAddingFriend, setIsAddingFriend] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isSelf) return;
@@ -99,24 +96,8 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
     setIsEditing(false);
   };
 
-  const addFriend = async () => {
-    if (isSelf) return;
-
-    setFriendInfo(null);
-
-    try {
-      setIsAddingFriend(true);
-      await api.post(`${import.meta.env.VITE_API_URL}/f/request/${id}`, null, { withCredentials: true });
-      setFriendInfo("Request sent.");
-    } catch {
-      setFriendInfo("Failed to send request.");
-    } finally {
-      setIsAddingFriend(false);
-    }
-  };
-
   return (
-    <section className="container flex-row items-center gap-6">
+    <section className="panel flex-row items-center gap-6">
       <div className="relative">
         <label className={`block w-48 h-48 ${isSelf && isEditing ? "cursor-pointer" : ""}`}>
           {isUploading ? (
@@ -155,11 +136,7 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
                 </button>
               </div>
             )
-          ) : (
-            <button className="p-2 rounded-lg hover:bg-white/5 disabled:opacity-50" onClick={addFriend} disabled={isAddingFriend} aria-label="Add friend">
-              <UserPlus className="w-4 h-4" />
-            </button>
-          )}
+          ) : ""}
         </div>
 
         {/* DESCRIPTION */}
@@ -176,7 +153,6 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
 
         {descError && <p className="text-red-500/80 text-sm">{descError}</p>}
 
-        {!isSelf && friendInfo && <p className="text-xs opacity-70">{friendInfo}</p>}
       </div>
     </section>
   );

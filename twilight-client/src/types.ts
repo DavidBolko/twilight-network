@@ -28,9 +28,9 @@ export type PostType = {
   likes: User[];
   comments?: Comment[];
   saved: boolean;
+  createdAt: string,
   moodCounts?: Partial<Record<Mood, number>>;
   myMood?: Mood | null;
-  refetch: Function;
 };
 
 export type Community = {
@@ -67,7 +67,6 @@ export type SidebarType = {
     membersCount: number;
     postsCount: number;
   }[];
-  friends: User[]; // ✅ reuse
+  friends: User[]; 
   chatComingSoon: boolean;
 };
-type FriendRequest = { id: string; requesterId: string; requesterName: string; requesterImage?: string };

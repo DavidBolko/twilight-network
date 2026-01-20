@@ -3,7 +3,6 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import Sidebar from "../components/Sidebar.tsx";
 import type { PostType, Sort, TimeRange } from "../types.ts";
 import Post from "../components/Post.tsx";
 import { PostFilterTabs } from "../components/PostFilterTabs.tsx";
@@ -43,7 +42,7 @@ function Index() {
 
   useEffect(() => {
     const onScroll = () => {
-      // keď si 600px od dna
+      //sme 600px od konca obrazovky po scrolle
       const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 600;
 
       if (nearBottom && postsQ.hasNextPage && !postsQ.isFetchingNextPage) {
@@ -54,9 +53,14 @@ function Index() {
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [postsQ.hasNextPage, postsQ.isFetchingNextPage, postsQ.fetchNextPage]);
+  }, [postsQ.hasNextPage, postsQ.isFetchingNextPage, postsQ.fetchNextPage, postsQ]);
 
-  if (postsQ.isLoading) return <Loader />;
+  if (postsQ.isLoading)
+    return (
+      <div className="mt-64">
+        <Loader />
+      </div>
+    );
 
   if (postsQ.error) {
     navigate({ to: "/error", search: { message: "Nothing were found" } });
@@ -68,19 +72,16 @@ function Index() {
   for (const p of pages) posts.push(...p);
 
   return (
-    <div className="resp-grid p-2 gap-2">
-      <aside className="lg:col-start-1 lg:row-start-1 lg:sticky lg:top-20 lg:self-start lg:justify-self-end h-fit">
+    <div className="center-col">
+      <div className="col-start-2">
         <PostFilterTabs to="/" />
-      </aside>
-
-      <Sidebar />
-
-      <main className="container pt-1 lg:col-start-2 lg:row-start-1">
+      </div>
+      <main className="panel p-0 col-start-2 lg:row-start-2">
         {posts.length ? (
-          <ul className="container p-0">
+          <ul className="panel p-0">
             {posts.map((post) => (
-              <li className="card" key={post.id}>
-                <Post {...post} />
+              <li className="card hover:bg-tw-primary/15 transition-all" key={post.id}>
+                <Post {...post} refetch={postsQ.refetch} />
               </li>
             ))}
           </ul>
@@ -91,7 +92,13 @@ function Index() {
           </div>
         )}
 
-        {postsQ.isFetchingNextPage ? <p className="text-center text-sm opacity-70 py-4">Loading more...</p> : null}
+        {postsQ.isFetchingNextPage ? (
+          <div className="pt-64">
+            <Loader />
+          </div>
+        ) : (
+          ""
+        )}
       </main>
     </div>
   );

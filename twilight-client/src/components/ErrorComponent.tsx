@@ -1,7 +1,7 @@
 import { useRouter } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 
-export default function Error({ error }: { error?: unknown }) {
+export default function ErrorComponent({ error }: { error?: unknown }) {
   const router = useRouter();
 
   const message = error && typeof error === "object" && "message" in error ? String((error as { message?: string }).message) : "Something went wrong. Please try again later.";

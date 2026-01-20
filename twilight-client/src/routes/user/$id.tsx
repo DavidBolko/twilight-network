@@ -42,15 +42,14 @@ function RouteComponent() {
   if (!data) return null;
 
   return (
-    <div className="resp-grid">
+    <div className="center-col">
       <div className="lg:col-start-2 mt-4">
         <UserProfile data={data} id={id} refetch={refetch} currentUser={user ?? null} />
 
-        <section className="container">
+        <section className="panel">
           <div className="flex w-full">
             {categories.map((cat, i) => (
-              <button
-                key={cat}
+              <button key={cat}
                 onClick={() => {
                   setCategory(cat);
                   refetch();
@@ -62,10 +61,10 @@ function RouteComponent() {
           </div>
         </section>
 
-        <section className="container">
+        <section className="panel">
           {category === "Posts" &&
             (data.posts.length > 0 ? (
-              <ul className="flex gap-2 flex-col">
+              <ul className="panel p-0">
                 {data.posts.map((post) => (
                   <li className="card" key={post.id}>
                     <Post {...post} />
@@ -78,10 +77,10 @@ function RouteComponent() {
 
           {category === "Communities" &&
             (data.communities.length > 0 ? (
-              <ul className="flex gap-2 flex-col">
+              <ul className="panel p-0">
                 {data.communities.map((com) => (
                   <li key={com.id}>
-                    <CommunityCard community={com} currentUserId={user?.id!} isOwnProfile={user?.id === data.id} refetch={refetch} />
+                    <CommunityCard community={com} currentUserId={user?.id} isOwnProfile={user?.id === data.id} refetch={refetch} />
                   </li>
                 ))}
               </ul>
@@ -91,7 +90,7 @@ function RouteComponent() {
 
           {category === "Saved" &&
             (data.saved.length > 0 ? (
-              <ul className="flex gap-2 flex-col">
+              <ul className="panel p-0">
                 {data.saved.map((post) => (
                   <li className="card" key={post.id}>
                     <Post {...post} />

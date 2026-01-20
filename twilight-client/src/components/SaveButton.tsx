@@ -1,5 +1,5 @@
 import { BookmarkIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 
 import api from "../axios";
 
@@ -11,7 +11,8 @@ interface SaveButtonProps {
 export const SaveButton = ({ postId, saved }: SaveButtonProps) => {
   const [isSaved, setIsSaved] = useState(saved);
 
-  const toggleSave = async () => {
+  const toggleSave = async (e:SyntheticEvent) => {
+    e.stopPropagation()
     try {
       await api.put(
         `${import.meta.env.VITE_API_URL}/p/${postId}/save`,

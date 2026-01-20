@@ -12,7 +12,9 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOriginPatterns(
                         "https://twilight.bolkodev.ipv64.de",
-                        "http://localhost:5137"
+                        "http://localhost:5137",
+                        "http://localhost:5173",
+                        "http://192.168.1.18:5173"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

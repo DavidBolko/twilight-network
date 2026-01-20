@@ -39,7 +39,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         }
-        System.out.println("token: " + token);
         if (token != null) {
             try {
 

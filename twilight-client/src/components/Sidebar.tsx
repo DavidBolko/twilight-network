@@ -1,164 +1,147 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { Compass, Home, LogOut, PlusIcon } from "lucide-react";
 
-import type { SidebarType } from "../types.ts";
-import { getFromCdn } from "../utils.ts";
-import api from "../axios.ts";
-import axios from "axios";
+import type { SidebarType } from "../types";
+import api from "../axios";
+import { getFromCdn } from "../utils";
+import { useUser } from "../userContext";
+import { useState } from "react";
+import Modal from "./Modal";
+import CreateCommunity from "./CreateCommunity";
 
-type FriendRequest = {
-  id: string; // friendship id
-  requesterName: string;
-  requesterImage?: string | null;
-};
+type Props = { sidebarOpen: boolean };
 
-async function fetchSidebar(): Promise<SidebarType> {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/users/sidebar`, { withCredentials: true });
+type CommunityItem = SidebarType["ownedCommunities"][number];
+
+async function fetchOwned(): Promise<CommunityItem[]> {
+  const res = await api.get(`${import.meta.env.VITE_API_URL}/users/owned`, { withCredentials: true });
   return res.data;
 }
 
-async function fetchRequests(): Promise<FriendRequest[]> {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/f/requests/incoming`, { withCredentials: true });
+async function fetchJoined(): Promise<CommunityItem[]> {
+  const res = await api.get(`${import.meta.env.VITE_API_URL}/users/joined`, { withCredentials: true });
   return res.data;
 }
 
-function CommunityList({ title, items }: { title: string; items: SidebarType["ownedCommunities"] }) {
-  return (
-    <div>
-      <p className="text-sm font-semibold">{title}</p>
+export default function Sidebar({ sidebarOpen }: Props) {
+  const [open, setOpen] = useState<boolean>(false);
+  const user = useUser();
 
-      {items?.length ? (
-        <ul className="mt-2 space-y-2">
-          {items.map((c) => (
-            <li key={c.id} className="flex items-center justify-between gap-2">
-              <Link to="/communities/$id" params={{ id: String(c.id) }} search={{ posts: "hot" }} className="flex items-center gap-2 min-w-0">
-                <img className="w-8 h-8 rounded-full object-cover" src={c.image ? getFromCdn(c.image) : "/avatar.png"} alt="" />
-                <span className="truncate text-sm">{c.name}</span>
-              </Link>
-
-              <span className="text-xs opacity-70 tabular-nums">{c.postsCount}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-2 text-xs opacity-70">Nothing here yet.</p>
-      )}
-    </div>
-  );
-}
-
-export default function Sidebar() {
-  const qc = useQueryClient();
-
-  const sidebarQ = useQuery({
-    queryKey: ["sidebar"],
-    queryFn: fetchSidebar,
+  const ownedQ = useQuery({
+    queryKey: ["sidebar", "owned"],
+    queryFn: fetchOwned,
     staleTime: 60_000,
-    retry: false,
+    enabled: !!user,
   });
 
-  const blocked = axios.isAxiosError(sidebarQ.error) && (sidebarQ.error.response?.status === 401 || sidebarQ.error.response?.status === 403);
-
-  const reqQ = useQuery({
-    queryKey: ["friendRequests"],
-    queryFn: fetchRequests,
-    enabled: !blocked,
-    staleTime: 30_000,
-    retry: false,
+  const joinedQ = useQuery({
+    queryKey: ["sidebar", "joined"],
+    queryFn: fetchJoined,
+    staleTime: 60_000,
+    enabled: !!user,
   });
 
-  async function accept(id: string) {
-    await api.post(`${import.meta.env.VITE_API_URL}/f/accept/${id}`, null, { withCredentials: true });
-    qc.invalidateQueries({ queryKey: ["sidebar"] });
-    qc.invalidateQueries({ queryKey: ["friendRequests"] });
-  }
-
-  async function decline(id: string) {
-    await api.post(`${import.meta.env.VITE_API_URL}/f/decline/${id}`, null, { withCredentials: true });
-    qc.invalidateQueries({ queryKey: ["friendRequests"] });
-  }
-
-  if (blocked) {
+  if (!user) {
     return (
-      <aside className="card lg:sticky lg:top-20 h-fit">
-        <p className="text-sm font-semibold">Sidebar</p>
-        <p className="text-xs opacity-70 mt-1">Log in to see your communities and friends.</p>
+      <aside className={`sidebar ${sidebarOpen ? "flex" : "hidden"} xl:flex`}>
+        <div className="py-2">
+          <Link to="/" search={{ posts: "hot", time: "week" }} className="btn muted w-full justify-start gap-2">
+            <Home size={18} className="opacity-80" />
+            Home
+          </Link>
+
+          <Link to="/explore" className="btn muted w-full justify-start gap-2">
+            <Compass size={18} className="opacity-80" />
+            Explore
+          </Link>
+        </div>
+
+        <Link to="/auth/login" className="btn primary w-full p-2 mt-2">
+          <LogOut size={18} className="opacity-80" />
+          Log In
+        </Link>
       </aside>
     );
   }
 
-  if (sidebarQ.isLoading) {
-    return (
-      <aside className="card lg:sticky lg:top-20 h-fit">
-        <p className="text-sm font-semibold">Loading...</p>
-      </aside>
-    );
-  }
-
-  if (!sidebarQ.data) {
-    return (
-      <aside className="card lg:sticky lg:top-20 h-fit">
-        <p className="text-sm font-semibold">Sidebar</p>
-        <p className="text-xs opacity-70 mt-1">Failed to load.</p>
-      </aside>
-    );
-  }
-
-  const sidebar = sidebarQ.data;
+  const owned = ownedQ.data ?? [];
+  const joined = joinedQ.data ?? [];
 
   return (
-    <aside className="card lg:sticky lg:top-20 h-fit">
-      <CommunityList title="Owned" items={sidebar.ownedCommunities ?? []} />
-      <hr className="my-2 opacity-30" />
-      <CommunityList title="Member of" items={sidebar.memberCommunities ?? []} />
+    <>
+      <aside className={`sidebar ${sidebarOpen ? "flex" : "hidden"} xl:flex`}>
+        <div className="flex-1 overflow-y-">
+          <div className="py-2">
+            <Link to="/" search={{ posts: "hot", time: "week" }} className="btn muted w-full justify-start gap-2">
+              <Home size={18} className="opacity-80" />
+              Home
+            </Link>
 
-      <hr className="my-2 opacity-30" />
+            <Link to="/explore" className="btn muted w-full justify-start gap-2">
+              <Compass size={18} className="opacity-80" />
+              Explore
+            </Link>
 
-      <div>
-        <p className="text-sm font-semibold">Friends</p>
+            <button className="btn muted w-full justify-start gap-2" onClick={()=>setOpen(true)}>
+              <PlusIcon size={18} className="opacity-80" />
+              New community
+            </button>
+          </div>
 
-        {/* requests inside Friends */}
-        {reqQ.data?.length ? (
-          <div className="mt-2">
-            <p className="text-xs opacity-70 mb-1">Requests</p>
-
-            <ul className="space-y-2">
-              {reqQ.data.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <img className="w-7 h-7 rounded-full object-cover" src={r.requesterImage ? getFromCdn(r.requesterImage) : "/avatar.png"} alt="" />
-                    <span className="text-sm truncate">{r.requesterName}</span>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button className="btn primary px-2 py-1 text-xs" onClick={() => accept(r.id)}>
-                      Accept
-                    </button>
-                    <button className="btn px-2 py-1 text-xs" onClick={() => decline(r.id)}>
-                      Decline
-                    </button>
-                  </div>
+          <p className="text-sm font-semibold divider-top py-2">Owned</p>
+          {owned.length ? (
+            <ul className="mt-2 pb-2">
+              {owned.map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-2">
+                  <Link to="/communities/$id" params={{ id: String(c.id) }} search={{ posts: "hot" }} className="panel flex-row items-center gap-2">
+                    <img className="w-8 h-8 rounded-full object-cover" src={c.image ? getFromCdn(c.image) : "/avatar.png"} alt="" />
+                    <span className="text-sm">{c.name}</span>
+                  </Link>
+                  <span className="text-xs text-tw-muted">{c.postsCount}</span>
                 </li>
               ))}
             </ul>
+          ) : (
+            <p className="mt-2 text-xs text-tw-muted py-2">Nothing here yet.</p>
+          )}
 
-            <hr className="my-2 opacity-30" />
+          <p className="text-sm font-semibold divider-top py-2">Communites</p>
+          {joined.length ? (
+            <ul className="mt-2 pb-2">
+              {joined.map((c) => (
+                <li key={c.id} className="panel flex-row justify-between items-center gap-2 hover:bg-tw-primary/10 p-2">
+                  <Link to="/communities/$id" params={{ id: String(c.id) }} search={{ posts: "hot" }} className="flex items-center gap-2  ">
+                    <img className="w-8 h-8 rounded-full object-cover" src={c.image ? getFromCdn(c.image) : "/avatar.png"} alt="" />
+                    <span className="truncate text-sm">{c.name}</span>
+                  </Link>
+                  <span className="text-xs text-tw-muted">{c.postsCount}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-xs text-tw-muted pt-2">Nothing here yet.</p>
+          )}
+        </div>
+
+        <Link to="/auth/logout" className="btn w-full justify-start border-none p-2 hover:danger mb-2 gap-2">
+          <LogOut size={18} className="opacity-80" />
+          Logout
+        </Link>
+        <div className="py-2 pb-12 divider-top">
+          <Link to="/user/$id" params={{ id: user.id }} activeOptions={{ includeSearch: false }} className="panel mb-4 flex-row rounded-lg hover:bg-tw-primary/10">
+            <img src={user.image ? getFromCdn(user.image) : "/anonymous.png"} className="w-10 h-10 rounded-full object-cover border border-tw-border/80" alt="profile" />
+            <span>{user.name}</span>
+          </Link>
+        </div>
+      </aside>
+      {open ? (
+        <Modal onClose={() => setOpen(false)} background={true} lightbox={false}>
+          <div className="p-4">
+            <CreateCommunity setIsOpen={setOpen}/>
           </div>
-        ) : null}
-
-        {sidebar.friends?.length ? (
-          <ul className="mt-2 space-y-2">
-            {sidebar.friends.map((f) => (
-              <li key={f.id} className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${f.online ? "bg-green-500" : "bg-gray-500"}`} />
-                <span className="text-sm truncate">{f.name}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-2 text-xs opacity-70">{sidebar.chatComingSoon ? "Chat coming soon" : "No friends yet."}</p>
-        )}
-      </div>
-    </aside>
+        </Modal>
+      ) : null}
+    </>
   );
 }

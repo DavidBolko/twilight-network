@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
@@ -15,7 +16,7 @@ export default {
           glow: "#C4B5FD",
           accent: "#8B5CF6",
           "accent-dark": "#6D28D9",
-          "light-bg": "#F1ECFB",
+          "light-bg": "#E6E6FA",
           "light-surface": "#F5EEFD",
           "light-border": "#9082B1",
           "light-text": "#2C1F47",

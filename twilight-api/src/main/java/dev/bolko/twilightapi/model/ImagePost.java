@@ -2,12 +2,14 @@ package dev.bolko.twilightapi.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
 public final class ImagePost {
 
     @Id

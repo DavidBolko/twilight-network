@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { type SyntheticEvent, useMemo, useState } from "react";
 import { queryClient } from "../../main.tsx";
 import api from "../../axios.ts";
@@ -66,34 +66,31 @@ function Login() {
   };
 
   return (
-    <div className="container center lg:mt-16">
-      <h1 className="text-4xl text-center  lg:m-0">Welcome back</h1>
-
-      <div className="card lg:flex-row center max-w-5xl p-6">
-        <form onSubmit={submit} noValidate className="container lg:max-w-sm">
-          <label htmlFor="email">Email</label>
-          <input name="email" type="email" required onChange={(e) => setEmail(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
-
-          <label htmlFor="password">Password</label>
-          <input name="password" type="password" required onChange={(e) => setPassword(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
-
-          {errorMessage && <p className="text-red-500/80 text-sm">{errorMessage}</p>}
-
-          <button type="submit" className="btn primary w-full mt-2">
-            Login
-          </button>
-
-          <div className="flex gap-2 items-center">
-            <p className="text-sm text-tw-muted">Don't have an account?</p>
-            <a href="/auth/register" className="text-tw-primary hover:text-tw-accent">
-              Create an account
-            </a>
+    <div className="panel center">
+      <h1 className="text-6xl font-bold">TWILIGHT</h1>
+      <div className="panel center pt-24">
+        <h2 className="text-4xl text-center ">Welcome back</h2>
+        <div className="card flex-row center max-w-5xl p-6">
+          <form onSubmit={submit} noValidate className="panel lg:max-w-sm">
+            <label htmlFor="email">Email</label>
+            <input name="email" type="email" required onChange={(e) => setEmail(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
+            <label htmlFor="password">Password</label>
+            <input name="password" type="password" required onChange={(e) => setPassword(e.target.value)} className={`${errorMessage ? "error" : ""}`} />
+            {errorMessage && <p className="text-red-500/80 text-sm">{errorMessage}</p>}
+            <button type="submit" className="btn primary w-full mt-2">
+              Login
+            </button>
+            <div className="panel flex-row center">
+              <p className="text-sm text-tw-muted">Don't have an account?</p>
+              <Link to="/auth/register" className="text-tw-primary hover:text-tw-accent">
+                Create an account
+              </Link>
+            </div>
+          </form>
+          <div className="hidden md:flex panel lg:w-1/2 center">
+            <img src="/twilight.png" alt="login illustration" className="max-w-[300px] w-full h-auto object-contain" />
+            <h2 className="text-lg text-glow">{quote}</h2>
           </div>
-        </form>
-
-        <div className="container lg:w-1/2 center">
-          <img src="/twilight.png" alt="login illustration" className="max-w-[300px] w-full h-auto object-contain" />
-          <h2 className="text-lg text-glow">{quote}</h2>
         </div>
       </div>
     </div>

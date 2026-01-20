@@ -6,7 +6,7 @@ import api from "../axios";
 
 type CommunityCardProps = {
   community: Community;
-  currentUserId: string;
+  currentUserId?: string;
   isOwnProfile: boolean;
   refetch: () => void;
 };
@@ -28,7 +28,7 @@ export default function CommunityCard({ community, currentUserId, refetch }: Com
 
   return (
     <div className="card flex-row center p-6">
-      <Link className="container flex-row " to="/communities/$id" search={{ posts: "hot" }} params={{ id: community.id }}>
+      <Link className="panel flex-row " to="/communities/$id" search={{ posts: "hot" }} params={{ id: community.id }}>
         <img src={community.imageUrl ? getFromCdn(community.imageUrl) : community.imageUrl} alt={community.name} className="w-20 h-20 rounded-full object-cover" />
         <div>
           <span className="font-semibold text-lg">{community.name}</span>

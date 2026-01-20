@@ -41,9 +41,8 @@
   }
 
   a {
-    @apply underline-offset-4;
-    @apply hover:underline focus-visible:underline;
-    @apply hover:text-tw-primary-dark dark:hover:text-tw-primary; /* light vs dark */
+    @apply w-fit;
+    @apply hover:text-tw-primary-dark dark:hover:text-tw-primary;
   }
 }
 
@@ -58,14 +57,8 @@
 }
 
 @layer components {
-  .resp-grid {
-    @apply grid;
-    @apply grid-cols-1;
-    @apply gap-2;
-    @apply lg:grid-cols-tw;
-    @apply justify-center;
-    @apply place-self-center;
-    @apply w-full;
+  .center-col {
+    @apply flex flex-col w-full mx-auto gap-2 p-2 max-w-[760px]; 
   }
 
   .divider-top {
@@ -75,7 +68,7 @@
     @apply border-r border-tw-light-border dark:border-tw-border;
   }
 
-  .container {
+  .panel {
     @apply flex;
     @apply flex-col;
     @apply gap-2;
@@ -86,15 +79,20 @@
   }
 
   .box {
-    @apply container border border-tw-border p-4;
+    @apply panel border border-tw-border p-4;
   }
 
   .navbar {
-    @apply flex p-2 justify-between items-center gap-2;
+    @apply flex p-2 justify-between lg:grid grid-cols-3 items-center gap-2;
     @apply w-full bg-tw-light-surface dark:bg-tw-surface/70 backdrop-blur-md sticky top-0 z-50;
   }
+
+  .sidebar {
+    @apply flex flex-col w-full h-screen p-4 bg-tw-light-surface dark:bg-tw-surface/70 backdrop-blur-md rounded-none  max-w-64 fixed left-0 z-50 ;
+  }
+
   .card {
-    @apply container border rounded-md;
+    @apply panel border rounded-md;
     @apply bg-tw-light-surface dark:bg-tw-surface;
     @apply border-tw-light-border dark:border-tw-border;
     @apply shadow-[0_6px_15px_rgba(0,0,0,0.08)];
@@ -120,10 +118,8 @@
     @apply hover:shadow-[0_0_15px_rgba(239,68,68,0.7)];
   }
 
-  .accent {
-    @apply bg-tw-accent;
-    @apply hover:bg-tw-accent-dark;
-    @apply hover:shadow-[0_0_15px_rgba(99,102,241,0.7)];
+  .muted {
+    @apply  border-none p-2 hover:bg-tw-primary/10;
   }
 
   .text-glow {

@@ -9,17 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as ErrorRouteImport } from './routes/error'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as UserIdRouteImport } from './routes/user/$id'
 import { Route as PostIdRouteImport } from './routes/post/$id'
 import { Route as CommunitiesIdRouteImport } from './routes/communities/$id'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as AdminOwlsRouteImport } from './routes/admin/owls'
 
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
   path: '/error',
@@ -28,11 +32,6 @@ const ErrorRoute = ErrorRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UserIdRoute = UserIdRouteImport.update({
@@ -65,103 +64,98 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminOwlsRoute = AdminOwlsRouteImport.update({
-  id: '/admin/owls',
-  path: '/admin/owls',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
-  '/admin/owls': typeof AdminOwlsRoute
+  '/explore': typeof ExploreRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/post/$id': typeof PostIdRoute
   '/user/$id': typeof UserIdRoute
-  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
-  '/admin/owls': typeof AdminOwlsRoute
+  '/explore': typeof ExploreRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/post/$id': typeof PostIdRoute
   '/user/$id': typeof UserIdRoute
-  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
-  '/admin/owls': typeof AdminOwlsRoute
+  '/explore': typeof ExploreRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/post/$id': typeof PostIdRoute
   '/user/$id': typeof UserIdRoute
-  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/error'
-    | '/admin/owls'
+    | '/explore'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
     | '/communities/$id'
     | '/post/$id'
     | '/user/$id'
-    | '/admin'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/error'
-    | '/admin/owls'
+    | '/explore'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
     | '/communities/$id'
     | '/post/$id'
     | '/user/$id'
-    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/error'
-    | '/admin/owls'
+    | '/explore'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
     | '/communities/$id'
     | '/post/$id'
     | '/user/$id'
-    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ErrorRoute: typeof ErrorRoute
-  AdminOwlsRoute: typeof AdminOwlsRoute
+  ExploreRoute: typeof ExploreRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthLogoutRoute: typeof AuthLogoutRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   CommunitiesIdRoute: typeof CommunitiesIdRoute
   PostIdRoute: typeof PostIdRoute
   UserIdRoute: typeof UserIdRoute
-  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/error': {
       id: '/error'
       path: '/error'
@@ -174,13 +168,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/user/$id': {
@@ -225,27 +212,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/owls': {
-      id: '/admin/owls'
-      path: '/admin/owls'
-      fullPath: '/admin/owls'
-      preLoaderRoute: typeof AdminOwlsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ErrorRoute: ErrorRoute,
-  AdminOwlsRoute: AdminOwlsRoute,
+  ExploreRoute: ExploreRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthLogoutRoute: AuthLogoutRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   CommunitiesIdRoute: CommunitiesIdRoute,
   PostIdRoute: PostIdRoute,
   UserIdRoute: UserIdRoute,
-  AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
