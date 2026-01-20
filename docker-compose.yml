@@ -29,6 +29,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_PORT: 9173
       UPLOAD_DIR: /app/uploads
     ports:
       - "9173:9173"
