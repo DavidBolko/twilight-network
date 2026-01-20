@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: twilight-db
+    environment:
+      POSTGRES_DB: twilight
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - twilight_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d twilight"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./twilight-api
+      dockerfile: Dockerfile
+    container_name: twilight-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/twilight
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - "9173:9173"
+    volumes:
+      - ./twilight-api/uploads:/app/uploads
+  client:
+    build:
+      context: ./twilight-client
+      dockerfile: Dockerfile
+    container_name: twilight-client
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: http://localhost:9173/api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./twilight-client:/app
+      - /app/node_modules
+    command: ["npm","run","dev","--","--host","0.0.0.0","--port","5173"]
+
+volumes:
+  twilight_db:

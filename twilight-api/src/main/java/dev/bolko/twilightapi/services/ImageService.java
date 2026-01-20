@@ -3,6 +3,7 @@ package dev.bolko.twilightapi.services;
 import dev.bolko.twilightapi.model.ImagePost;
 import dev.bolko.twilightapi.model.Post;
 import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,10 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.net.MalformedURLException;
 @Service
+
 public class ImageService {
+    private final String uploadDir = System.getenv().getOrDefault("UPLOAD_DIR", "uploads");
+
     private static final String UPLOAD_DIR = "uploads/";
 
     public ImageService() {

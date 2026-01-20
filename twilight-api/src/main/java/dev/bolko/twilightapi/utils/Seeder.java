@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Profile("dev")
+//@Profile("dev")
 @Component
 public class Seeder implements CommandLineRunner {
 
@@ -46,7 +46,6 @@ public class Seeder implements CommandLineRunner {
         Random rnd = new Random();
         LocalDateTime now = LocalDateTime.now();
 
-        // 1) USERS
         List<User> users = new ArrayList<>();
         for (int i = 1; i <= 25; i++) {
             User u = new User();
@@ -60,7 +59,6 @@ public class Seeder implements CommandLineRunner {
         }
         userRepo.saveAll(users);
 
-        // 2) COMMUNITY
         User creator = users.get(0);
 
         Community community = new Community();
@@ -74,25 +72,18 @@ public class Seeder implements CommandLineRunner {
         }
         communityRepo.save(community);
 
-        // 3) POSTS
         for (int i = 1; i <= 100; i++) {
             Post p = new Post();
             p.setCommunity(community);
             p.setAuthor(users.get(rnd.nextInt(users.size())));
 
-            // random createdAt v poslednom roku
-            LocalDateTime created = now
-                    .minusDays(rnd.nextInt(365))
-                    .minusHours(rnd.nextInt(24))
-                    .minusMinutes(rnd.nextInt(60));
+            LocalDateTime created = now.minusDays(rnd.nextInt(365)).minusHours(rnd.nextInt(24)).minusMinutes(rnd.nextInt(60));
             p.setCreatedAt(created);
 
-            // text (väčšinou)
-            String text = randomPostText(rnd, i);
-            boolean hasText = rnd.nextInt(10) != 0; // 90% má text
+            String text = randomPostText(rnd);
+            boolean hasText = rnd.nextInt(10) != 0;
             p.setText(hasText ? text : null);
 
-            // images (0..3)
             int imgCount = rnd.nextInt(4);
             if (imgCount > 0) {
                 List<String> pool = new ArrayList<>(UPLOAD_IMAGES);
@@ -107,15 +98,13 @@ public class Seeder implements CommandLineRunner {
 
             boolean hasImages = !p.getImagePosts().isEmpty();
 
-            // musí mať aspoň text alebo obrázok
             if (!hasText && !hasImages) {
-                p.setText(text); // fallback nech je validné
+                p.setText(text);
                 hasText = true;
             }
 
             p.setType(hasText && hasImages ? PostType.MIXED : hasImages ? PostType.IMAGE : PostType.TEXT);
 
-            // likes 0..18
             int likeCount = rnd.nextInt(19);
             for (int k = 0; k < likeCount; k++) {
                 p.getLikes().add(users.get(rnd.nextInt(users.size())));
@@ -125,18 +114,12 @@ public class Seeder implements CommandLineRunner {
         }
     }
 
-    private String randomPostText(Random rnd, int i) {
-        String[] starts = {"Dnes som riešil", "Rýchly tip:", "Narazil som na", "Skúšam", "Hot take:"};
-        String[] mids = {"Spring Boot", "TanStack Router", "React Query", "PostgreSQL", "Docker", "JWT auth"};
-        String[] ends = {
-                "a išlo to lepšie než som čakal.",
-                "a mám z toho zvláštny bug.",
-                "— máte niekto podobne?",
-                "a toto je môj fix.",
-                "a chcem to spraviť čistejšie."
-        };
-        return starts[rnd.nextInt(starts.length)] + " " +
-                mids[rnd.nextInt(mids.length)] + " " +
-                ends[rnd.nextInt(ends.length)] + " (#" + i + ")";
+    private String randomPostText(Random rnd) {
+        String lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque justo ipsum, ullamcorper sed dui a, rutrum condimentum eros. Praesent hendrerit erat nunc, a mollis ligula viverra at. Proin porttitor tincidunt risus, eget fringilla erat tempor quis. Maecenas placerat laoreet mauris, a bibendum orci pellentesque vitae. Suspendisse sed urna tortor. Donec efficitur pulvinar aliquam. Proin lobortis dolor vel augue commodo semper. Pellentesque massa massa, vulputate eu nisl a, mollis congue turpis. Pellentesque a lectus ac nibh molestie venenatis consectetur nec diam. Donec congue non odio eget rutrum. Suspendisse pellentesque lacus sit amet gravida tempus. Nunc tempus vitae nibh a venenatis. In feugiat odio ac urna mattis iaculis ac sit amet tortor. In hac habitasse platea dictumst. Phasellus ut nulla tellus.\n" +
+                "\n" +
+                "Aenean aliquam ipsum et purus euismod, vel mollis leo aliquam. Cras ultricies elit faucibus, faucibus tortor sed, blandit nibh. Nulla sollicitudin ipsum vel tincidunt consectetur. Fusce vulputate eros erat. Fusce nec fringilla nisi. Donec auctor nisi at tortor iaculis, quis blandit tellus ullamcorper. Quisque vitae massa rhoncus, consectetur sem et, feugiat metus. Phasellus at faucibus eros. Vestibulum fermentum eros lacus, in viverra nibh pulvinar at. Maecenas id scelerisque dui, sit amet auctor lorem. In orci ipsum, lobortis et tempor sit amet, molestie quis massa. Nunc tincidunt pretium est, et tristique mi tempus ac. Integer laoreet quam eu mi euismod mattis. In mollis rutrum luctus.\n" +
+                "\n" +
+                "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Aliquam ac est tincidunt, pulvinar libero sed, faucibus libero. Nulla massa mi, vulputate at viverra sed, tristique ac arcu. Cras quis libero sit amet nisi vestibulum cursus. Proin non lobortis metus. Nunc lacinia nisi sit amet ornare cursus. Proin eu dui ut metus condimentum pretium non sed magna. Integer sed turpis sed tortor placerat condimentum sit amet a nisi. Integer accumsan mollis velit eget facilisis. Phasellus nec convallis magna, sed rhoncus nulla. Fusce laoreet lectus faucibus odio gravida pharetra nec at nisl. Suspendisse fermentum mollis sapien vitae laoreet. In laoreet nec lorem at efficitur. Curabitur eu justo eu quam bibendum ultrices. Nunc dignissim mattis sollicitudin. Donec est est, consequat id sodales quis, pellentesque et lacus.";
+        return lorem.substring(0, rnd.nextInt()%lorem.length());
     }
 }
