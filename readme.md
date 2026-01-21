@@ -5,7 +5,7 @@ Požiadavky:
 - WSL2 (napr. Ubuntu)
 - Docker Desktop
 
-Vo WSL:
+Vo terminale/Powershell:
 
 ```bash
 git clone https://github.com/DavidBolko/twilight-network
