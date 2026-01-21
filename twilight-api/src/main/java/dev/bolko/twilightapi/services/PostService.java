@@ -132,6 +132,7 @@ public class PostService {
         boolean canDelete = perm.canModerate(post.getAuthor().getId(), post.getCommunity().getId(), me);
         if (!canDelete) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot delete this post");
 
+        commentRepo.deleteCommentsByPost_Id(id);
         for (User u : post.getSavedBy()) {
             u.getSavedPosts().remove(post);
         }

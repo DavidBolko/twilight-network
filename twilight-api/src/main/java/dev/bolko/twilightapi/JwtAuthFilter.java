@@ -17,6 +17,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Pomoc s AI
+ */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 

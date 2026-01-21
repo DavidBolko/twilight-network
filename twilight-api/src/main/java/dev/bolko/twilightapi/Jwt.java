@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
-
+/**
+ * Pomoc s AI
+ */
 @Component
 public class Jwt {
 

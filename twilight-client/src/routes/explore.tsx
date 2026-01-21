@@ -4,16 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 
 import api from "../axios";
 import { getFromCdn } from "../utils";
+import type { Community } from "../types";
+import { Loader } from "lucide-react";
 
 type Category = { id: number; name: string };
-type Community = {
-  id: number;
-  name: string;
-  description?: string | null;
-  image?: string | null;
-  imageUrl?: string | null; // ak pouzivas imageUrl namiesto image
-  categoryId?: number | null;
-};
 
 export const Route = createFileRoute("/explore")({
   component: ExplorePage,
@@ -37,13 +31,11 @@ function ExplorePage() {
   const catQ = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
-    staleTime: 5 * 60_000,
   });
 
   const comQ = useQuery({
     queryKey: ["communities", activeCategoryId],
     queryFn: () => fetchCommunities(activeCategoryId),
-    staleTime: 60_000,
   });
 
   const categories = catQ.data ?? [];
@@ -60,42 +52,29 @@ function ExplorePage() {
         {tabs.map((c) => {
           const active = c.id === activeCategoryId;
           return (
-            <button
-              key={String(c.id)}
-              onClick={() => setActiveCategoryId(c.id)}
-              className={`btn ${active ? "primary" : "muted"} whitespace-nowrap`}
-              type="button"
-            >
+            <button key={String(c.id)} onClick={() => setActiveCategoryId(c.id)} className={`btn ${active ? "primary" : "muted"} whitespace-nowrap`} type="button">
               {c.name}
             </button>
           );
         })}
       </div>
 
-      {/* Loading / error */}
       {catQ.isError ? <p className="text-sm text-red-500">Failed to load categories.</p> : null}
       {comQ.isError ? <p className="text-sm text-red-500">Failed to load communities.</p> : null}
-      {comQ.isLoading ? <p className="text-sm opacity-70">Loading...</p> : null}
+      {comQ.isLoading ? (
+        <div className="pt-64">
+          <Loader />
+        </div>
+      ) : null}
 
-      {/* Communities list */}
       {!comQ.isLoading && (
         <div className="flex flex-col gap-2">
           {communities.length ? (
             communities.map((c) => {
-              const img = c.imageUrl ?? c.image ?? null;
+              const img = c.imageUrl ?? null;
               return (
-                <Link
-                  key={c.id}
-                  to="/communities/$id"
-                  params={{ id: String(c.id) }}
-                  search={{ posts: "hot" }}
-                  className="panel flex-row items-center gap-3 hover:bg-tw-primary/10"
-                >
-                  <img
-                    src={img ? getFromCdn(img) : "/avatar.png"}
-                    alt=""
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
+                <Link key={c.id} to="/communities/$id" params={{ id: String(c.id) }} search={{ posts: "hot" }} className="panel flex-row items-center gap-3 hover:bg-tw-primary/10">
+                  <img src={img ? getFromCdn(img) : "/avatar.png"} alt="" className="w-10 h-10 rounded-full object-cover" />
                   <div className="min-w-0">
                     <p className="font-medium truncate">{c.name}</p>
                     {c.description ? <p className="text-xs opacity-70 line-clamp-1">{c.description}</p> : null}

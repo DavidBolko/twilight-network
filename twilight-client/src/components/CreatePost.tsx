@@ -63,7 +63,7 @@ export default function CreatePost({ communityId, onPosted }: Props) {
         onPosted?.();
       }
     } catch (e2: unknown) {
-      if (axios.isAxiosError(e2)) setErr(String(e2.response?.data ?? e2.message));
+      if (axios.isAxiosError(e2)) setErr(String(e2.response?.data ?? e2.message) + ", try smaller image.");
       else setErr("Unexpected error.");
     } finally {
       setLoading(false);

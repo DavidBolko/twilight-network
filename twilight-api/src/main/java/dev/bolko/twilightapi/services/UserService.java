@@ -87,4 +87,18 @@ public class UserService {
         if (principal == null) return Optional.empty();
         return userRepo.findById(principal.getId());
     }
+
+    @Transactional
+    public void toggleElder(UUID targetId, User principal) {
+        if (!Boolean.TRUE.equals(principal.getIsElderOwl())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
+        }
+
+        if (principal.getId().equals(targetId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot change yourself");
+        }
+        User target = userRepo.findById(targetId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        target.setIsElderOwl(!Boolean.TRUE.equals(target.getIsElderOwl()));
+        userRepo.save(target);
+    }
 }

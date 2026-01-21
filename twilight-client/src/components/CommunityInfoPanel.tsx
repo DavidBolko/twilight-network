@@ -16,6 +16,10 @@ type Props = {
   refetchCommunity: () => void;
 };
 
+/*
+ Uprava avatara pomohlo AI
+*/
+
 export default function CommunityInfoPanel({ community, me, isMember, refetchCommunity }: Props) {
   const navigate = useNavigate();
 

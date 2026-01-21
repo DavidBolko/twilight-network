@@ -72,10 +72,10 @@ public class AuthController {
         String token = UUID.randomUUID().toString();
 
         var cookie = org.springframework.http.ResponseCookie.from("XSRF-TOKEN", token)
-                .path("/")              // !!! kritické
-                .httpOnly(false)        // aby si to vedel prečítať JS/axios
-                .secure(false)          // na http localhost musí byť false
-                .sameSite("Lax")        // odporúčané
+                .path("/")
+                .httpOnly(false)
+                .secure(false)
+                .sameSite("Lax")
                 .build();
 
         res.addHeader("Set-Cookie", cookie.toString());

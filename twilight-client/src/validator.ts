@@ -1,3 +1,7 @@
+/*
+ Pre rychlost vygenerovane helpery s AI zo súladene s backendom
+*/
+
 export function validateRegistrationInput(name: string, email: string, password: string, password2: string): string | null {
   let err: string | null;
 
@@ -64,7 +68,6 @@ export function validatePostClient(text: string, images: File[]) {
     if (images.length > 10) return "You can upload a maximum of 10 images.";
     for (const f of images) {
       if (!f.type.startsWith("image/")) return "Only image files are allowed.";
-      // voliteľne: limit 5MB (ak máš na backende)
       if (f.size > 5 * 1024 * 1024) return "Each image must be <= 5MB.";
     }
   }

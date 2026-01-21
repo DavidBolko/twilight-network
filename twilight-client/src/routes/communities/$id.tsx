@@ -36,6 +36,11 @@ const fetchCommunityPostsPage = async (communityId: string, sort: Sort, page: nu
   return res.data as PostType[];
 };
 
+/**
+ * Infinite scroll pomohlo AI
+ * 
+ */
+
 function CommunityComponent() {
   const queryClient = useQueryClient();
   const { id } = useParams({ strict: false }) as { id: string };

@@ -20,7 +20,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-
+/**
+ * Pomoc s AI
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {

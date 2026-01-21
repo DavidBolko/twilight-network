@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { FullUser, User } from "../types";
 import { getFromCdn } from "../utils";
 
-import { Check, Pencil, X, Loader2Icon } from "lucide-react";
+import { Check, Pencil, X, Loader2Icon, Shield, ShieldCheck } from "lucide-react";
 import { validateAvatarFile, validateDescription } from "../validator";
 import api from "../axios";
 
@@ -13,8 +13,34 @@ interface UserProfileProps {
   currentUser: User | null;
 }
 
+
+/*
+ Uprava avatara pomohlo AI
+*/
+
 export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps) => {
   const isSelf = currentUser?.id === id;
+
+  const canToggleElder = !!currentUser?.isElder && !isSelf;
+  const [isTogglingElder, setIsTogglingElder] = useState(false);
+  const [elderError, setElderError] = useState<string | null>(null);
+
+  const toggleElder = async () => {
+    if (!canToggleElder) return;
+    setElderError(null);
+
+    try {
+      setIsTogglingElder(true);
+
+      await api.put(`/users/${id}/toggleElder`);
+
+      await refetch();
+    } catch {
+      setElderError("Failed to toggle elder.");
+    } finally {
+      setIsTogglingElder(false);
+    }
+  };
 
   const [description, setDescription] = useState(data.description || "");
   const [isEditing, setIsEditing] = useState(false);
@@ -115,23 +141,31 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
       <div className="flex flex-col gap-2 w-full min-w-0">
         <div className="flex items-center justify-between gap-3">
           <p className="font-semibold text-lg truncate">{data.name}</p>
-
-          {isSelf ? (
-            !isEditing ? (
-              <button className="p-2 rounded-lg hover:bg-white/5" onClick={() => setIsEditing(true)} aria-label="Edit profile">
-                <Pencil className="w-4 h-4" />
+          {/* ACTION ICONS */}
+          <div className="flex items-center gap-1">
+            {canToggleElder ? (
+              <button className="p-2 rounded-lg hover:bg-white/5 disabled:opacity-50" onClick={toggleElder} disabled={isTogglingElder} title={data.isElder ? "Remove elder" : "Make elder"} aria-label="Toggle elder">
+                {data.isElder ? <ShieldCheck className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
               </button>
-            ) : (
-              <div className="flex items-center gap-1">
-                <button className="p-2 rounded-lg hover:bg-white/5 disabled:opacity-50" onClick={saveDescription} disabled={isSaving} aria-label="Save">
-                  <Check className="w-4 h-4" />
+            ) : null}
+
+            {isSelf ? (
+              !isEditing ? (
+                <button className="p-2 rounded-lg hover:bg-white/5" onClick={() => setIsEditing(true)} aria-label="Edit profile">
+                  <Pencil className="w-4 h-4" />
                 </button>
-                <button className="p-2 rounded-lg hover:bg-white/5 disabled:opacity-50" onClick={cancelEdit} disabled={isSaving} aria-label="Cancel">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            )
-          ) : ""}
+              ) : (
+                <div className="flex items-center gap-1">
+                  <button className="p-2 rounded-lg hover:bg-white/5 disabled:opacity-50" onClick={saveDescription} disabled={isSaving} aria-label="Save">
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button className="p-2 rounded-lg hover:bg-white/5 disabled:opacity-50" onClick={cancelEdit} disabled={isSaving} aria-label="Cancel">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )
+            ) : null}
+          </div>
         </div>
 
         <textarea
@@ -146,7 +180,7 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
         />
 
         {descError && <p className="text-red-500/80 text-sm">{descError}</p>}
-
+        {elderError && <p className="text-red-500/80 text-sm">{elderError}</p>}
       </div>
     </section>
   );

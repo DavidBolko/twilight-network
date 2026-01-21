@@ -61,6 +61,14 @@ public class UserController {
         }
     }
 
+    @PutMapping("/{id}/toggleElder")
+    public ResponseEntity<?> toggleElder(@PathVariable UUID id, @AuthenticationPrincipal User principal) {
+        if (principal == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+
+        userService.toggleElder(id, principal);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/{id}/description")
     public ResponseEntity<String> changeUserDescription(@PathVariable UUID id, @RequestParam String description, @AuthenticationPrincipal User principal) {
         if (principal == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");

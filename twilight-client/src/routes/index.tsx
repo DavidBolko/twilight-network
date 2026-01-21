@@ -26,6 +26,12 @@ const fetchPostsPage = async (sort: Sort, time: TimeRange, page: number) => {
   return res.data as PostType[];
 };
 
+
+/**
+ * Infinite scroll pomohlo AI
+ * 
+ */
+
 function Index() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/" });
