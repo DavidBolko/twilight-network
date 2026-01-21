@@ -81,9 +81,7 @@ export default function EditPost({ postId, initialText, initialImageIds, onSaved
       files.forEach((f) => fd.append("images", f));
       removed.forEach((id) => fd.append("removeImageIds", id));
 
-      const res = await api.put(`${import.meta.env.VITE_API_URL}/p/${postId}`, fd, {
-        withCredentials: true,
-      });
+      const res = await api.put(`/p/${postId}`, fd);
 
       if (res.status === 200) {
         const updated = res.data as PostType;

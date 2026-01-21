@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.*;
 
@@ -13,9 +15,7 @@ import java.util.*;
 @ToString(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email")
-})
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "email")})
 public final class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -53,7 +53,12 @@ public final class User {
 
     @ManyToMany
     @JoinTable(name = "user_saved_posts", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "post_id"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Post> savedPosts = new HashSet<>();
+
+    @ManyToMany(mappedBy = "nightOwls")
+    @JsonIgnore
+    private Set<Community> moderatedCommunities = new HashSet<>();
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("user-comments")

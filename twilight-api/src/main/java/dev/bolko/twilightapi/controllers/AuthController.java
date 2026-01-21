@@ -8,10 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -64,4 +66,20 @@ public class AuthController {
         setTokenCookie(response, "", 0);
         return ResponseEntity.ok("Logged out");
     }
+
+    @GetMapping("/csrf")
+    public ResponseEntity<Void> csrf(HttpServletResponse res) {
+        String token = UUID.randomUUID().toString();
+
+        var cookie = org.springframework.http.ResponseCookie.from("XSRF-TOKEN", token)
+                .path("/")              // !!! kritické
+                .httpOnly(false)        // aby si to vedel prečítať JS/axios
+                .secure(false)          // na http localhost musí byť false
+                .sameSite("Lax")        // odporúčané
+                .build();
+
+        res.addHeader("Set-Cookie", cookie.toString());
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -1,10 +1,9 @@
 import { createFileRoute, useParams, useSearch } from "@tanstack/react-router";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useEffect } from "react";
 
 import type { Community, PostType } from "../../types.ts";
-import { getFromCdn } from "../../utils.ts";
 import { useUser } from "../../userContext.tsx";
 
 import Post from "../../components/Post.tsx";
@@ -13,6 +12,7 @@ import CreatePost from "../../components/CreatePost.tsx";
 import api from "../../axios.ts";
 import Loader from "../../components/Loader.tsx";
 import ErrorComponent from "../../components/ErrorComponent.tsx";
+import CommunityInfoPanel from "../../components/CommunityInfoPanel.tsx";
 
 type Sort = "new" | "hot" | "best";
 
@@ -25,19 +25,19 @@ export const Route = createFileRoute("/communities/$id")({
 const PAGE_SIZE = 10;
 
 const fetchCommunity = async (id: string) => {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/c/${id}`, { withCredentials: true });
+  const res = await api.get(`/c/${id}`);
   return res.data as Community;
 };
 
 const fetchCommunityPostsPage = async (communityId: string, sort: Sort, page: number) => {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/p`, {
-    withCredentials: true,
-    params: { communityId, posts: sort, page, size: PAGE_SIZE },
+  const res = await api.get(`/p`, {
+    params: { communityId, sort, page, size: PAGE_SIZE },
   });
   return res.data as PostType[];
 };
 
 function CommunityComponent() {
+  const queryClient = useQueryClient();
   const { id } = useParams({ strict: false }) as { id: string };
   const { posts: sort } = useSearch({ from: "/communities/$id" });
   const user = useUser();
@@ -64,22 +64,18 @@ function CommunityComponent() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); 
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [postsQ.hasNextPage, postsQ.isFetchingNextPage, postsQ.fetchNextPage, postsQ]);
 
   const data = communityQ.data;
 
-  const handleJoin = async () => {
-    await api.put(`${import.meta.env.VITE_API_URL}/c/join/${data?.id}`, {}, { withCredentials: true });
-    communityQ.refetch();
-  };
-
-  if (communityQ.isLoading || postsQ.isLoading) return (
-    <div className="pt-64">
-      <Loader />
-    </div>
-  );
+  if (communityQ.isLoading || postsQ.isLoading)
+    return (
+      <div className="pt-64">
+        <Loader />
+      </div>
+    );
   if (!data) throw new Error("Community not found");
 
   const isMember = data.members?.some((m) => m.id === user?.id) ?? false;
@@ -95,7 +91,8 @@ function CommunityComponent() {
 
           <CreatePost
             communityId={data.id}
-            onPosted={() => {
+            onPosted={async () => {
+              queryClient.removeQueries({ queryKey: ["community-posts", id, sort] });
               communityQ.refetch();
               postsQ.refetch();
               window.scrollTo({ top: 0, behavior: "smooth" });
@@ -106,7 +103,7 @@ function CommunityComponent() {
             <ul className="panel p-0">
               {posts.map((post) => (
                 <li className="card" key={post.id}>
-                  <Post {...post} />
+                  <Post {...post} refetch={communityQ.refetch} />
                 </li>
               ))}
             </ul>
@@ -120,47 +117,8 @@ function CommunityComponent() {
           {postsQ.isFetchingNextPage ? <p className="text-center text-sm opacity-70 py-4">Loading more...</p> : null}
         </main>
 
-        {/* RIGHT: community info */}
         <aside className="lg:col-start-3 lg:sticky h-fit order-1">
-          <div className="card h-fit">
-            <div className="panel flex-row">
-              <img src={data.imageUrl ? getFromCdn(data.imageUrl) : data.imageUrl} className="w-16 h-16 rounded-full object-cover" alt={`${data.name} avatar`} />
-
-              <div className="min-w-0">
-                <h1 className="text-lg font-semibold truncate">{data.name}</h1>
-                <button onClick={handleJoin} className={`btn ${isMember ? "danger" : "primary"}`} aria-pressed={!!isMember}>
-                  {isMember ? "Leave" : "Join"}
-                </button>
-              </div>
-            </div>
-
-            <div className="panel flex-col divider-top rounded-none">
-              <div className="panel flex-row">
-                <div className="card">
-                  <p className="text-xs text-tw-light-muted dark:text-tw-muted">Members</p>
-                  <p className="text-lg font-semibold">{data.members?.length ?? 0}</p>
-                </div>
-                <div className="card">
-                  <p className="text-xs">Posts</p>
-                  <p className="text-lg font-semibold">{data.postCount ?? 0}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs mb-1">About</p>
-                <p className="text-sm text-justify break-words whitespace-pre-wrap">{data.description}</p>
-              </div>
-
-              <div>
-                <p className="text-xs mb-1">Rules</p>
-                <ul className="text-sm list-disc pl-4">
-                  <li>Be respectful.</li>
-                  <li>No spam or self-promo.</li>
-                  <li>Stay on topic.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <CommunityInfoPanel community={data} me={user} isMember={isMember} refetchCommunity={communityQ.refetch} />
         </aside>
       </div>
     </div>

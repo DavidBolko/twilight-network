@@ -15,12 +15,12 @@ type Props = { sidebarOpen: boolean };
 type CommunityItem = SidebarType["ownedCommunities"][number];
 
 async function fetchOwned(): Promise<CommunityItem[]> {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/users/owned`, { withCredentials: true });
+  const res = await api.get(`/users/owned`);
   return res.data;
 }
 
 async function fetchJoined(): Promise<CommunityItem[]> {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/users/joined`, { withCredentials: true });
+  const res = await api.get(`/users/joined`);
   return res.data;
 }
 
@@ -71,7 +71,7 @@ export default function Sidebar({ sidebarOpen }: Props) {
   return (
     <>
       <aside className={`sidebar ${sidebarOpen ? "flex" : "hidden"} xl:flex`}>
-        <div className="flex-1 overflow-y-">
+        <div className="flex-1 overflow-y-auto">
           <div className="py-2">
             <Link to="/" search={{ posts: "hot", time: "week" }} className="btn muted w-full justify-start gap-2">
               <Home size={18} className="opacity-80" />

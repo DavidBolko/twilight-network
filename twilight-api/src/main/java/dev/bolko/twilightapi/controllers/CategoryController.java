@@ -1,7 +1,7 @@
 package dev.bolko.twilightapi.controllers;
 
 import dev.bolko.twilightapi.dto.CategoryDto;
-import dev.bolko.twilightapi.repositories.CategoryService;
+import dev.bolko.twilightapi.services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

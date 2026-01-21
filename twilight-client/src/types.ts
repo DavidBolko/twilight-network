@@ -15,24 +15,8 @@ export type Comment = {
   id: number;
   text: string;
   author: User;
+  communityNightOwlsId: string[]; 
 };
-
-export type PostType = {
-  id: string;
-  text: string;
-  communityId: number;
-  communityName: string;
-  communityImage: string;
-  author: User;
-  images?: string[];
-  likes: User[];
-  comments?: Comment[];
-  saved: boolean;
-  createdAt: string,
-  moodCounts?: Partial<Record<Mood, number>>;
-  myMood?: Mood | null;
-};
-
 export type Community = {
   id: string;
   name: string;
@@ -40,6 +24,21 @@ export type Community = {
   imageUrl: string;
   members: User[];
   postCount: number;
+  communityNightOwlsId: string[];
+  creatorId: string;
+};
+export type PostType = {
+  id: string;
+  text: string;
+  communityId: number;
+  communityName: string;
+  communityImage: string;
+  communityNightOwlsId: string[];
+  author: User;
+  images?: string[];
+  likes: User[];
+  saved: boolean;
+  createdAt: string;
 };
 
 export type FullUser = {

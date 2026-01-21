@@ -41,9 +41,7 @@ function Register() {
       formData.append("password", password);
       formData.append("password2", password2);
 
-      const result = await api.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const result = await api.post(`/auth/register`, formData)
 
       if (result.status === 200) {
         await navigate({ to: "/auth/login" });

@@ -19,15 +19,12 @@ public class PostDto {
     public AuthDto author;
     public List<String> images;
     public List<AuthDto> likes;
-    public List<CommentDto> comments;
     public boolean saved;
 
     public LocalDateTime createdAt;
+    public List<String> communityNightOwlsId;
 
-    public Map<String, Integer> moodCounts;
-    public String myMood;
-
-    public PostDto(Post post, List<Comment> comments, User user) {
+    public PostDto(Post post, User user) {
         this.id = post.getId();
         this.text = post.getText();
         this.type = post.getType();
@@ -42,12 +39,17 @@ public class PostDto {
 
         this.images = post.getImagePosts() == null ? List.of() : post.getImagePosts().stream().map(ImagePost::getUrl).toList();
         this.likes = post.getLikes() == null ? List.of() : post.getLikes().stream().map(AuthDto::new).toList();
-        this.comments = comments == null ? List.of() : comments.stream().map(CommentDto::new).toList();
-        this.moodCounts = null;
-        this.myMood = null;
+
+        this.communityNightOwlsId = List.of();
+    }
+
+    public PostDto(Post post, User user, List<String> owlIds) {
+        this(post, user);
+        this.communityNightOwlsId = (owlIds == null) ? List.of() : owlIds;
     }
 
     public PostDto(Post post) {
-        this(post, List.of(), null);
+        this(post, null);
     }
 }
+

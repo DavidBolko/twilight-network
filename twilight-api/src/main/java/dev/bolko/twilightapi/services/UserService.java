@@ -1,6 +1,7 @@
 package dev.bolko.twilightapi.services;
 
 import dev.bolko.twilightapi.dto.CommunityItemDto;
+import dev.bolko.twilightapi.dto.PostDto;
 import dev.bolko.twilightapi.dto.UserDto;
 import dev.bolko.twilightapi.model.Comment;
 import dev.bolko.twilightapi.model.Community;
@@ -33,17 +34,14 @@ public class UserService {
 
     public UserDto getUser(UUID id) {
         User user = userRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        List<Comment> comments = commentRepo.findByAuthorId(id);
-
-        return new UserDto(user, comments);
+        return new UserDto(user);
     }
 
     public List<UserDto> getUser(String query) {
         String q = query == null ? "" : query.trim();
         if (q.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Query required");
 
-        return userRepo.findByNameContainingIgnoreCase(q).stream().limit(20).map(u -> new UserDto(u, List.of())).toList();
+        return userRepo.findByNameContainingIgnoreCase(q).stream().limit(20).map(UserDto::new).toList();
     }
 
     @Transactional(readOnly = true)

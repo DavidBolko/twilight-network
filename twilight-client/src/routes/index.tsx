@@ -20,8 +20,7 @@ export const Route = createFileRoute("/")({
 const PAGE_SIZE = 10;
 
 const fetchPostsPage = async (sort: Sort, time: TimeRange, page: number) => {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/p`, {
-    withCredentials: true,
+  const res = await api.get("/p", {
     params: { sort, time, page, size: PAGE_SIZE },
   });
   return res.data as PostType[];
@@ -55,6 +54,8 @@ function Index() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [postsQ.hasNextPage, postsQ.isFetchingNextPage, postsQ.fetchNextPage, postsQ]);
 
+
+
   if (postsQ.isLoading)
     return (
       <div className="mt-64">
@@ -81,7 +82,7 @@ function Index() {
           <ul className="panel p-0">
             {posts.map((post) => (
               <li className="card hover:bg-tw-primary/15 transition-all" key={post.id}>
-                <Post {...post} refetch={postsQ.refetch} />
+                <Post {...post}/>
               </li>
             ))}
           </ul>

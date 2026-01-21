@@ -83,12 +83,6 @@ function validateName(name: string): string | null {
   return null;
 }
 
-function validateTitle(title: string): string | null {
-  const t = (title ?? "").trim();
-  if (isBlank(t)) return "Title cannot be empty.";
-  if (t.length < 3 || t.length > 100) return "Title must be between 3 and 100 characters.";
-  return null;
-}
 
 function validateEmail(email: string): string | null {
   const e = (email ?? "").trim();

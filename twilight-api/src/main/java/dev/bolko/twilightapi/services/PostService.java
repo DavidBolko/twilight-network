@@ -26,6 +26,7 @@ public class PostService {
     private final UserRepository userRepo;
     private final CommentRepository commentRepo;
     private final ImageService imageService;
+    private final PermissionService perm;
 
     @Transactional
     public PostDto create(Long communityId, String text, List<MultipartFile> images, User me) {
@@ -52,46 +53,45 @@ public class PostService {
         }
 
         postRepo.save(post);
-        return new PostDto(post, List.of(), me);
+        PostDto dto = new PostDto(post, me);
+        dto.communityNightOwlsId = userRepo.findNightOwlIdsByCommunityId(post.getCommunity().getId());
+        return dto;
+
     }
 
     @Transactional
     public PostDto update(Long id, String text, List<MultipartFile> images, List<String> removeImageIds, User me) {
         Post post = postRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
-        boolean canEdit = post.getAuthor().getId().equals(me.getId()) || Boolean.TRUE.equals(me.getIsElderOwl());
-        if (!canEdit) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot edit this post");
+        if (!perm.canModerate(post.getAuthor().getId(), post.getCommunity().getId(), me)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot edit this post");
+        }
 
         if (text != null) {
             String t = text.trim();
             post.setText(t.isEmpty() ? null : t);
         }
 
-        if (removeImageIds != null && !removeImageIds.isEmpty()) {
+        if (removeImageIds != null && !removeImageIds.isEmpty() && post.getImagePosts() != null) {
             Set<String> remove = new HashSet<>(removeImageIds);
-            List<String> toDelete = new ArrayList<>();
+            List<String> toDelete = post.getImagePosts().stream().map(ImagePost::getUrl).filter(remove::contains).toList();
 
-            Iterator<ImagePost> it = post.getImagePosts().iterator();
-            while (it.hasNext()) {
-                ImagePost ip = it.next();
-                if (remove.contains(ip.getUrl())) {
-                    toDelete.add(ip.getUrl());
-                    it.remove();
-                }
-            }
+            post.getImagePosts().removeIf(ip -> remove.contains(ip.getUrl()));
+
             if (!toDelete.isEmpty()) imageService.deleteImages(toDelete);
         }
 
+        // 3) limit + add images
         int current = post.getImagePosts() == null ? 0 : post.getImagePosts().size();
-        int add = images == null ? 0 : images.size();
-        if (current + add > 10) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can upload a maximum of 10 images.");
+        int add = (images == null) ? 0 : images.size();
+        if (current + add > 10) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can upload a maximum of 10 images.");
+        }
 
         if (images != null && !images.isEmpty()) {
             String imgErr = validator.validatePostInput(null, images);
             if (imgErr != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, imgErr);
-        }
 
-        if (images != null && !images.isEmpty()) {
             try {
                 post.getImagePosts().addAll(imageService.saveImages(images, post));
             } catch (IOException e) {
@@ -99,32 +99,42 @@ public class PostService {
             }
         }
 
-        boolean hasTextNow = post.getText() != null && !post.getText().trim().isEmpty();
-        boolean hasImagesNow = post.getImagePosts() != null && !post.getImagePosts().isEmpty();
-
-        String finalErr = validator.validatePostInput(post.getText(), hasImagesNow);
+        boolean hasImages = post.getImagePosts() != null && !post.getImagePosts().isEmpty();
+        String finalErr = validator.validatePostInput(post.getText(), hasImages);
         if (finalErr != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, finalErr);
 
-        post.setType(hasTextNow && hasImagesNow ? PostType.MIXED : hasImagesNow ? PostType.IMAGE : PostType.TEXT);
+        boolean hasText = post.getText() != null && !post.getText().trim().isEmpty();
+        post.setType(hasText && hasImages ? PostType.MIXED : hasImages ? PostType.IMAGE : PostType.TEXT);
 
-        List<Comment> comments = commentRepo.findByPostId(post.getId());
-        return new PostDto(post, comments, me);
+        PostDto dto = new PostDto(post, me);
+        dto.communityNightOwlsId = userRepo.findNightOwlIdsByCommunityId(post.getCommunity().getId());
+        return dto;
     }
+
 
     @Transactional(readOnly = true)
     public PostDto getOne(Long id, User meOrNull) {
         Post post = postRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
-        List<Comment> comments = commentRepo.findByPostId(post.getId());
-        return new PostDto(post, comments.reversed(), meOrNull);
+        Long cId = post.getCommunity().getId();
+        List<String> owlIds = userRepo.findNightOwlIdsByCommunityId(cId);
+        long postCount = postRepo.countByCommunityId(cId);
+
+        PostDto dto = new PostDto(post, meOrNull);
+        dto.communityNightOwlsId = userRepo.findNightOwlIdsByCommunityId(post.getCommunity().getId());
+        return dto;
     }
 
     @Transactional
     public void delete(Long id, User me) {
         Post post = postRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
-        boolean canDelete = post.getAuthor().getId().equals(me.getId()) || me.getIsElderOwl();
+        boolean canDelete = perm.canModerate(post.getAuthor().getId(), post.getCommunity().getId(), me);
         if (!canDelete) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot delete this post");
+
+        for (User u : post.getSavedBy()) {
+            u.getSavedPosts().remove(post);
+        }
 
         List<String> urls = post.getImagePosts().stream().map(ImagePost::getUrl).toList();
         imageService.deleteImages(urls);
@@ -149,48 +159,6 @@ public class PostService {
         userRepo.save(me);
     }
 
-    @Transactional
-    public String addComment(Long postId, String content, User me) {
-        Post post = postRepo.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-
-        String c = content == null ? "" : content.trim();
-        if (c.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment cannot be empty");
-        if (c.length() > 500) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment too long (max 500)");
-
-        Comment com = new Comment(c, post, me);
-        commentRepo.save(com);
-        return com.getContent();
-    }
-
-    @Transactional
-    public Comment updateComment(Long postId, Long commentId, String text, User me) {
-        Comment c = commentRepo.findById(commentId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        if (!c.getPost().getId().equals(postId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        boolean can = c.getAuthor().getId().equals(me.getId()) || me.getIsElderOwl();
-        if (!can) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-
-        String t = text == null ? "" : text.trim();
-        if (t.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment required");
-        if (t.length() > 500) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too long");
-
-        c.setContent(t);
-        return c;
-    }
-
-    @Transactional
-    public void deleteComment(Long postId, Long commentId, User me) {
-        Comment c = commentRepo.findById(commentId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        if (!c.getPost().getId().equals(postId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        boolean can = c.getAuthor().getId().equals(me.getId()) || me.getIsElderOwl();
-        if (!can) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-
-        commentRepo.delete(c);
-    }
-
     @Transactional(readOnly = true)
     public List<PostDto> feed(Long communityId, String sort, String time, int page, int size, User meOrNull) {
         LocalDateTime now = LocalDateTime.now();
@@ -208,19 +176,31 @@ public class PostService {
         if ("hot".equals(s) && "all".equals(t)) from = now.minusDays(7);
 
         Page<Post> postsPage;
-
         if ("new".equals(s)) {
             Pageable pageableNew = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
             postsPage = (communityId == null) ? postRepo.findNewSince(from, pageableNew) : postRepo.findNewByCommunitySince(communityId, from, pageableNew);
-
         } else if ("best".equals(s) || "hot".equals(s)) {
             Pageable pageable = PageRequest.of(page, size);
             postsPage = (communityId == null) ? postRepo.findBestSince(from, pageable) : postRepo.findBestByCommunitySince(communityId, from, pageable);
-
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort: " + sort);
         }
 
-        return postsPage.getContent().stream().map(p -> new PostDto(p, null, meOrNull)).toList();
+        if (communityId != null) {
+            List<String> owlIds = userRepo.findNightOwlIdsByCommunityId(communityId);
+
+            return postsPage.getContent().stream().map(p -> {
+                PostDto dto = new PostDto(p, meOrNull);
+                dto.communityNightOwlsId = owlIds;
+                return dto;
+            }).toList();
+        }
+
+        return postsPage.getContent().stream().map(p -> {
+            PostDto dto = new PostDto(p, meOrNull);
+            dto.communityNightOwlsId = userRepo.findNightOwlIdsByCommunityId(p.getCommunity().getId());
+            return dto;
+        }).toList();
     }
+
 }

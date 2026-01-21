@@ -33,11 +33,11 @@ export default function Gallery({ imageIds }: Props) {
 
         {images.length > 1 ? (
           <>
-            <button type="button" onClick={() => prev()} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-md bg-tw-light-surface/30 hover:bg-tw-surface/60 " aria-label="Previous image">
+            <button type="button" onClick={(e) => {e.stopPropagation(); next()}} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-md bg-tw-light-surface/30 hover:bg-tw-surface/60 " aria-label="Previous image">
               <ChevronLeft />
             </button>
 
-            <button type="button" onClick={() => next()} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md bg-tw-light-surface/30 hover:bg-tw-surface/60" aria-label="Next image">
+            <button type="button" onClick={(e) => {e.stopPropagation(); next()}} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md bg-tw-light-surface/30 hover:bg-tw-surface/60" aria-label="Next image">
               <ChevronRight />
             </button>
 

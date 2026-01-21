@@ -1,24 +1,27 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import Loader from "../../components/Loader.tsx";
 import { useEffect } from "react";
 
 import api from "../../axios.ts";
 
 export const Route = createFileRoute("/auth/logout")({
-  component: Login,
+  component: Logout,
 });
 
-function Login() {
-  const navigate = useNavigate();
+function Logout() {
   useEffect(() => {
     const logout = async () => {
-      await api.get(`${import.meta.env.VITE_API_URL}/auth/logout`, {
-        withCredentials: true,
-      });
+      await api.post("/auth/logout", {});
+
       window.location.href = "/";
     };
-    logout();
-  }, [navigate]);
 
-  return <Loader />;
+    logout();
+  }, []);
+
+  return (
+    <div className="pt-64">
+      <Loader />
+    </div>
+  );
 }

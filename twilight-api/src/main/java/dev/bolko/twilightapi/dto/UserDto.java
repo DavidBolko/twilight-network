@@ -20,33 +20,18 @@ public class UserDto {
     public Set<PostDto> saved;
     public boolean isElder;
 
-    public UserDto(User user, List<Comment> allComments) {
+    public UserDto(User user) {
         this.id = user.getId();
         this.name = user.getName();
         this.image = user.getImage();
         this.description = user.getDescription();
-        this.saved = user.getSavedPosts().stream().map(PostDto::new).collect(Collectors.toSet());
-        this.isElder = user.getIsElderOwl();
 
-        this.posts = user.getPosts() == null
-                ? List.of()
-                : user.getPosts().stream()
-                .map(post -> {
-                    List<Comment> commentsForPost = allComments.stream()
-                            .filter(c -> c.getPost().getId().equals(post.getId()))
-                            .toList();
-                    return new PostDto(post, commentsForPost, user);
-                })
-                .toList();
+        this.isElder = Boolean.TRUE.equals(user.getIsElderOwl());
 
-        this.communities = user.getCommunities() == null
-                ? Set.of()
-                : user.getCommunities().stream()
-                .map(CommunityDto::new)
-                .collect(Collectors.toSet());
-    }
+        this.posts = (user.getPosts() == null) ? List.of() : user.getPosts().stream().map(p -> new PostDto(p, user)).toList();
 
-    public UserDto(User user) {
-        this(user, List.of());
+        this.saved = (user.getSavedPosts() == null) ? Set.of() : user.getSavedPosts().stream().map(p -> new PostDto(p, user)).collect(Collectors.toSet());
+
+        this.communities = (user.getCommunities() == null) ? Set.of() : user.getCommunities().stream().map(CommunityDto::new).collect(Collectors.toSet());
     }
 }

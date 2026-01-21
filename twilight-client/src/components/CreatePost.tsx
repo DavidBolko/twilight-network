@@ -55,7 +55,7 @@ export default function CreatePost({ communityId, onPosted }: Props) {
       fd.append("text", text);
       files.forEach((f) => fd.append("images", f));
 
-      const res = await api.post(`${import.meta.env.VITE_API_URL}/p/${communityId}`, fd, { withCredentials: true });
+      const res = await api.post(`/p/${communityId}`, fd);
 
       if (res.status === 201 || res.status === 200) {
         setText("");

@@ -13,7 +13,7 @@ type Props = {
 type Category = { id: number; name: string };
 
 async function fetchCategories(): Promise<Category[]> {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/categories`, { withCredentials: true });
+  const res = await api.get(`categories`);
   return res.data;
 }
 
@@ -27,7 +27,7 @@ export default function CreateCommunity({ setIsOpen }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const [categoryId, setCategoryId] = useState<string>(""); // select value (string)
+  const [categoryId, setCategoryId] = useState<string>("");
 
   const categoriesQ = useQuery({
     queryKey: ["categories"],
@@ -78,13 +78,10 @@ export default function CreateCommunity({ setIsOpen }: Props) {
       const form = new FormData();
       form.append("name", title.trim());
       form.append("description", desc.trim());
-      form.append("categoryId", categoryId); // 👈 posielame vybranú kategóriu
+      form.append("categoryId", categoryId); 
       if (image) form.append("image", image);
 
-      const res = await api.post(`${import.meta.env.VITE_API_URL}/c/create`, form, {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await api.post(`/c/create`, form)
 
       setIsOpen(false);
       await navigate({ to: `/communities/${res.data.id}`, params: { id: String(res.data.id) } });
@@ -94,7 +91,6 @@ export default function CreateCommunity({ setIsOpen }: Props) {
         const status = err.response?.status;
         if (status === 409) return setError("A community with this name already exists.");
         if (status === 401 || status === 403) return setError("You must be logged in.");
-        // ak backend vráti text chyby
         const msg = typeof err.response?.data === "string" ? err.response.data : "";
         if (msg) return setError(msg);
       }

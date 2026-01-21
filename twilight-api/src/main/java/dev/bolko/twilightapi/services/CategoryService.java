@@ -1,6 +1,7 @@
-package dev.bolko.twilightapi.repositories;
+package dev.bolko.twilightapi.services;
 
 import dev.bolko.twilightapi.dto.CategoryDto;
+import dev.bolko.twilightapi.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

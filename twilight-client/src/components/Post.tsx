@@ -12,6 +12,7 @@ import { DeleteButton } from "./DeleteButton";
 import { SaveButton } from "./SaveButton";
 import Gallery from "./Gallery";
 import EditPost from "./EditPost";
+import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 
 type Props = PostType & {
   refetch?: () => void;
@@ -21,12 +22,15 @@ export default function Post(props: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUser = useUser();
+
+  const queryClient = useQueryClient();
+
   const { id: communityIdParam } = useParams({ strict: false }) as { id?: string };
 
   const isPostPage = location.pathname.startsWith("/post/");
   const isInCommunityPage = communityIdParam === String(props.communityId);
 
-  const canEdit = !!currentUser && (props.author.id === currentUser.id || currentUser.isElder);
+  const canEdit =!!currentUser &&(props.author.id === currentUser.id ||currentUser.isElder || (props.communityNightOwlsId ?? []).includes(currentUser.id));
   const canDelete = canEdit;
 
   const [editing, setEditing] = useState<boolean>(false);
@@ -48,16 +52,34 @@ export default function Post(props: Props) {
     navigate({ to: "/post/$id", params: { id: props.id } });
   };
 
-  const deletePost = async () => {
-    const res = await api.delete(`${import.meta.env.VITE_API_URL}/p/${props.id}`, { withCredentials: true });
-    if (res.status === 200) {
-      if (isPostPage) navigate({ to: "/", search: { posts: "hot", time:"week" } });
-      props.refetch?.();
-    }
+  const deletePost = async (): Promise<void> => {
+    const res = await api.delete(`/p/${props.id}`);
+    if (res.status < 200 || res.status >= 300) return;
+
+    const deletedId = String(props.id);
+
+    queryClient.setQueriesData<InfiniteData<PostType[]>>({ queryKey: ["posts"] }, (old) => {
+      if (!old) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page) => page.filter((p) => String(p.id) !== deletedId)),
+      };
+    });
+
+    queryClient.setQueriesData<InfiniteData<PostType[]>>({ queryKey: ["community-posts"] }, (old) => {
+      if (!old) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page) => page.filter((p) => String(p.id) !== deletedId)),
+      };
+    });
+    props.refetch?.()
+    queryClient.invalidateQueries({ queryKey: ["posts"] });
+    queryClient.invalidateQueries({ queryKey: ["community-posts"] });
+
+    if (isPostPage) navigate({ to: "/", search: { posts: "hot", time: "week" } });
   };
 
-  console.log(props.images);
-  
   return (
     <article className="panel cursor-pointer" onClick={goToPost} role="article" aria-label="Post">
       <header className="panel flex-row">
@@ -88,7 +110,6 @@ export default function Post(props: Props) {
           )}
         </div>
 
-        {/* EDIT/DELETE len na post page nie na feede */}
         {isPostPage ? (
           <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
             {canEdit && !editing ? (

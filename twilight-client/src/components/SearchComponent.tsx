@@ -18,12 +18,12 @@ export default function SearchComponent() {
       {
         queryKey: ["search-communities", q],
         enabled,
-        queryFn: async () => (await api.get<Community[]>(`${import.meta.env.VITE_API_URL}/c`, { params: { query: q }, withCredentials: true })).data,
+        queryFn: async () => (await api.get<Community[]>(`/c`, { params: { query: q }})).data,
       },
       {
         queryKey: ["search-users", q],
         enabled,
-        queryFn: async () => (await api.get<User[]>(`${import.meta.env.VITE_API_URL}/users/search`, { params: { query: q }, withCredentials: true })).data,
+        queryFn: async () => (await api.get<User[]>(`/users/search`, { params: { query: q }})).data,
       },
     ],
   });

@@ -15,19 +15,10 @@ export default function LikeButton(props: props) {
   const [filled, setFilled] = useState(props.filled);
   const [count, setCount] = useState(props.count);
 
-  const setLike = async (e:SyntheticEvent) => {
-    e.stopPropagation()
+  const setLike = async (e: SyntheticEvent) => {
+    e.stopPropagation();
     try {
-      const response = await api.put(
-        `${import.meta.env.VITE_API_URL}/p/${props.id}/like`,
-        {},
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
+      const response = await api.put(`/p/${props.id}/like`,);
 
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: ["community"] });

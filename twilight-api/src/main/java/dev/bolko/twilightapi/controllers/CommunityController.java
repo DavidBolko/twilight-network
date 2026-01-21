@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/c")
@@ -50,5 +51,26 @@ public class CommunityController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<CommunityDto> updateCommunity(@PathVariable Long id, @RequestParam(value = "name", required = false) String name, @RequestParam(value = "description", required = false) String description, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal User principal) {
+        User me = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
+
+        return ResponseEntity.ok(communityService.update(id, name, description, image, me));
+    }
+
+    @PutMapping("/{communityId}/night-owls/{userId}")
+    public ResponseEntity<?> toggleNightOwl(@PathVariable Long communityId, @PathVariable UUID userId, @AuthenticationPrincipal User principal) {
+        User me = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
+        communityService.toggleNightOwl(communityId, userId, me);
+        return ResponseEntity.ok().build();
+    }
+
+    // --------- DELETE ---------
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> delete(@PathVariable Long id, @AuthenticationPrincipal User principal) {
+        User me = userService.getCurrentUser(principal).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated"));
+        communityService.delete(id, me);
+        return ResponseEntity.ok().build();
+    }
 
 }

@@ -46,8 +46,7 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
     try {
       setIsUploading(true);
 
-      await api.put(`${import.meta.env.VITE_API_URL}/users/${id}/avatar`, formData, {
-        withCredentials: true,
+      await api.put(`/users/${id}/avatar`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -76,8 +75,7 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
     try {
       setIsSaving(true);
 
-      await api.put(`${import.meta.env.VITE_API_URL}/users/${id}/description`, formData, {
-        withCredentials: true,
+      await api.put(`/users/${id}/description`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -108,19 +106,16 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
             <img src={data.image ? getFromCdn(data.image) : "/anonymous.png"} className={`w-48 h-48 border rounded-full object-cover ${avatarError ? "error" : ""} ${isSelf && isEditing ? "hover:opacity-70" : ""}`} alt="avatar" />
           )}
 
-          {/* upload len keď som v edit mode */}
           {isSelf && isEditing ? <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /> : null}
         </label>
 
         {avatarError && <p className="text-red-500/80 text-sm mt-2 w-48">{avatarError}</p>}
       </div>
 
-      {/* INFO */}
       <div className="flex flex-col gap-2 w-full min-w-0">
         <div className="flex items-center justify-between gap-3">
           <p className="font-semibold text-lg truncate">{data.name}</p>
 
-          {/* ACTION ICONS */}
           {isSelf ? (
             !isEditing ? (
               <button className="p-2 rounded-lg hover:bg-white/5" onClick={() => setIsEditing(true)} aria-label="Edit profile">
@@ -139,7 +134,6 @@ export const UserProfile = ({ data, id, refetch, currentUser }: UserProfileProps
           ) : ""}
         </div>
 
-        {/* DESCRIPTION */}
         <textarea
           className={`w-full bg-transparent outline-none resize-none ${descError ? "error" : ""} ${!isEditing ? "opacity-80" : ""}`}
           value={description}

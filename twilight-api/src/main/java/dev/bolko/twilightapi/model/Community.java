@@ -42,6 +42,11 @@ public final class Community {
     @JsonIgnore
     private Set<User> members = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(name = "community_night_owls", joinColumns = @JoinColumn(name = "community_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @JsonIgnore
+    private Set<User> nightOwls = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -52,7 +57,6 @@ public final class Community {
         this.image = image;
         this.creator = creator;
     }
-    // --- helpers (používaj v service) ---
     public void addMember(User user) {
         members.add(user);
         user.getCommunities().add(this);
@@ -62,4 +66,9 @@ public final class Community {
         members.remove(user);
         user.getCommunities().remove(this);
     }
+
+    public void addNightOwl(User user) {
+        nightOwls.add(user);
+    }
+
 }

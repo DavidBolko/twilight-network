@@ -28,4 +28,15 @@ public interface CommunityRepository extends JpaRepository<Community,  Long >{
     List<Community> findByCategoryId(Long categoryId);
 
     List<Community> findByCategoryIdAndNameContainingIgnoreCase(Long categoryId, String query);
+
+    @Query("""
+  select count(u) > 0
+  from Community c
+  join c.nightOwls u
+  where c.id = :communityId
+    and u.id = :userId
+""")
+    boolean isNightOwlOfCommunity(@Param("communityId") Long communityId, @Param("userId") UUID userId);
+
+
 }

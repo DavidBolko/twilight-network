@@ -13,7 +13,7 @@ import api from "../../axios";
 const categories = ["Posts", "Communities", "Saved"] as const;
 
 const fetchUser = async (id: string) => {
-  const res = await api.get<FullUser>(`${import.meta.env.VITE_API_URL}/users/${id}`, {
+  const res = await api.get<FullUser>(`/users/${id}`, {
     withCredentials: true,
   });
   return res.data;

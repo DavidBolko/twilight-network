@@ -20,13 +20,12 @@ export const Route = createFileRoute("/explore")({
 });
 
 async function fetchCategories(): Promise<Category[]> {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/categories`, { withCredentials: true });
+  const res = await api.get(`/categories`);
   return res.data;
 }
 
 async function fetchCommunities(categoryId: number | null): Promise<Community[]> {
-  const res = await api.get(`${import.meta.env.VITE_API_URL}/c`, {
-    withCredentials: true,
+  const res = await api.get(`/c`, {
     params: categoryId ? { categoryId } : undefined,
   });
   return res.data;

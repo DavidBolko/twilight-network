@@ -51,6 +51,10 @@ public class Post {
     @JoinTable(name = "post_likes", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> likes = new HashSet<>();
 
+    @ManyToMany(mappedBy = "savedPosts")
+    private Set<User> savedBy = new HashSet<>();
+
+
     @PrePersist
     void onCreate() {
         if (id == null) id = IdentifierGenerator.randomLong();

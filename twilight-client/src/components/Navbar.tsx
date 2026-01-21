@@ -17,7 +17,6 @@ export default function Navbar(props: props) {
 
   const [searchOpen, setSearchOpen] = useState(false);
 
-  // skry navbar na auth/error/logout page (ak to chceš takto)
   const hide = pathname.includes("/auth") || pathname.startsWith("/error") || pathname.startsWith("/auth/logout");
   if (hide) return null;
 

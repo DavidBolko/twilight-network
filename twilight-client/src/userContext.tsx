@@ -11,9 +11,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const { data, isLoading } = useQuery<User>({
     queryKey: ["currentUser"],
     queryFn: async () => {
-      const res = await api.get<User>(`${import.meta.env.VITE_API_URL}/auth/me`, {
-        withCredentials: true,
-      });
+
+      const res = await api.get<User>(`${import.meta.env.VITE_API_URL}/auth/me`)
       return res.data;
     },
     retry: false,
@@ -28,5 +27,5 @@ export function UserProvider({ children }: { children: ReactNode }) {
 }
 
 export function useUser() {
-  return useContext(UserContext); // User | null
+  return useContext(UserContext);
 }

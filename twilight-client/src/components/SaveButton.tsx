@@ -11,16 +11,10 @@ interface SaveButtonProps {
 export const SaveButton = ({ postId, saved }: SaveButtonProps) => {
   const [isSaved, setIsSaved] = useState(saved);
 
-  const toggleSave = async (e:SyntheticEvent) => {
-    e.stopPropagation()
+  const toggleSave = async (e: SyntheticEvent) => {
+    e.stopPropagation();
     try {
-      await api.put(
-        `${import.meta.env.VITE_API_URL}/p/${postId}/save`,
-        {},
-        {
-          withCredentials: true,
-        },
-      );
+      await api.put(`/p/${postId}/save`);
       setIsSaved(!isSaved);
     } catch (e) {
       console.error("Save toggle failed", e);

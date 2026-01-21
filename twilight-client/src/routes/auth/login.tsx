@@ -33,12 +33,7 @@ function Login() {
     formData.append("password", password);
 
     try {
-      const result = await api.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const result = await api.post(`/auth/login`, formData)
 
       if (result.status === 200) {
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
