@@ -79,7 +79,7 @@ public class InputValidatorService {
         if (!name.matches("^[A-Za-z0-9 _-]+$"))
             return "Name contains invalid characters.";
         return null;
-    }
+    };
 
     private String validateTitle(String title) {
         if (isBlank(title)) return "Title cannot be empty.";
