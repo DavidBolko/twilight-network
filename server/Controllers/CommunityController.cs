@@ -94,7 +94,7 @@ public class CommunitiesController : ControllerBase
         if (!string.IsNullOrEmpty(userId))
             query = query.Where(c => c.Members.Any(m => m.Id == userId));
         if (!string.IsNullOrEmpty(name))
-            query = query.Where(c => c.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(c => EF.Functions.ILike(c.Name, $"%{name}%"));
         if (page != null && size != null) query = query.Skip(page.Value * size.Value).Take(size.Value);
 
         var communities = await query

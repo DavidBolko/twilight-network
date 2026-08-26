@@ -66,7 +66,7 @@ export const postSchema = z.object({
 
   author: z.object({
     id: z.string(),
-    username: z.string(),
+    userName: z.string(),
     avatar: z.string().nullable(),
     isElderOwl: z.boolean(),
   }),
@@ -137,8 +137,60 @@ export const createCommunitySchema = z.object({
     .refine((file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type), "Only .jpg, .png and .webp formats are supported.")
     .optional(),
 });
+export const actorSchema = z.object({
+  id: z.string(),
+  userName: z.string(),
+  avatar: z.string().nullable(),
+  isElderOwl: z.boolean(),
+});
 
+export const notificationSchema = z.object({
+  id: z.number(),
+  type: z.union([
+    z.literal(0).transform(() => "FriendRequest" as const),
+    z.literal(1).transform(() => "FriendAccepted" as const),
+    z.literal(2).transform(() => "PostLiked" as const),
+    z.literal(3).transform(() => "PostComment" as const),
+  ]),
+  isRead: z.boolean(),
+  createdAt: z.string(),
+  resourceId: z.string().nullable(),
+  actor: actorSchema.nullable(),
+});
+export const channelParticipantSchema = z.object({
+  userId: z.string(),
+  userName: z.string(),
+  avatar: z.string().nullable(),
+});
+
+export const channelSchema = z.object({
+  id: z.number(),
+  type: z.union([
+    z.literal(0).transform(() => "DIRECT" as const),
+    z.literal(1).transform(() => "GROUP" as const),
+  ]),
+  title: z.string().nullable(),
+  lastMessageAt: z.string().nullable(),
+  participants: z.array(channelParticipantSchema),
+});
+
+export const chatMessageSchema = z.object({
+  id: z.number(),
+  channelId: z.number(),
+  text: z.string().nullable(),
+  type: z.number(), 
+  createdAt: z.string(),
+  senderId: z.string().nullable(),
+  senderName: z.string().nullable(),
+  senderAvatar: z.string().nullable(),
+});
+
+export type Channel = z.infer<typeof channelSchema>;
+export type ChannelParticipant = z.infer<typeof channelParticipantSchema>;
+export type ChatMsg = z.infer<typeof chatMessageSchema>;
+export type Notification = z.infer<typeof notificationSchema>;
 export type PostType = z.infer<typeof postSchema>;
+export type Actor = z.infer<typeof actorSchema>;
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type User = z.infer<typeof userSchema>;
 export type CommentType = z.infer<typeof commentSchema>;

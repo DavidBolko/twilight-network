@@ -9,47 +9,37 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as ErrorRouteImport } from './routes/error'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as UserIdRouteImport } from './routes/user/$id'
+import { Route as MainRouteRouteImport } from './routes/_main/route'
+import { Route as MainIndexRouteImport } from './routes/_main/index'
 import { Route as PostIdRouteImport } from './routes/post/$id'
-import { Route as CommunitiesIdRouteImport } from './routes/communities/$id'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as CommunitiesIdIndexRouteImport } from './routes/communities/$id.index'
-import { Route as CommunitiesIdSettingsRouteImport } from './routes/communities/$id.settings'
-import { Route as CommunitiesIdSettingsGlobalRouteImport } from './routes/communities/$id.settings.global'
+import { Route as MainNotificationsRouteImport } from './routes/_main/notifications'
+import { Route as MainExploreRouteImport } from './routes/_main/explore'
+import { Route as MainUserIdRouteImport } from './routes/_main/user/$id'
+import { Route as MainCommunitiesIdRouteImport } from './routes/_main/communities/$id'
+import { Route as CommunitiesIdSettingsRouteRouteImport } from './routes/communities/$id/settings/route'
+import { Route as CommunitiesIdSettingsIndexRouteImport } from './routes/communities/$id/settings/index'
 
-const ExploreRoute = ExploreRouteImport.update({
-  id: '/explore',
-  path: '/explore',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
   path: '/error',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const MainRouteRoute = MainRouteRouteImport.update({
+  id: '/_main',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserIdRoute = UserIdRouteImport.update({
-  id: '/user/$id',
-  path: '/user/$id',
-  getParentRoute: () => rootRouteImport,
+const MainIndexRoute = MainIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MainRouteRoute,
 } as any)
 const PostIdRoute = PostIdRouteImport.update({
   id: '/post/$id',
   path: '/post/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunitiesIdRoute = CommunitiesIdRouteImport.update({
-  id: '/communities/$id',
-  path: '/communities/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -67,130 +57,139 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CommunitiesIdIndexRoute = CommunitiesIdIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => CommunitiesIdRoute,
+const MainNotificationsRoute = MainNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => MainRouteRoute,
 } as any)
-const CommunitiesIdSettingsRoute = CommunitiesIdSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => CommunitiesIdRoute,
+const MainExploreRoute = MainExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => MainRouteRoute,
 } as any)
-const CommunitiesIdSettingsGlobalRoute =
-  CommunitiesIdSettingsGlobalRouteImport.update({
-    id: '/global',
-    path: '/global',
-    getParentRoute: () => CommunitiesIdSettingsRoute,
+const MainUserIdRoute = MainUserIdRouteImport.update({
+  id: '/user/$id',
+  path: '/user/$id',
+  getParentRoute: () => MainRouteRoute,
+} as any)
+const MainCommunitiesIdRoute = MainCommunitiesIdRouteImport.update({
+  id: '/communities/$id',
+  path: '/communities/$id',
+  getParentRoute: () => MainRouteRoute,
+} as any)
+const CommunitiesIdSettingsRouteRoute =
+  CommunitiesIdSettingsRouteRouteImport.update({
+    id: '/communities/$id/settings',
+    path: '/communities/$id/settings',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const CommunitiesIdSettingsIndexRoute =
+  CommunitiesIdSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => CommunitiesIdSettingsRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/error': typeof ErrorRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof MainExploreRoute
+  '/notifications': typeof MainNotificationsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/communities/$id': typeof CommunitiesIdRouteWithChildren
   '/post/$id': typeof PostIdRoute
-  '/user/$id': typeof UserIdRoute
-  '/communities/$id/settings': typeof CommunitiesIdSettingsRouteWithChildren
-  '/communities/$id/': typeof CommunitiesIdIndexRoute
-  '/communities/$id/settings/global': typeof CommunitiesIdSettingsGlobalRoute
+  '/': typeof MainIndexRoute
+  '/communities/$id/settings': typeof CommunitiesIdSettingsRouteRouteWithChildren
+  '/communities/$id': typeof MainCommunitiesIdRoute
+  '/user/$id': typeof MainUserIdRoute
+  '/communities/$id/settings/': typeof CommunitiesIdSettingsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/error': typeof ErrorRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof MainExploreRoute
+  '/notifications': typeof MainNotificationsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
   '/post/$id': typeof PostIdRoute
-  '/user/$id': typeof UserIdRoute
-  '/communities/$id/settings': typeof CommunitiesIdSettingsRouteWithChildren
-  '/communities/$id': typeof CommunitiesIdIndexRoute
-  '/communities/$id/settings/global': typeof CommunitiesIdSettingsGlobalRoute
+  '/': typeof MainIndexRoute
+  '/communities/$id': typeof MainCommunitiesIdRoute
+  '/user/$id': typeof MainUserIdRoute
+  '/communities/$id/settings': typeof CommunitiesIdSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_main': typeof MainRouteRouteWithChildren
   '/error': typeof ErrorRoute
-  '/explore': typeof ExploreRoute
+  '/_main/explore': typeof MainExploreRoute
+  '/_main/notifications': typeof MainNotificationsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/communities/$id': typeof CommunitiesIdRouteWithChildren
   '/post/$id': typeof PostIdRoute
-  '/user/$id': typeof UserIdRoute
-  '/communities/$id/settings': typeof CommunitiesIdSettingsRouteWithChildren
-  '/communities/$id/': typeof CommunitiesIdIndexRoute
-  '/communities/$id/settings/global': typeof CommunitiesIdSettingsGlobalRoute
+  '/_main/': typeof MainIndexRoute
+  '/communities/$id/settings': typeof CommunitiesIdSettingsRouteRouteWithChildren
+  '/_main/communities/$id': typeof MainCommunitiesIdRoute
+  '/_main/user/$id': typeof MainUserIdRoute
+  '/communities/$id/settings/': typeof CommunitiesIdSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/error'
     | '/explore'
+    | '/notifications'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
-    | '/communities/$id'
     | '/post/$id'
-    | '/user/$id'
+    | '/'
     | '/communities/$id/settings'
-    | '/communities/$id/'
-    | '/communities/$id/settings/global'
+    | '/communities/$id'
+    | '/user/$id'
+    | '/communities/$id/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/error'
     | '/explore'
+    | '/notifications'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
     | '/post/$id'
+    | '/'
+    | '/communities/$id'
     | '/user/$id'
     | '/communities/$id/settings'
-    | '/communities/$id'
-    | '/communities/$id/settings/global'
   id:
     | '__root__'
-    | '/'
+    | '/_main'
     | '/error'
-    | '/explore'
+    | '/_main/explore'
+    | '/_main/notifications'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
-    | '/communities/$id'
     | '/post/$id'
-    | '/user/$id'
+    | '/_main/'
     | '/communities/$id/settings'
-    | '/communities/$id/'
-    | '/communities/$id/settings/global'
+    | '/_main/communities/$id'
+    | '/_main/user/$id'
+    | '/communities/$id/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  MainRouteRoute: typeof MainRouteRouteWithChildren
   ErrorRoute: typeof ErrorRoute
-  ExploreRoute: typeof ExploreRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthLogoutRoute: typeof AuthLogoutRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
-  CommunitiesIdRoute: typeof CommunitiesIdRouteWithChildren
   PostIdRoute: typeof PostIdRoute
-  UserIdRoute: typeof UserIdRoute
+  CommunitiesIdSettingsRouteRoute: typeof CommunitiesIdSettingsRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/explore': {
-      id: '/explore'
-      path: '/explore'
-      fullPath: '/explore'
-      preLoaderRoute: typeof ExploreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/error': {
       id: '/error'
       path: '/error'
@@ -198,32 +197,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErrorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/_main': {
+      id: '/_main'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof MainRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/$id': {
-      id: '/user/$id'
-      path: '/user/$id'
-      fullPath: '/user/$id'
-      preLoaderRoute: typeof UserIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_main/': {
+      id: '/_main/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof MainIndexRouteImport
+      parentRoute: typeof MainRouteRoute
     }
     '/post/$id': {
       id: '/post/$id'
       path: '/post/$id'
       fullPath: '/post/$id'
       preLoaderRoute: typeof PostIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/communities/$id': {
-      id: '/communities/$id'
-      path: '/communities/$id'
-      fullPath: '/communities/$id'
-      preLoaderRoute: typeof CommunitiesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/register': {
@@ -247,67 +239,93 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/communities/$id/': {
-      id: '/communities/$id/'
-      path: '/'
-      fullPath: '/communities/$id/'
-      preLoaderRoute: typeof CommunitiesIdIndexRouteImport
-      parentRoute: typeof CommunitiesIdRoute
+    '/_main/notifications': {
+      id: '/_main/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof MainNotificationsRouteImport
+      parentRoute: typeof MainRouteRoute
+    }
+    '/_main/explore': {
+      id: '/_main/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof MainExploreRouteImport
+      parentRoute: typeof MainRouteRoute
+    }
+    '/_main/user/$id': {
+      id: '/_main/user/$id'
+      path: '/user/$id'
+      fullPath: '/user/$id'
+      preLoaderRoute: typeof MainUserIdRouteImport
+      parentRoute: typeof MainRouteRoute
+    }
+    '/_main/communities/$id': {
+      id: '/_main/communities/$id'
+      path: '/communities/$id'
+      fullPath: '/communities/$id'
+      preLoaderRoute: typeof MainCommunitiesIdRouteImport
+      parentRoute: typeof MainRouteRoute
     }
     '/communities/$id/settings': {
       id: '/communities/$id/settings'
-      path: '/settings'
+      path: '/communities/$id/settings'
       fullPath: '/communities/$id/settings'
-      preLoaderRoute: typeof CommunitiesIdSettingsRouteImport
-      parentRoute: typeof CommunitiesIdRoute
+      preLoaderRoute: typeof CommunitiesIdSettingsRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/communities/$id/settings/global': {
-      id: '/communities/$id/settings/global'
-      path: '/global'
-      fullPath: '/communities/$id/settings/global'
-      preLoaderRoute: typeof CommunitiesIdSettingsGlobalRouteImport
-      parentRoute: typeof CommunitiesIdSettingsRoute
+    '/communities/$id/settings/': {
+      id: '/communities/$id/settings/'
+      path: '/'
+      fullPath: '/communities/$id/settings/'
+      preLoaderRoute: typeof CommunitiesIdSettingsIndexRouteImport
+      parentRoute: typeof CommunitiesIdSettingsRouteRoute
     }
   }
 }
 
-interface CommunitiesIdSettingsRouteChildren {
-  CommunitiesIdSettingsGlobalRoute: typeof CommunitiesIdSettingsGlobalRoute
+interface MainRouteRouteChildren {
+  MainExploreRoute: typeof MainExploreRoute
+  MainNotificationsRoute: typeof MainNotificationsRoute
+  MainIndexRoute: typeof MainIndexRoute
+  MainCommunitiesIdRoute: typeof MainCommunitiesIdRoute
+  MainUserIdRoute: typeof MainUserIdRoute
 }
 
-const CommunitiesIdSettingsRouteChildren: CommunitiesIdSettingsRouteChildren = {
-  CommunitiesIdSettingsGlobalRoute: CommunitiesIdSettingsGlobalRoute,
+const MainRouteRouteChildren: MainRouteRouteChildren = {
+  MainExploreRoute: MainExploreRoute,
+  MainNotificationsRoute: MainNotificationsRoute,
+  MainIndexRoute: MainIndexRoute,
+  MainCommunitiesIdRoute: MainCommunitiesIdRoute,
+  MainUserIdRoute: MainUserIdRoute,
 }
 
-const CommunitiesIdSettingsRouteWithChildren =
-  CommunitiesIdSettingsRoute._addFileChildren(
-    CommunitiesIdSettingsRouteChildren,
-  )
-
-interface CommunitiesIdRouteChildren {
-  CommunitiesIdSettingsRoute: typeof CommunitiesIdSettingsRouteWithChildren
-  CommunitiesIdIndexRoute: typeof CommunitiesIdIndexRoute
-}
-
-const CommunitiesIdRouteChildren: CommunitiesIdRouteChildren = {
-  CommunitiesIdSettingsRoute: CommunitiesIdSettingsRouteWithChildren,
-  CommunitiesIdIndexRoute: CommunitiesIdIndexRoute,
-}
-
-const CommunitiesIdRouteWithChildren = CommunitiesIdRoute._addFileChildren(
-  CommunitiesIdRouteChildren,
+const MainRouteRouteWithChildren = MainRouteRoute._addFileChildren(
+  MainRouteRouteChildren,
 )
 
+interface CommunitiesIdSettingsRouteRouteChildren {
+  CommunitiesIdSettingsIndexRoute: typeof CommunitiesIdSettingsIndexRoute
+}
+
+const CommunitiesIdSettingsRouteRouteChildren: CommunitiesIdSettingsRouteRouteChildren =
+  {
+    CommunitiesIdSettingsIndexRoute: CommunitiesIdSettingsIndexRoute,
+  }
+
+const CommunitiesIdSettingsRouteRouteWithChildren =
+  CommunitiesIdSettingsRouteRoute._addFileChildren(
+    CommunitiesIdSettingsRouteRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  MainRouteRoute: MainRouteRouteWithChildren,
   ErrorRoute: ErrorRoute,
-  ExploreRoute: ExploreRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthLogoutRoute: AuthLogoutRoute,
   AuthRegisterRoute: AuthRegisterRoute,
-  CommunitiesIdRoute: CommunitiesIdRouteWithChildren,
   PostIdRoute: PostIdRoute,
-  UserIdRoute: UserIdRoute,
+  CommunitiesIdSettingsRouteRoute: CommunitiesIdSettingsRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

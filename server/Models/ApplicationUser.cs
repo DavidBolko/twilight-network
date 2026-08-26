@@ -13,8 +13,8 @@ public class ApplicationUser : IdentityUser
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     // Many-to-Many - Komunity
-    public ICollection<Community> Communities { get; set; } = new List<Community>(); // Člen
-    public ICollection<Community> ModeratedCommunities { get; set; } = new List<Community>(); // Moderátor
+    public ICollection<Community> Communities { get; set; } = new List<Community>();
+    public ICollection<Community> ModeratedCommunities { get; set; } = new List<Community>();
 
     // Many-to-Many - Príspevky
     public ICollection<Post> LikedPosts { get; set; } = new List<Post>();
@@ -23,4 +23,7 @@ public class ApplicationUser : IdentityUser
     // Many-to-Many - Sledovanie (Followers)
     public ICollection<ApplicationUser> Followers { get; set; } = new List<ApplicationUser>();
     public ICollection<ApplicationUser> Following { get; set; } = new List<ApplicationUser>();
+
+    public ICollection<Friendship> SentRequests { get; set; } = new List<Friendship>();
+    public ICollection<Friendship> ReceivedRequests { get; set; } = new List<Friendship>();
 }

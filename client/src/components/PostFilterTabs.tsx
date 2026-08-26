@@ -18,30 +18,23 @@ type Props = {
 
 export function PostFilterTabs({ activeSort, activeTime, onChange }: Props) {
   return (
-    <div className="flex items-center justify-between px-4 h-12 border-b border-tw-light-border dark:border-tw-border bg-tw-light-surface/50 dark:bg-tw-surface/50 backdrop-blur-sm sticky top-0 z-10">
+    <div className="flex items-center justify-between px-4 h-12 divider-bottom bg-tw-light-surface/50 dark:bg-tw-surface/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="flex gap-4">
         {(["hot", "new", "top"] as Search["posts"][]).map((sort) => (
           <button
             key={sort}
             onClick={() => onChange(sort, activeTime)}
-            className={`flex items-center gap-1.5 transition-colors ${
-              activeSort === sort
-                ? "text-tw-primary-dark dark:text-tw-primary font-bold"
-                : "text-tw-muted hover:text-tw-light-text dark:hover:text-tw-text"
-            }`}
+            className={`flex items-center gap-1.5 text-sm transition-colors
+              ${activeSort === sort ? "text-tw-primary font-bold" : "text-tw-muted hover:text-tw-light-text dark:hover:text-tw-text"}`}
           >
             {icons[sort]}
-            <span className="text-sm capitalize hidden sm:inline">{sort}</span>
+            <span className="capitalize hidden sm:inline">{sort}</span>
           </button>
         ))}
       </div>
 
       {activeSort === "top" && (
-        <select
-          value={activeTime}
-          onChange={(e) => onChange(activeSort, e.target.value as Search["time"])}
-          className="bg-transparent text-xs font-medium border-none focus:ring-0 cursor-pointer text-tw-muted hover:text-tw-text"
-        >
+        <select value={activeTime} onChange={(e) => onChange(activeSort, e.target.value as Search["time"])} className="bg-transparent text-xs font-medium border-none focus:ring-0 cursor-pointer text-tw-muted">
           <option value="day">Today</option>
           <option value="week">This Week</option>
           <option value="month">This Month</option>

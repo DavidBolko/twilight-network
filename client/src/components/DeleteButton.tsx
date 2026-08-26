@@ -27,7 +27,7 @@ export const DeleteButton = ({ onConfirm, isAuthor }: DeleteButtonProps) => {
                   Cancel
                 </button>
                 <button
-                  className="btn danger px-3 hover:text-tw-primary"
+                  className="btn btn-danger px-3"
                   onClick={(e:SyntheticEvent) => {
                     e.stopPropagation()
                     onConfirm();

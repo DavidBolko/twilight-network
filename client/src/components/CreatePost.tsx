@@ -117,76 +117,40 @@ export default function CreatePost({ communityId, onPosted }: Props) {
     await createPostMutation.mutateAsync(data);
   });
 
-return (
+  return (
     <form className="flex flex-col gap-4" onSubmit={submit} noValidate>
-      <div className="flex gap-4">
-        <div className="flex-1 flex flex-col gap-2">
-          <input 
-            {...register("title")} 
-            type="text" 
-            placeholder="Title (optional)" 
-            className="w-full bg-transparent border-none outline-none text-xl font-bold placeholder:opacity-30 p-0 focus:ring-0" 
-          />
-
-          <textarea 
-            {...register("text")} 
-            placeholder="What's happening?" 
-            className="w-full bg-transparent border-none outline-none text-lg resize-none placeholder:opacity-30 p-0 focus:ring-0 min-h-[80px]" 
-          />
-
-          {previews.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2 rounded-xl overflow-hidden">
-              {previews.map((url, idx) => (
-                <div key={url} className="relative group aspect-video border border-tw-border/50 rounded-lg overflow-hidden">
-                  <img src={url} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="" />
-                  <button 
-                    type="button" 
-                    className="btn-danger absolute top-2 right-2 !p-1.5 !rounded-full bg-black/50 backdrop-blur-sm shadow-xl" 
-                    onClick={() => removeFile(idx)} 
-                    disabled={isPosting}
-                  >
-                    <XIcon className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="flex flex-col gap-2">
+        <input {...register("title")} type="text" placeholder="Title (optional)" className="bg-transparent border-none outline-none text-xl font-bold placeholder:opacity-30 p-0 focus:ring-0" />
+        <textarea {...register("text")} placeholder="What's happening?" className="bg-transparent border-none outline-none text-lg resize-none placeholder:opacity-30 p-0 focus:ring-0 min-h-[80px]" />
+        {previews.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+            {previews.map((url, idx) => (
+              <div key={url} className="relative group aspect-video border border-tw-light-border dark:border-tw-border rounded-lg overflow-hidden">
+                <img src={url} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="" />
+                <button type="button" className="btn btn-danger absolute top-2 right-2 p-1.5 rounded-full bg-black/50 backdrop-blur-sm" onClick={() => removeFile(idx)} disabled={isPosting}>
+                  <XIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <hr className="border-tw-light-border dark:border-tw-border opacity-50" />
+      {(errors.title || errors.text || errors.root) && <div className="form-error text-center bg-red-500/10 py-2 rounded-md">{errors.title?.message || errors.text?.message || errors.root?.message}</div>}
 
-      {(errors.title || errors.text || errors.root) && (
-        <div className="form-error text-center bg-red-500/10 py-2 rounded-md">
-          {errors.title?.message || errors.text?.message || errors.root?.message}
-        </div>
-      )}
-
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-2 divider-top">
         <div className="flex items-center gap-2">
           <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={pickFiles} />
-
-          <button 
-            type="button" 
-            className="btn-muted !p-2 group" 
-            onClick={() => fileRef.current?.click()} 
-            disabled={isPosting} 
-            title="Add images"
-          >
-            <ImageIcon size={20} className="transition-all group-hover:filter group-hover:drop-shadow-[0_0_8px_rgba(var(--tw-color-primary-rgb),0.8)]" />
+          <button type="button" className="btn btn-muted p-2" onClick={() => fileRef.current?.click()} disabled={isPosting} title="Add images">
+            <ImageIcon size={20} className="group-hover:drop-shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
           </button>
-
           <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">
-            Images: {files.length}/{IMAGES_MAX}
+            {files.length}/{IMAGES_MAX}
           </span>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={!isValid || isPosting} 
-          className="link px-2 py-2 text-xs uppercase tracking-widest font-bold"
-        >
-          {isPosting ? <Loader2 size={18} className="animate-spin" /> : <SendIcon width={18}/>}
+        <button type="submit" disabled={!isValid || isPosting} className="btn btn-primary px-4">
+          {isPosting ? <Loader2 size={18} className="animate-spin" /> : <SendIcon size={18} />}
         </button>
       </div>
     </form>

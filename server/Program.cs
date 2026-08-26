@@ -7,8 +7,10 @@ using server.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddAntiforgery();
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<ImageService>();
+builder.Services.AddScoped<ChannelService>();
 
 builder.Services.AddDbContext<AppDbContext>(opts =>
 {
@@ -33,11 +35,14 @@ builder.Services.AddCors(opts =>
 {
     opts.AddPolicy("client", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://twilight.bolkodev.ipv64.de").AllowCredentials().AllowAnyHeader().AllowAnyMethod();
+        policy.WithOrigins("http://localhost:5173", "https://twilight.bolkodev.ipv64.de", "http://192.168.1.50:5173").AllowCredentials().AllowAnyHeader().AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
+app.MapHub<NotificationHub>("/Hubs/NotificationHub");
+app.MapHub<ChatHub>("/Hubs/ChatHub");
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

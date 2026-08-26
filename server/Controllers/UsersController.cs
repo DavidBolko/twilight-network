@@ -11,9 +11,13 @@ public class UsersController : ControllerBase
     public UsersController(AppDbContext context) => _context = context;
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetProfile(string id)
+    public async Task<IActionResult> GetUser(string id)
     {
+        if (string.IsNullOrWhiteSpace(id))
+            return BadRequest("Id must be provided.");
+
         var user = await _context.Users
+            .Where(u => !string.IsNullOrWhiteSpace(id) && u.Id == id)
             .Select(u => new UserDto
             {
                 Id = u.Id,
@@ -24,10 +28,34 @@ public class UsersController : ControllerBase
                 FollowersCount = u.Followers.Count,
                 FollowingCount = u.Following.Count
             })
-            .FirstOrDefaultAsync(u => u.Id == id);
+            .FirstOrDefaultAsync();
 
-        if (user == null) return NotFound();
+        if (user == null)
+            return NotFound();
+
         return Ok(user);
+    }
+
+
+    [HttpGet]
+    public async Task<IActionResult> GetUsers([FromQuery] string? userName, [FromQuery] int page = 0, [FromQuery] int size = 10)
+    {
+        var users = await _context.Users
+            .Where(u => u.UserName != null && EF.Functions.ILike(u.UserName, $"%{userName}%"))
+            .Skip(page * size).Take(size)
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                UserName = u.UserName!,
+                Avatar = u.Avatar,
+                About = u.About,
+                IsElderOwl = u.IsElderOwl,
+                FollowersCount = u.Followers.Count,
+                FollowingCount = u.Following.Count
+            })
+            .ToListAsync();
+
+        return Ok(users);
     }
 
     [HttpGet("{id}/posts")]

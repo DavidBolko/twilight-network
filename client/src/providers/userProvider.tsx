@@ -1,10 +1,11 @@
-import { createContext, type ReactNode, useContext } from "react";
-import { userSchema, type User } from "./types.ts";
+import { createContext, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Loader from "./components/Loader.tsx";
-import { api } from "./api.ts";
+import { api } from "../api";
+import { userSchema, type User } from "../types";
+import { Loader } from "lucide-react";
 
-const UserContext = createContext<User | null>(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const UserContext = createContext<User | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const { data, isLoading } = useQuery<User | null>({
@@ -31,6 +32,3 @@ export function UserProvider({ children }: { children: ReactNode }) {
   return <UserContext.Provider value={data ?? null}>{children}</UserContext.Provider>;
 }
 
-export function useUser() {
-  return useContext(UserContext);
-}

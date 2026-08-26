@@ -1,20 +1,18 @@
-import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
+import { createFileRoute, ErrorComponent, useNavigate, useParams } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { searchSchema } from "../../../schemas";
+import { api } from "../../../api";
+import { queryClient } from "../../../main";
+import { useInfiniteScroll, useUser } from "../../../hooks";
+import type { CommunityType, PostType } from "../../../types";
+import Loader from "../../../components/Loader";
+import CommunityHeader from "../../../components/CommunityHeader";
+import CreatePost from "../../../components/CreatePost";
+import { PostFilterTabs } from "../../../components/PostFilterTabs";
+import Post from "../../../components/Post";
 
-import { queryClient } from "../../main.tsx";
-import type { PostType, CommunityType } from "../../types.ts";
-import { useUser } from "../../userContext.tsx";
-import { api } from "../../api.ts";
-import { searchSchema } from "../../schemas.ts";
 
-import Post from "../../components/Post.tsx";
-import { PostFilterTabs } from "../../components/PostFilterTabs.tsx";
-import CreatePost from "../../components/CreatePost.tsx";
-import Loader from "../../components/Loader.tsx";
-import ErrorComponent from "../../components/ErrorComponent.tsx";
-import CommunityHeader from "../../components/CommunityHeader.tsx";
-import { useInfiniteScroll } from "../../hooks.tsx";
 
 const PAGE_SIZE = 10;
 
@@ -22,7 +20,7 @@ const fetchCommunityPosts = async (id: string, sort: string, time: string, page:
   return api.get(`posts?communityId=${id}&sort=${sort}&time=${time}&page=${page}&size=${PAGE_SIZE}`);
 };
 
-export const Route = createFileRoute("/communities/$id/")({
+export const Route = createFileRoute("/_main/communities/$id")({
   validateSearch: (search) => searchSchema.parse(search),
   loaderDeps: ({ search: { posts, time } }) => ({ posts, time }),
   loader: async ({ params: { id }, deps: { posts, time } }) => {
@@ -43,7 +41,7 @@ export const Route = createFileRoute("/communities/$id/")({
 });
 
 function CommunityPage() {
-  const { id } = useParams({ from: "/communities/$id" });
+  const { id } = useParams({ from: "/_main/communities/$id" });
   const navigate = useNavigate({ from: "/communities/$id" });
     const { posts: activeSort, time: activeTime } = Route.useSearch();
     const user = useUser();

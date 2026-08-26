@@ -8,10 +8,10 @@ import { queryClient } from "../../main.tsx";
 import Post from "../../components/Post";
 import { createCommentSchema, type CommentType, type PostType } from "../../types";
 import { api, ApiError } from "../../api";
-import { useUser } from "../../userContext";
 import ErrorComponent from "../../components/ErrorComponent";
 import Comment from "../../components/Comment";
 import Loader from "../../components/Loader";
+import { useUser } from "../../hooks.tsx";
 
 const fetchPost = (id: string) => api.get<PostType>(`posts/${id}`);
 const fetchComments = (id: string) => api.get<CommentType[]>(`comments/${id}`);
@@ -31,7 +31,7 @@ function PostPage() {
   const location = useRouterState({ select: (s) => s.location });
   const user = useUser();
   const queryClient = useQueryClient();
-  const { id } = useParams({ from: Route.id });
+  const { id } = useParams({ from: "/post/$id" });
   
   const [comment, setComment] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

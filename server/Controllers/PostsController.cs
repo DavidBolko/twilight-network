@@ -143,7 +143,7 @@ public class PostsController : ControllerBase
                 Author = new AuthorDto
                 {
                     Id = p.Author.Id,
-                    Username = p.Author.UserName!,
+                    UserName = p.Author.UserName!,
                     Avatar = p.Author.Avatar,
                     IsElderOwl = p.Author.IsElderOwl
                 },
@@ -186,6 +186,13 @@ public class PostsController : ControllerBase
         if (!string.IsNullOrEmpty(queryParams.AuthorId))
         {
             query = query.Where(p => p.AuthorId == queryParams.AuthorId);
+        }
+
+        if (!string.IsNullOrEmpty(queryParams.Query))
+        {
+            query = query.Where(p =>
+                (p.Title != null && EF.Functions.ILike(p.Title, $"%{queryParams.Query}%")) ||
+                (p.Text != null && EF.Functions.ILike(p.Text, $"%{queryParams.Query}%")));
         }
 
         if (queryParams.Time != "all")
@@ -232,7 +239,7 @@ public class PostsController : ControllerBase
                 Author = new AuthorDto
                 {
                     Id = p.Author.Id,
-                    Username = p.Author.UserName!,
+                    UserName = p.Author.UserName!,
                     Avatar = p.Author.Avatar,
                     IsElderOwl = p.Author.IsElderOwl
                 },
@@ -474,7 +481,7 @@ public class PostsController : ControllerBase
                 Author = new AuthorDto
                 {
                     Id = p.Author.Id,
-                    Username = p.Author.UserName!,
+                    UserName = p.Author.UserName!,
                     Avatar = p.Author.Avatar,
                     IsElderOwl = p.Author.IsElderOwl
                 },

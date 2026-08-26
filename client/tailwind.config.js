@@ -13,26 +13,17 @@ export default {
           muted: "#A0A0B2",
           primary: "#A78BFA",
           "primary-dark": "#7359CA",
-          glow: "#C4B5FD",
-          accent: "#8B5CF6",
-          "accent-dark": "#6D28D9",
-          "light-bg": "#E6E6FA",
-          "light-surface": "#F5EEFD",
-          "light-border": "#9082B1",
-          "light-text": "#2C1F47",
-          "light-muted": "#7262A3",
-          mood: {
-            mysterious: "#8B7CF6", // muted violet
-            moody: "#6D8CFF", // soft blue
-            enchanted: "#F0B86A", // warm muted gold
-            haunted: "#5FBF98", // muted teal/green
-            serene: "#77D7EA", // soft cyan
+          light: {
+            bg: "#E6E6FA",
+            surface: "#F5EEFD",
+            border: "#9082B1",
+            text: "#2C1F47",
+            muted: "#7262A3",
           },
         },
       },
       gridTemplateColumns: {
         app: "minmax(16rem, 1fr) minmax(0, 40rem) minmax(16rem, 1fr)",
-
       },
       boxShadow: {
         'primary-glow': '0 0 15px rgba(167, 139, 250, 0.4)',

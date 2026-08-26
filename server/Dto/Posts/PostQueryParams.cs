@@ -12,4 +12,6 @@ public class PostQueryParameters
     public string? AuthorId { get; set; }
 
     public bool Saved { get; set; } = false;
+    public string? Query { get; set; }
+
 }
