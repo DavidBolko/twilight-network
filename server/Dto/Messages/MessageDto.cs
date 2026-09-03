@@ -7,6 +7,7 @@ public class MessageDto
     public DateTime CreatedAt { get; set; }
 
     public string? SenderId { get; set; }
-    public string? SenderName { get; set; }
+    public string? SenderFirstName { get; set; }
+    public string? SenderLastName { get; set; }
     public string? SenderAvatar { get; set; }
 }

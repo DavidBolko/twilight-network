@@ -1,5 +1,5 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { BellIcon, BookmarkIcon, Compass, Link } from "lucide-react";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { BellIcon, BookmarkIcon, Compass, Home } from "lucide-react";
 
 export const Route = createFileRoute("/communities/$id/settings")({
   component: LayoutComponent,
@@ -27,7 +27,6 @@ function LayoutComponent() {
         </Link>
         <Link
           to="/explore"
-          search={{ tab: "Posts" }}
           className={baseCls}
           activeProps={{ className: activeCls }}
         >

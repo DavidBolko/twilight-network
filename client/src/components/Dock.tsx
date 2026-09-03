@@ -36,7 +36,7 @@ export default function Dock() {
           <CompassIcon size={20} />
           Explore
         </Link>
-        <Link to="/user/$id" params={{ id: user!.id }} search={{ tab: "Saved" }} className={baseCls} activeProps={{ className: activeCls }}>
+        <Link to="/user/$id"  search={{ tab: "Saved" }} className={baseCls} activeProps={{ className: activeCls }}>
           <BookmarkIcon size={20} />
           Saved
         </Link>

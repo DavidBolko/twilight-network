@@ -14,12 +14,11 @@ public class NotificationsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetNotifications()
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue("sub");
         if (currentUserId == null) return Unauthorized();
 
         var notifications = await _context.Notifications
             .Where(n => n.UserId == currentUserId)
-            .Include(n => n.Actor)
             .OrderByDescending(n => n.CreatedAt)
             .Select(n => new NotificationDto
             {
@@ -31,18 +30,19 @@ public class NotificationsController : ControllerBase
                 Actor = n.Actor == null ? null : new AuthorDto
                 {
                     Id = n.Actor.Id,
-                    UserName = n.Actor.UserName!,
-                    Avatar = n.Actor.Avatar,
+                    FullName = $"{n.Actor.FirstName} {n.Actor.LastName}".Trim(),
+                    Avatar = n.Actor.Avatar
                 }
             })
             .ToListAsync();
+
         return Ok(notifications);
     }
 
     [HttpPatch("read-all")]
     public async Task<IActionResult> MarkAllAsRead()
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue("sub");
         if (currentUserId == null) return Unauthorized();
 
         await _context.Notifications
@@ -52,3 +52,4 @@ public class NotificationsController : ControllerBase
         return Ok();
     }
 }
+

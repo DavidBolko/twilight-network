@@ -21,7 +21,7 @@ public class CommunitiesController : ControllerBase
         _imageService = imageService;
     }
 
-    private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
+    private string? CurrentUserId => User.FindFirstValue("sub");
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult> GetCommunity(Guid id)
@@ -44,8 +44,12 @@ public class CommunitiesController : ControllerBase
                 Members = c.Members.Select(m => new MemberDto
                 {
                     Id = m.Id,
-                    UserName = m.UserName ?? "",
+                    FirstName = m.FirstName,
+                    LastName = m.LastName,
                     Avatar = m.Avatar,
+                    About = m.About,
+                    FollowersCount = m.Followers.Count,
+                    FollowingCount = m.Following.Count,
                     IsNightOwl = c.NightOwls.Any(mod => mod.Id == m.Id),
                     IsCreator = c.CreatorId == m.Id,
                 }).ToList()
@@ -64,7 +68,9 @@ public class CommunitiesController : ControllerBase
         var userId = CurrentUserId;
         if (userId == null) return Unauthorized();
 
-        var community = await _context.Communities.Include(c => c.Members.Where(u => u.Id == userId)).FirstOrDefaultAsync(c => c.Id == id);
+        var community = await _context.Communities
+            .Include(c => c.Members.Where(u => u.Id == userId))
+            .FirstOrDefaultAsync(c => c.Id == id);
 
         if (community == null) return NotFound();
 
@@ -85,17 +91,20 @@ public class CommunitiesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetCommunities([FromQuery] string? userId, [FromQuery] string? name, [FromQuery] int? page, [FromQuery] int? size)
+    public async Task<ActionResult> GetCommunities(
+        [FromQuery] string? userId,
+        [FromQuery] string? name,
+        [FromQuery] int? page,
+        [FromQuery] int? size)
     {
-        var currentUserId = CurrentUserId;
-
         var query = _context.Communities.AsQueryable();
 
         if (!string.IsNullOrEmpty(userId))
             query = query.Where(c => c.Members.Any(m => m.Id == userId));
         if (!string.IsNullOrEmpty(name))
             query = query.Where(c => EF.Functions.ILike(c.Name, $"%{name}%"));
-        if (page != null && size != null) query = query.Skip(page.Value * size.Value).Take(size.Value);
+        if (page != null && size != null)
+            query = query.Skip(page.Value * size.Value).Take(size.Value);
 
         var communities = await query
             .Select(c => new CommunityDto
@@ -110,8 +119,12 @@ public class CommunitiesController : ControllerBase
                 Members = c.Members.Select(m => new MemberDto
                 {
                     Id = m.Id,
-                    UserName = m.UserName ?? "",
+                    FirstName = m.FirstName,
+                    LastName = m.LastName,
                     Avatar = m.Avatar,
+                    About = m.About,
+                    FollowersCount = m.Followers.Count,
+                    FollowingCount = m.Following.Count,
                     IsNightOwl = c.NightOwls.Any(mod => mod.Id == m.Id),
                     IsCreator = c.CreatorId == m.Id,
                 }).ToList()
@@ -161,3 +174,4 @@ public class CommunitiesController : ControllerBase
         return CreatedAtAction(nameof(GetCommunity), new { id = community.Id }, new { id = community.Id });
     }
 }
+

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using server;
 using Microsoft.EntityFrameworkCore;
+
 [ApiController]
 [Route("channels/{channelId}/messages")]
 public class MessagesController : ControllerBase
@@ -19,7 +20,7 @@ public class MessagesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMessages(long channelId)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue("sub");
         if (currentUserId == null) return Unauthorized();
 
         var isMember = await _context.ChannelParticipants
@@ -37,7 +38,8 @@ public class MessagesController : ControllerBase
                 m.CreatedAt,
                 m.EditedAt,
                 SenderId = m.SenderId,
-                SenderName = m.Sender.UserName,
+                SenderFirstName = m.Sender.FirstName,
+                SenderLastName = m.Sender.LastName,
                 SenderAvatar = m.Sender.Avatar,
             })
             .ToListAsync();
@@ -48,7 +50,7 @@ public class MessagesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> SendMessage(long channelId, [FromBody] SendMessageDto dto)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue("sub");
         if (currentUserId == null) return Unauthorized();
 
         var isMember = await _context.ChannelParticipants
@@ -79,7 +81,8 @@ public class MessagesController : ControllerBase
             Type = message.Type,
             CreatedAt = message.CreatedAt,
             SenderId = currentUserId,
-            SenderName = sender?.UserName,
+            SenderFirstName = sender?.FirstName,
+            SenderLastName = sender?.LastName,
             SenderAvatar = sender?.Avatar
         };
 
@@ -87,4 +90,3 @@ public class MessagesController : ControllerBase
         return Ok(messageDto);
     }
 }
-

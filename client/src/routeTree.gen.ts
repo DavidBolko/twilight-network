@@ -16,6 +16,7 @@ import { Route as PostIdRouteImport } from './routes/post/$id'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as MainNotificationsRouteImport } from './routes/_main/notifications'
 import { Route as MainExploreRouteImport } from './routes/_main/explore'
 import { Route as MainUserIdRouteImport } from './routes/_main/user/$id'
@@ -57,6 +58,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MainNotificationsRoute = MainNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/error': typeof ErrorRoute
   '/explore': typeof MainExploreRoute
   '/notifications': typeof MainNotificationsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/error': typeof ErrorRoute
   '/explore': typeof MainExploreRoute
   '/notifications': typeof MainNotificationsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/error': typeof ErrorRoute
   '/_main/explore': typeof MainExploreRoute
   '/_main/notifications': typeof MainNotificationsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/error'
     | '/explore'
     | '/notifications'
+    | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/error'
     | '/explore'
     | '/notifications'
+    | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/error'
     | '/_main/explore'
     | '/_main/notifications'
+    | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
@@ -181,6 +193,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   MainRouteRoute: typeof MainRouteRouteWithChildren
   ErrorRoute: typeof ErrorRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthLogoutRoute: typeof AuthLogoutRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_main/notifications': {
@@ -321,6 +341,7 @@ const CommunitiesIdSettingsRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   MainRouteRoute: MainRouteRouteWithChildren,
   ErrorRoute: ErrorRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthLogoutRoute: AuthLogoutRoute,
   AuthRegisterRoute: AuthRegisterRoute,

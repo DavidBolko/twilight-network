@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using server;
 using server.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
 
 [ApiController]
 [Route("friendship")]
@@ -13,7 +13,10 @@ public class FriendshipController : ControllerBase
     private readonly IHubContext<NotificationHub> _hubContext;
     private readonly ChannelService _channelService;
 
-    public FriendshipController(AppDbContext context, IHubContext<NotificationHub> hubContext, ChannelService channelService)
+    public FriendshipController(
+        AppDbContext context,
+        IHubContext<NotificationHub> hubContext,
+        ChannelService channelService)
     {
         _context = context;
         _hubContext = hubContext;
@@ -23,60 +26,78 @@ public class FriendshipController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetFriendship(string id)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await _context.Users.FindAsync(currentUserId);
-        if (user == null)
-        {
+        var currentUserId = User.FindFirstValue("sub");
+
+        if (currentUserId == null)
             return Unauthorized("Not logged in.");
-        }
+
+        var user = await _context.Users.FindAsync(currentUserId);
+
+        if (user == null)
+            return Unauthorized("User not found.");
 
         var user2 = await _context.Users.FindAsync(id);
+
         if (user2 == null)
-        {
-            return NotFound("User doesn't exists.");
-        }
+            return NotFound("User doesn't exist.");
 
         var exists = await _context.Friendships.AnyAsync(f =>
-            ((f.RequesterId == currentUserId && f.AddresseeId == id) ||
-            (f.RequesterId == id && f.AddresseeId == currentUserId))
-            && f.Status == FriendshipStatus.Accepted);
+            (
+                (f.RequesterId == currentUserId && f.AddresseeId == id)
+                ||
+                (f.RequesterId == id && f.AddresseeId == currentUserId)
+            )
+            && f.Status == FriendshipStatus.Accepted
+        );
+
         return Ok(exists);
     }
 
     [HttpPost("{id}")]
-    public async Task<IActionResult> SentRequest(string id)
+    public async Task<IActionResult> SendRequest(string id)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await _context.Users.FindAsync(currentUserId);
-        if (currentUserId == null || user == null)
-        {
+        var currentUserId = User.FindFirstValue("sub");
+
+        if (currentUserId == null)
             return Unauthorized("Not logged in.");
-        }
+
+        var user = await _context.Users.FindAsync(currentUserId);
+
+        if (user == null)
+            return Unauthorized("User not found.");
 
         var receiver = await _context.Users.FindAsync(id);
+
         if (receiver == null)
-        {
-            return NotFound("User doesn't exists.");
-        }
-        if (currentUserId == id) return BadRequest("Cannot add yourself.");
+            return NotFound("User doesn't exist.");
+
+        if (currentUserId == id)
+            return BadRequest("Cannot add yourself.");
 
         var exists = await _context.Friendships.AnyAsync(f =>
-            (f.RequesterId == currentUserId && f.AddresseeId == id) ||
-            (f.RequesterId == id && f.AddresseeId == currentUserId));
-        if (exists) return Conflict("Friendship already exists.");
-        var fr = new Friendship
+            (f.RequesterId == currentUserId && f.AddresseeId == id)
+            ||
+            (f.RequesterId == id && f.AddresseeId == currentUserId)
+        );
+
+        if (exists)
+            return Conflict("Friendship already exists.");
+
+        var friendship = new Friendship
         {
             AddresseeId = receiver.Id,
-            RequesterId = currentUserId,
+            RequesterId = currentUserId
         };
-        _context.Friendships.Add(fr);
+
+        _context.Friendships.Add(friendship);
         await _context.SaveChangesAsync();
+
         var notification = new Notification
         {
             UserId = receiver.Id,
             ActorId = currentUserId,
-            ResourceId = fr.Id.ToString(),
-            Type = NotificationType.FriendRequest,
+            ResourceId = friendship.Id.ToString(),
+            Type = NotificationType.FriendRequest
         };
 
         _context.Notifications.Add(notification);
@@ -89,29 +110,42 @@ public class FriendshipController : ControllerBase
             IsRead = notification.IsRead,
             CreatedAt = notification.CreatedAt,
             ResourceId = notification.ResourceId,
+
             Actor = new AuthorDto
             {
                 Id = user.Id,
-                UserName = user.UserName!,
-                Avatar = user.Avatar,
-                IsElderOwl = user.IsElderOwl,
+                FullName = $"{user.FirstName} {user.LastName}".Trim(),
+                Avatar = user.Avatar
             }
         };
 
-        await _hubContext.Clients.User(receiver.Id).SendAsync("NewNotification", notificationDto);
+        await _hubContext.Clients
+            .User(receiver.Id)
+            .SendAsync("NewNotification", notificationDto);
+
         return Ok();
     }
 
     [HttpPatch("{id}/accept")]
     public async Task<IActionResult> AcceptRequest(long id)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (currentUserId == null) return Unauthorized();
+        var currentUserId = User.FindFirstValue("sub");
+
+        if (currentUserId == null)
+            return Unauthorized();
 
         var friendship = await _context.Friendships.FindAsync(id);
-        if (friendship == null) return NotFound();
-        if (friendship.AddresseeId != currentUserId) return Forbid();
-        if (friendship.Status != FriendshipStatus.Pending) return BadRequest("Request is not pending.");
+
+        if (friendship == null)
+            return NotFound();
+
+        if (friendship.AddresseeId != currentUserId)
+            return Forbid();
+
+        if (friendship.Status != FriendshipStatus.Pending)
+        {
+            return BadRequest("Request is not pending.");
+        }
 
         friendship.Status = FriendshipStatus.Accepted;
         friendship.RespondedAt = DateTime.UtcNow;
@@ -121,13 +155,14 @@ public class FriendshipController : ControllerBase
             UserId = friendship.RequesterId,
             ActorId = currentUserId,
             ResourceId = friendship.Id.ToString(),
-            Type = NotificationType.FriendAccepted,
+            Type = NotificationType.FriendAccepted
         };
 
         _context.Notifications.Add(notification);
         await _context.SaveChangesAsync();
 
         var currentUser = await _context.Users.FindAsync(currentUserId);
+
         var notificationDto = new NotificationDto
         {
             Id = notification.Id,
@@ -135,35 +170,55 @@ public class FriendshipController : ControllerBase
             IsRead = notification.IsRead,
             CreatedAt = notification.CreatedAt,
             ResourceId = notification.ResourceId,
-            Actor = currentUser == null ? null : new AuthorDto
-            {
-                Id = currentUser.Id,
-                UserName = currentUser.UserName!,
-                Avatar = currentUser.Avatar,
-                IsElderOwl = currentUser.IsElderOwl,
-            }
+
+            Actor = currentUser == null
+                ? null
+                : new AuthorDto
+                {
+                    Id = currentUser.Id,
+                    FullName = $"{currentUser.FirstName} {currentUser.LastName}".Trim(),
+                    Avatar = currentUser.Avatar
+                }
         };
 
-        await _hubContext.Clients.User(friendship.RequesterId).SendAsync("NewNotification", notificationDto);
-        await _channelService.CreateDirectChannelAsync(currentUserId, friendship.RequesterId);
+        await _hubContext.Clients
+            .User(friendship.RequesterId)
+            .SendAsync("NewNotification", notificationDto);
+
+        await _channelService.CreateDirectChannelAsync(
+            currentUserId,
+            friendship.RequesterId
+        );
+
         return Ok();
     }
 
     [HttpPatch("{id}/decline")]
     public async Task<IActionResult> DeclineRequest(long id)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (currentUserId == null) return Unauthorized();
+        var currentUserId = User.FindFirstValue("sub");
+
+        if (currentUserId == null)
+            return Unauthorized();
 
         var friendship = await _context.Friendships.FindAsync(id);
-        if (friendship == null) return NotFound();
-        if (friendship.AddresseeId != currentUserId) return Forbid();
-        if (friendship.Status != FriendshipStatus.Pending) return BadRequest("Request is not pending.");
+
+        if (friendship == null)
+            return NotFound();
+
+        if (friendship.AddresseeId != currentUserId)
+            return Forbid();
+
+        if (friendship.Status != FriendshipStatus.Pending)
+        {
+            return BadRequest("Request is not pending.");
+        }
 
         friendship.Status = FriendshipStatus.Declined;
         friendship.RespondedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
         return Ok();
     }
 }

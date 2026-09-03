@@ -1,6 +1,4 @@
-using System.Data;
 using System.Security.Claims;
-using ImageMagick;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,17 +25,18 @@ public class PostsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> CreatePost([FromForm] CreatePostDto data)
     {
-        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (authorId == null) return Unauthorized();
+        var authorId = User.FindFirstValue("sub");
+
+        if (authorId == null)
+            return Unauthorized();
 
         if (data.CommunityId.HasValue)
         {
-            var communityExists = await _db.Communities.AnyAsync(c => c.Id == data.CommunityId.Value);
+            var communityExists = await _db.Communities
+                .AnyAsync(c => c.Id == data.CommunityId.Value);
 
             if (!communityExists)
-            {
                 return BadRequest(new { message = "Community doesn't exist." });
-            }
         }
 
         var images = data.Images ?? [];
@@ -46,7 +45,10 @@ public class PostsController : ControllerBase
 
         if (!hasImages && !hasText)
         {
-            return BadRequest(new { message = "Text is required when there are no images." });
+            return BadRequest(new
+            {
+                message = "Text is required when there are no images."
+            });
         }
 
         try
@@ -60,8 +62,14 @@ public class PostsController : ControllerBase
 
         var post = new Post
         {
-            Title = string.IsNullOrWhiteSpace(data.Title) ? null : data.Title.Trim(),
-            Text = string.IsNullOrWhiteSpace(data.Text) ? null : data.Text.Trim(),
+            Title = string.IsNullOrWhiteSpace(data.Title)
+                ? null
+                : data.Title.Trim(),
+
+            Text = string.IsNullOrWhiteSpace(data.Text)
+                ? null
+                : data.Text.Trim(),
+
             Type = hasImages ? PostType.Image : PostType.Text,
             CommunityId = data.CommunityId,
             AuthorId = authorId,
@@ -77,7 +85,10 @@ public class PostsController : ControllerBase
             {
                 for (var i = 0; i < images.Count; i++)
                 {
-                    var imageUrl = await _imageService.SaveImageAsync(images[i], "posts");
+                    var imageUrl = await _imageService.SaveImageAsync(
+                        images[i],
+                        "posts"
+                    );
 
                     var imagePost = new ImagePost
                     {
@@ -97,7 +108,10 @@ public class PostsController : ControllerBase
             }
             catch
             {
-                return BadRequest(new { message = "Invalid image file." });
+                return BadRequest(new
+                {
+                    message = "Invalid image file."
+                });
             }
         }
 
@@ -112,10 +126,10 @@ public class PostsController : ControllerBase
         );
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetPost(Guid id)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue("sub");
 
         var post = await _db.Posts
             .Include(p => p.Author)
@@ -132,67 +146,92 @@ public class PostsController : ControllerBase
                 Text = p.Text,
                 Type = p.Type.ToString(),
                 CreatedAt = p.CreatedAt,
+
                 LikesCount = p.Likes.Count,
                 CommentsCount = p.Comments.Count,
 
-                IsLiked = currentUserId != null && p.Likes.Any(u => u.Id == currentUserId),
-                IsSaved = currentUserId != null && p.SavedBy.Any(u => u.Id == currentUserId),
+                IsLiked = currentUserId != null &&
+                          p.Likes.Any(u => u.Id == currentUserId),
 
-                Images = p.ImagePosts.OrderBy(i => i.Position).Select(i => i.Url).ToList(),
+                IsSaved = currentUserId != null &&
+                          p.SavedBy.Any(u => u.Id == currentUserId),
+
+                Images = p.ImagePosts
+                    .OrderBy(i => i.Position)
+                    .Select(i => i.Url)
+                    .ToList(),
 
                 Author = new AuthorDto
                 {
                     Id = p.Author.Id,
-                    UserName = p.Author.UserName!,
-                    Avatar = p.Author.Avatar,
-                    IsElderOwl = p.Author.IsElderOwl
+                    FullName = $"{p.Author.FirstName} {p.Author.LastName}".Trim(),
+                    Avatar = p.Author.Avatar
                 },
 
-                Community = p.Community != null ? new CommunitySummaryDto
-                {
-                    Id = p.Community.Id,
-                    Name = p.Community.Name,
-                    Image = p.Community.Image
-                } : null
+                Community = p.Community != null
+                    ? new CommunitySummaryDto
+                    {
+                        Id = p.Community.Id,
+                        Name = p.Community.Name,
+                        Image = p.Community.Image
+                    }
+                    : null
             })
             .FirstOrDefaultAsync();
 
         if (post == null)
-        {
             return NotFound();
-        }
 
         return Ok(post);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPosts([FromQuery] PostQueryParameters queryParams)
+    public async Task<IActionResult> GetPosts(
+        [FromQuery] PostQueryParameters queryParams)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue("sub");
 
-        var query = _db.Posts.Include(p => p.Author).Include(p => p.Community).AsQueryable();
+        var query = _db.Posts
+            .Include(p => p.Author)
+            .Include(p => p.Community)
+            .AsQueryable();
 
         if (queryParams.CommunityId.HasValue)
         {
-            query = query.Where(p => p.CommunityId == queryParams.CommunityId.Value);
+            query = query.Where(p =>
+                p.CommunityId == queryParams.CommunityId.Value);
         }
 
         if (queryParams.Saved)
         {
-            if (currentUserId == null) return Unauthorized();
-            query = query.Where(p => p.SavedBy.Any(u => u.Id == currentUserId));
+            if (currentUserId == null)
+                return Unauthorized();
+
+            query = query.Where(p =>
+                p.SavedBy.Any(u => u.Id == currentUserId));
         }
 
         if (!string.IsNullOrEmpty(queryParams.AuthorId))
         {
-            query = query.Where(p => p.AuthorId == queryParams.AuthorId);
+            query = query.Where(p =>
+                p.AuthorId == queryParams.AuthorId);
         }
 
         if (!string.IsNullOrEmpty(queryParams.Query))
         {
             query = query.Where(p =>
-                (p.Title != null && EF.Functions.ILike(p.Title, $"%{queryParams.Query}%")) ||
-                (p.Text != null && EF.Functions.ILike(p.Text, $"%{queryParams.Query}%")));
+                (p.Title != null &&
+                 EF.Functions.ILike(
+                     p.Title,
+                     $"%{queryParams.Query}%"
+                 ))
+                ||
+                (p.Text != null &&
+                 EF.Functions.ILike(
+                     p.Text,
+                     $"%{queryParams.Query}%"
+                 ))
+            );
         }
 
         if (queryParams.Time != "all")
@@ -207,14 +246,21 @@ public class PostsController : ControllerBase
                 _ => DateTime.MinValue
             };
 
-            query = query.Where(p => p.CreatedAt >= timeLimit);
+            query = query.Where(p =>
+                p.CreatedAt >= timeLimit);
         }
 
         query = queryParams.Sort.ToLower() switch
         {
             "new" => query.OrderByDescending(p => p.CreatedAt),
-            "top" => query.OrderByDescending(p => p.Likes.Count),
-            "hot" => query.OrderByDescending(p => p.Likes.Count).ThenByDescending(p => p.CreatedAt),
+
+            "top" => query.OrderByDescending(p =>
+                p.Likes.Count),
+
+            "hot" => query
+                .OrderByDescending(p => p.Likes.Count)
+                .ThenByDescending(p => p.CreatedAt),
+
             _ => query.OrderByDescending(p => p.CreatedAt)
         };
 
@@ -228,28 +274,36 @@ public class PostsController : ControllerBase
                 Text = p.Text,
                 Type = p.Type.ToString(),
                 CreatedAt = p.CreatedAt,
+
                 LikesCount = p.Likes.Count,
                 CommentsCount = p.Comments.Count,
 
-                IsLiked = currentUserId != null && p.Likes.Any(u => u.Id == currentUserId),
-                IsSaved = currentUserId != null && p.SavedBy.Any(u => u.Id == currentUserId),
+                IsLiked = currentUserId != null &&
+                          p.Likes.Any(u => u.Id == currentUserId),
 
-                Images = p.ImagePosts.OrderBy(i => i.Position).Select(i => i.Url).ToList(),
+                IsSaved = currentUserId != null &&
+                          p.SavedBy.Any(u => u.Id == currentUserId),
+
+                Images = p.ImagePosts
+                    .OrderBy(i => i.Position)
+                    .Select(i => i.Url)
+                    .ToList(),
 
                 Author = new AuthorDto
                 {
                     Id = p.Author.Id,
-                    UserName = p.Author.UserName!,
-                    Avatar = p.Author.Avatar,
-                    IsElderOwl = p.Author.IsElderOwl
+                    FullName = $"{p.Author.FirstName} {p.Author.LastName}".Trim(),
+                    Avatar = p.Author.Avatar
                 },
 
-                Community = p.Community != null ? new CommunitySummaryDto
-                {
-                    Id = p.Community.Id,
-                    Name = p.Community.Name,
-                    Image = p.Community.Image
-                } : null
+                Community = p.Community != null
+                    ? new CommunitySummaryDto
+                    {
+                        Id = p.Community.Id,
+                        Name = p.Community.Name,
+                        Image = p.Community.Image
+                    }
+                    : null
             })
             .ToListAsync();
 
@@ -260,26 +314,31 @@ public class PostsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ToggleLike(Guid id)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) return Unauthorized();
+        var userId = User.FindFirstValue("sub");
 
-        var post = await _db.Posts.Include(p => p.Likes).FirstOrDefaultAsync(p => p.Id == id);
+        if (userId == null)
+            return Unauthorized();
 
-        if (post == null) return NotFound();
+        var post = await _db.Posts
+            .Include(p => p.Likes)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return Unauthorized();
+        if (post == null)
+            return NotFound();
 
-        var alreadyLiked = post.Likes.Any(u => u.Id == userId);
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+            return Unauthorized();
+
+        var alreadyLiked = post.Likes
+            .Any(u => u.Id == userId);
 
         if (alreadyLiked)
-        {
             post.Likes.Remove(user);
-        }
         else
-        {
             post.Likes.Add(user);
-        }
 
         await _db.SaveChangesAsync();
 
@@ -294,28 +353,31 @@ public class PostsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ToggleSave(Guid id)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) return Unauthorized();
+        var userId = User.FindFirstValue("sub");
+
+        if (userId == null)
+            return Unauthorized();
 
         var post = await _db.Posts
             .Include(p => p.SavedBy)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        if (post == null) return NotFound();
+        if (post == null)
+            return NotFound();
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return Unauthorized();
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
-        var alreadySaved = post.SavedBy.Any(u => u.Id == userId);
+        if (user == null)
+            return Unauthorized();
+
+        var alreadySaved = post.SavedBy
+            .Any(u => u.Id == userId);
 
         if (alreadySaved)
-        {
             post.SavedBy.Remove(user);
-        }
         else
-        {
             post.SavedBy.Add(user);
-        }
 
         await _db.SaveChangesAsync();
 
@@ -329,8 +391,10 @@ public class PostsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> DeletePost(Guid id)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) return Unauthorized();
+        var userId = User.FindFirstValue("sub");
+
+        if (userId == null)
+            return Unauthorized();
 
         var post = await _db.Posts
             .Include(p => p.Likes)
@@ -339,19 +403,17 @@ public class PostsController : ControllerBase
             .Include(p => p.Comments)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        if (post == null) return NotFound();
+        if (post == null)
+            return NotFound();
 
         if (post.AuthorId != userId)
-        {
             return Forbid();
-        }
 
         post.Likes.Clear();
         post.SavedBy.Clear();
 
         _db.ImagePosts.RemoveRange(post.ImagePosts);
         _db.Comments.RemoveRange(post.Comments);
-
         _db.Posts.Remove(post);
 
         await _db.SaveChangesAsync();
@@ -359,31 +421,26 @@ public class PostsController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("{id:long}")]
+    [HttpPut("{id:guid}")]
     [Authorize]
-    public async Task<IActionResult> UpdatePost(Guid id, [FromForm] UpdatePostDto data)
+    public async Task<IActionResult> UpdatePost(
+        Guid id,
+        [FromForm] UpdatePostDto data)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) return Unauthorized();
+        var userId = User.FindFirstValue("sub");
 
-        var isElderOwl = await _db.Users
-            .Where(u => u.Id == userId)
-            .Select(u => u.IsElderOwl)
-            .FirstOrDefaultAsync();
+        if (userId == null)
+            return Unauthorized();
 
         var post = await _db.Posts
             .Include(p => p.ImagePosts)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (post == null)
-        {
             return NotFound();
-        }
 
-        if (post.AuthorId != userId && !isElderOwl)
-        {
+        if (post.AuthorId != userId)
             return Forbid();
-        }
 
         var imagesToRemove = post.ImagePosts
             .Where(i => data.RemoveImages.Contains(i.Url))
@@ -395,27 +452,44 @@ public class PostsController : ControllerBase
             .ToList();
 
         var newImages = data.Images ?? [];
-        var finalImageCount = remainingImages.Count + newImages.Count;
+
+        var finalImageCount =
+            remainingImages.Count + newImages.Count;
 
         if (finalImageCount > 10)
         {
-            return BadRequest(new { message = "Maximum number of images is 10." });
+            return BadRequest(new
+            {
+                message = "Maximum number of images is 10."
+            });
         }
 
         var trimmedText = data.Text?.Trim();
 
-        if (string.IsNullOrWhiteSpace(trimmedText) && finalImageCount == 0)
+        if (string.IsNullOrWhiteSpace(trimmedText) &&
+            finalImageCount == 0)
         {
-            return BadRequest(new { message = "Post cannot be empty." });
+            return BadRequest(new
+            {
+                message = "Post cannot be empty."
+            });
         }
 
         if (trimmedText?.Length > 2000)
         {
-            return BadRequest(new { message = "Text too long (max 2000)." });
+            return BadRequest(new
+            {
+                message = "Text too long (max 2000)."
+            });
         }
 
-        post.Text = string.IsNullOrWhiteSpace(trimmedText) ? null : trimmedText;
-        post.Type = finalImageCount > 0 ? PostType.Image : PostType.Text;
+        post.Text = string.IsNullOrWhiteSpace(trimmedText)
+            ? null
+            : trimmedText;
+
+        post.Type = finalImageCount > 0
+            ? PostType.Image
+            : PostType.Text;
 
         foreach (var image in imagesToRemove)
         {
@@ -433,7 +507,10 @@ public class PostsController : ControllerBase
         {
             for (var i = 0; i < newImages.Count; i++)
             {
-                var imageUrl = await _imageService.SaveImageAsync(newImages[i], "posts");
+                var imageUrl = await _imageService.SaveImageAsync(
+                    newImages[i],
+                    "posts"
+                );
 
                 var imagePost = new ImagePost
                 {
@@ -451,12 +528,13 @@ public class PostsController : ControllerBase
         }
         catch
         {
-            return BadRequest(new { message = "Invalid image file." });
+            return BadRequest(new
+            {
+                message = "Invalid image file."
+            });
         }
 
         await _db.SaveChangesAsync();
-
-        var currentUserId = userId;
 
         var updatedPost = await _db.Posts
             .Where(p => p.Id == id)
@@ -467,11 +545,12 @@ public class PostsController : ControllerBase
                 Text = p.Text,
                 Type = p.Type.ToString(),
                 CreatedAt = p.CreatedAt,
+
                 LikesCount = p.Likes.Count,
                 CommentsCount = p.Comments.Count,
 
-                IsLiked = p.Likes.Any(u => u.Id == currentUserId),
-                IsSaved = p.SavedBy.Any(u => u.Id == currentUserId),
+                IsLiked = p.Likes.Any(u => u.Id == userId),
+                IsSaved = p.SavedBy.Any(u => u.Id == userId),
 
                 Images = p.ImagePosts
                     .OrderBy(i => i.Position)
@@ -481,22 +560,21 @@ public class PostsController : ControllerBase
                 Author = new AuthorDto
                 {
                     Id = p.Author.Id,
-                    UserName = p.Author.UserName!,
-                    Avatar = p.Author.Avatar,
-                    IsElderOwl = p.Author.IsElderOwl
+                    FullName = $"{p.Author.FirstName} {p.Author.LastName}".Trim(),
+                    Avatar = p.Author.Avatar
                 },
 
-                Community = p.Community != null ? new CommunitySummaryDto
-                {
-                    Id = p.Community.Id,
-                    Name = p.Community.Name,
-                    Image = p.Community.Image
-                } : null
+                Community = p.Community != null
+                    ? new CommunitySummaryDto
+                    {
+                        Id = p.Community.Id,
+                        Name = p.Community.Name,
+                        Image = p.Community.Image
+                    }
+                    : null
             })
             .FirstAsync();
 
         return Ok(updatedPost);
     }
-
-
 }

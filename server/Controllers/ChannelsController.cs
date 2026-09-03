@@ -14,7 +14,7 @@ public class ChannelsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetChannels()
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue("sub");
         if (currentUserId == null) return Unauthorized();
 
         var channels = await _context.Channels
@@ -31,7 +31,8 @@ public class ChannelsController : ControllerBase
                 Participants = c.Participants.Select(p => new
                 {
                     p.UserId,
-                    p.User.UserName,
+                    p.User.FirstName,
+                    p.User.LastName,
                     p.User.Avatar,
                 })
             })

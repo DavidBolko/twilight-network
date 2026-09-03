@@ -1,10 +1,10 @@
-public class UserDto
+public class CurrentUserDto
 {
     public string Id { get; set; } = null!;
+    public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+
     public string? Avatar { get; set; }
-    public string? About { get; set; }
-    public int FollowersCount { get; set; }
-    public int FollowingCount { get; set; }
+
 }

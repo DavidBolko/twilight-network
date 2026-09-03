@@ -41,14 +41,21 @@ export type SidebarType = {
   chatComingSoon: boolean;
 };
 
+export const currentUserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  avatar: z.string().nullable(),
+  about: z.string().nullable().optional(),
+});
+
 export const userSchema = z.object({
   id: z.string(),
-  userName: z.string(),
-  email: z.string().email(),
-  avatar: z.string().nullable().optional(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  avatar: z.string().nullable(),
   about: z.string().nullable().optional(),
-  isElderOwl: z.boolean(),
-  // online: z.boolean(),
 });
 
 export const postSchema = z.object({
@@ -66,9 +73,10 @@ export const postSchema = z.object({
 
   author: z.object({
     id: z.string(),
-    userName: z.string(),
+    fullName: z.string().nullable().optional(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
     avatar: z.string().nullable(),
-    isElderOwl: z.boolean(),
   }),
 
   community: z
@@ -100,7 +108,8 @@ export const commentSchema = z.object({
   createdAt: z.string(),
   author: z.object({
     id: z.string(),
-    username: z.string(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
     avatar: z.string().nullable(),
   }),
 });
@@ -110,7 +119,7 @@ export const createCommentSchema = z.object({
   postId: z.string(),
 });
 export const communitySchema = z.object({
-  id: z.uuid(),
+  id: z.string().uuid(),
   name: z.string().min(3).max(60),
   description: z.string().max(500).nullable(),
   image: z.string(),
@@ -121,7 +130,8 @@ export const communitySchema = z.object({
   canManage: z.boolean(),
   members: z.array(z.object({
     id: z.string(),
-    username: z.string(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
     avatar: z.string().nullable(),
     isNightOwl: z.boolean(),
     isCreator: z.boolean(),
@@ -159,10 +169,10 @@ export const notificationSchema = z.object({
 });
 export const channelParticipantSchema = z.object({
   userId: z.string(),
-  userName: z.string(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
   avatar: z.string().nullable(),
 });
-
 export const channelSchema = z.object({
   id: z.number(),
   type: z.union([
@@ -181,7 +191,8 @@ export const chatMessageSchema = z.object({
   type: z.number(), 
   createdAt: z.string(),
   senderId: z.string().nullable(),
-  senderName: z.string().nullable(),
+  senderFirstName: z.string().nullable().optional(),
+  senderLastName: z.string().nullable().optional(),
   senderAvatar: z.string().nullable(),
 });
 
@@ -192,7 +203,8 @@ export type Notification = z.infer<typeof notificationSchema>;
 export type PostType = z.infer<typeof postSchema>;
 export type Actor = z.infer<typeof actorSchema>;
 export type CreatePostInput = z.infer<typeof createPostSchema>;
-export type User = z.infer<typeof userSchema>;
 export type CommentType = z.infer<typeof commentSchema>;
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type CommunityType = z.infer<typeof communitySchema>;
+export type User = z.infer<typeof userSchema>;
+export type CurrentUser = z.infer<typeof currentUserSchema>;

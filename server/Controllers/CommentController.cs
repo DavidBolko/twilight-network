@@ -32,7 +32,8 @@ public class CommentsController : ControllerBase
                 Author = new
                 {
                     id = c.Author.Id,
-                    username = c.Author.UserName,
+                    firstName = c.Author.FirstName,
+                    lastName = c.Author.LastName,
                     avatar = c.Author.Avatar
                 }
             })
@@ -45,8 +46,7 @@ public class CommentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> CreateComment([FromBody] CreateCommentDto data)
     {
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue("sub");
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
         var postExists = await _context.Posts.AnyAsync(p => p.Id == data.PostId && !p.IsDeleted);
@@ -62,6 +62,7 @@ public class CommentsController : ControllerBase
 
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
+
         var result = await _context.Comments
             .Where(c => c.Id == comment.Id)
             .Select(c => new
@@ -72,7 +73,8 @@ public class CommentsController : ControllerBase
                 Author = new
                 {
                     id = c.Author.Id,
-                    username = c.Author.UserName,
+                    firstName = c.Author.FirstName,
+                    lastName = c.Author.LastName,
                     avatar = c.Author.Avatar
                 }
             })
@@ -85,7 +87,7 @@ public class CommentsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateComment(long id, [FromBody] CreateCommentDto data)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue("sub");
         var isElderOwl = User.IsInRole("ElderOwl");
 
         var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
@@ -93,9 +95,7 @@ public class CommentsController : ControllerBase
         if (comment == null) return NotFound("Comment not found.");
 
         if (comment.AuthorId != userId && !isElderOwl)
-        {
             return Forbid();
-        }
 
         comment.Content = data.Content;
         comment.UpdatedAt = DateTime.UtcNow;
@@ -109,7 +109,7 @@ public class CommentsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteComment(long id)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue("sub");
         var isElderOwl = User.IsInRole("ElderOwl");
 
         var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
@@ -117,9 +117,7 @@ public class CommentsController : ControllerBase
         if (comment == null) return NotFound("Comment not found.");
 
         if (comment.AuthorId != userId && !isElderOwl)
-        {
             return Forbid();
-        }
 
         comment.IsDeleted = true;
 

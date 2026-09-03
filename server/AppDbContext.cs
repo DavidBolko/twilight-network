@@ -1,15 +1,15 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using server.Models;
 
 namespace server;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> opts) : base(opts)
     {
-
     }
+
+    public DbSet<ApplicationUser> Users { get; set; }
 
     public DbSet<Category> Categories { get; set; }
     public DbSet<Community> Communities { get; set; }
@@ -21,26 +21,34 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Message> Messages { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Friendship> Friendships => Set<Friendship>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        // 1. Unikátne indexy pre rýchle vyhľadávanie
-        builder.Entity<Community>().HasIndex(c => c.Name).IsUnique();
-        builder.Entity<Category>().HasIndex(c => c.Name).IsUnique();
+        builder.Entity<ApplicationUser>()
+            .HasKey(u => u.Id);
 
-        // 2. Globálny filter: Nechceme vidieť posty a komentáre s IsDeleted = true
-        builder.Entity<Post>().HasQueryFilter(p => !p.IsDeleted);
-        builder.Entity<Comment>().HasQueryFilter(c => !c.IsDeleted);
+        builder.Entity<Community>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
 
-        // 3. User -> Community (Creator)
+        builder.Entity<Category>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
+
+        builder.Entity<Post>()
+            .HasQueryFilter(p => !p.IsDeleted);
+
+        builder.Entity<Comment>()
+            .HasQueryFilter(c => !c.IsDeleted);
+
         builder.Entity<Community>()
             .HasOne(c => c.Creator)
             .WithMany(u => u.CreatedCommunities)
             .HasForeignKey(c => c.CreatorId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 4. Many-to-Many pre komunity
         builder.Entity<Community>()
             .HasMany(c => c.Members)
             .WithMany(u => u.Communities)
@@ -51,22 +59,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.ModeratedCommunities)
             .UsingEntity(j => j.ToTable("CommunityNightOwls"));
 
-        // 5. Post -> Community (Voliteľné pre posty mimo komunity)
         builder.Entity<Post>()
             .HasOne(p => p.Community)
             .WithMany(c => c.Posts)
             .HasForeignKey(p => p.CommunityId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.Cascade); // Ak sa predsa zmaže komunita, zmažú sa aj jej posty v DB
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // 6. User -> Post (Author)
         builder.Entity<Post>()
             .HasOne(p => p.Author)
             .WithMany(u => u.Posts)
             .HasForeignKey(p => p.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 7. Many-to-Many pre príspevky
         builder.Entity<Post>()
             .HasMany(p => p.Likes)
             .WithMany(u => u.LikedPosts)
@@ -77,14 +82,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.SavedPosts)
             .UsingEntity(j => j.ToTable("UserSavedPosts"));
 
-        // 8. User -> Comment (Author)
         builder.Entity<Comment>()
             .HasOne(c => c.Author)
             .WithMany(u => u.Comments)
             .HasForeignKey(c => c.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 9. Many-to-Many: Systém sledovania používateľov (Followers)
         builder.Entity<ApplicationUser>()
             .HasMany(u => u.Followers)
             .WithMany(u => u.Following)
@@ -103,6 +106,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<ChannelParticipant>()
-.HasKey(cp => new { cp.ChannelId, cp.UserId });
+            .HasKey(cp => new { cp.ChannelId, cp.UserId });
     }
 }

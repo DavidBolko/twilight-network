@@ -18,6 +18,7 @@
     "howler": "^2.2.4",
     "ky": "^2.0.2",
     "lucide-react": "^0.523.0",
+    "oidc-client-ts": "^3.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.75.0",

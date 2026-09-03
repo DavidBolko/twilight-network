@@ -7,6 +7,7 @@ import { UserContext } from "./providers/userProvider";
 import { ToastContext } from "./providers/toastProvider";
 import FriendRequestNotif from "./components/Notifications/FriendRequestNotif";
 import { type Notification } from "../src/types";
+
 export function useUser() {
   return useContext(UserContext);
 }
